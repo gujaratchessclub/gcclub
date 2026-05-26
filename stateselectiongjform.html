@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>State Selection GJ Registration - Gujarat Chess Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="stateselectiongjform.css"/>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-top"><div class="date-pill" id="datePill"></div></div>
+    <div class="header-logo">♟</div>
+    <h1 class="header-title">Gujarat Chess Club</h1>
+    <div class="form-badge">FORM_03</div>
+    <h2 class="form-subtitle">State Selection GJ Registration Form</h2>
+  </div>
+
+  <div class="form-container">
+    <form id="eventForm" novalidate autocomplete="off">
+      <input type="hidden" id="editDocId" value=""/>
+      <input type="hidden" id="editMode" value="false"/>
+
+      <!-- ENTRY TYPE -->
+      <div class="form-section">
+        <div class="section-title">Entry Type <span class="req">*</span></div>
+        <div class="radio-group">
+          <label class="radio-card"><input type="radio" name="enteredBy" value="Admin" required/><span class="radio-box"><span class="radio-icon">🛡</span><span>Admin</span></span></label>
+          <label class="radio-card"><input type="radio" name="enteredBy" value="Organizer" required/><span class="radio-box"><span class="radio-icon">🏆</span><span>Organizer</span></span></label>
+        </div>
+        <div class="field-error" id="err-enteredBy"></div>
+      </div>
+
+      <!-- ORGANIZER -->
+      <div class="form-section">
+        <div class="section-title">Organizer</div>
+        <div class="field-group">
+          <label class="field-label">Organizer Name <span class="req">*</span></label>
+          <div class="searchable-wrap">
+            <input type="text" id="organizerSearch" class="field-input" placeholder="Type to search organizer..." autocomplete="off"/>
+            <input type="hidden" id="organizerID"/>
+            <input type="hidden" id="organizerNameVal"/>
+            <div class="dropdown-list" id="organizerDropdown"></div>
+          </div>
+          <div class="field-error" id="err-organizer"></div>
+        </div>
+      </div>
+
+      <!-- EVENT DETAILS -->
+      <div class="form-section">
+        <div class="section-title">Event Details</div>
+        <div class="field-group">
+          <label class="field-label">Event Name <span class="req">*</span> <span class="hint">(auto UPPERCASE)</span></label>
+          <input type="text" id="eventName" class="field-input uppercase-input" placeholder="Enter event name"/>
+          <div class="field-error" id="err-eventName"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Start Date <span class="req">*</span></label>
+            <input type="date" id="startDate" class="field-input"/>
+            <div class="field-error" id="err-startDate"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">End Date <span class="req">*</span></label>
+            <input type="date" id="endDate" class="field-input"/>
+            <div class="field-error" id="err-endDate"></div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">System <span class="req">*</span></label>
+            <select id="system" class="field-input">
+              <option value="">-- Select System --</option>
+              <option>Swiss</option><option>Round Robin</option><option>Knockout</option>
+            </select>
+            <div class="field-error" id="err-system"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Format <span class="req">*</span></label>
+            <select id="format" class="field-input">
+              <option value="">-- Select Format --</option>
+              <option>Standard</option><option>Rapid</option><option>Blitz</option>
+            </select>
+            <div class="field-error" id="err-format"></div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Time Control <span class="optional">(Optional)</span></label>
+            <input type="text" id="timeControl" class="field-input" placeholder="e.g. 90+30, 25+10"/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">District <span class="req">*</span></label>
+            <select id="district" class="field-input">
+              <option value="">-- Select District --</option>
+              <option>Ahmedabad</option><option>Amreli</option><option>Anand</option>
+              <option>Aravalli</option><option>Banaskantha</option><option>Bharuch</option>
+              <option>Bhavnagar</option><option>Botad</option><option>Chhota Udepur</option>
+              <option>Dahod</option><option>Dang</option><option>Devbhoomi Dwarka</option>
+              <option>Gandhinagar</option><option>Gir Somnath</option><option>Jamnagar</option>
+              <option>Junagadh</option><option>Kachchh</option><option>Kheda</option>
+              <option>Mahisagar</option><option>Mehsana</option><option>Morbi</option>
+              <option>Narmada</option><option>Navsari</option><option>Panchmahal</option>
+              <option>Patan</option><option>Porbandar</option><option>Rajkot</option>
+              <option>Sabarkantha</option><option>Surat</option><option>Surendranagar</option>
+              <option>Tapi</option><option>Vadodara</option><option>Valsad</option>
+            </select>
+            <div class="field-error" id="err-district"></div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Venue <span class="optional">(Optional — auto UPPERCASE)</span></label>
+          <textarea id="venue" class="field-input field-textarea uppercase-input" placeholder="Leave blank = Declare Soon / Update Soon"></textarea>
+        </div>
+      </div>
+
+      <!-- PRIZE & FEES -->
+      <div class="form-section">
+        <div class="section-title">Prize & Entry Fees</div>
+        <div class="field-group">
+          <label class="field-label">Prize Fund <span class="optional">(Optional)</span></label>
+          <input type="text" id="prizeFund" class="field-input" placeholder="Type amount e.g. 100000" inputmode="numeric"/>
+          <div class="prize-preview" id="prizePreview"></div>
+        </div>
+        <div class="fees-grid">
+          <div class="fee-card">
+            <div class="fee-card-title">🕐 Write Full Early Bird Entry Fees</div>
+            <div class="field-group"><label class="field-label">Till Date</label><input type="date" id="earlyBirdDate" class="field-input"/></div>
+            <div class="field-group"><label class="field-label">Fees</label><input type="text" id="earlyBirdFees" class="field-input" placeholder="e.g. 500" inputmode="numeric"/><div class="prize-preview" id="earlyBirdPreview"></div></div>
+          </div>
+          <div class="fee-card">
+            <div class="fee-card-title">✅ Actual Entry Fees</div>
+            <div class="field-group" style="margin-bottom:0"><label class="field-label">Fees</label><input type="text" id="actualFees" class="field-input" placeholder="e.g. 700" inputmode="numeric"/><div class="prize-preview" id="actualFeesPreview"></div></div>
+          </div>
+          <div class="fee-card">
+            <div class="fee-card-title">⏰ Write Full Late Entry Fees</div>
+            <div class="field-group"><label class="field-label">From Date</label><input type="date" id="lateEntryDate" class="field-input"/></div>
+            <div class="field-group"><label class="field-label">Fees</label><input type="text" id="lateEntryFees" class="field-input" placeholder="e.g. 1000" inputmode="numeric"/><div class="prize-preview" id="lateEntryPreview"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOURNAMENT DIRECTOR -->
+      <div class="form-section">
+        <div class="section-title">Tournament Director <span class="optional">(Optional)</span></div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Tournament Director Name</label>
+            <input type="text" id="tdName" class="field-input" placeholder="Full name"/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">FIDE ID <span class="optional">(Optional)</span></label>
+            <input type="text" id="tdFideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARBITERS -->
+      <div class="form-section">
+        <div class="section-title">Arbiters <span class="optional">(Optional)</span></div>
+        <div class="arbiter-block">
+          <div class="arbiter-label">Chief Arbiter</div>
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">Name</label><input type="text" id="ca1Name" class="field-input" placeholder="Chief Arbiter name"/></div>
+            <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="ca1FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+          </div>
+        </div>
+        <div class="arbiter-block">
+          <div class="arbiter-label">Deputy Chief Arbiter 1</div>
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">Name</label><input type="text" id="dca1Name" class="field-input" placeholder="Deputy Chief Arbiter name"/></div>
+            <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="dca1FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+          </div>
+        </div>
+        <div class="arbiter-block">
+          <div class="arbiter-label">Deputy Chief Arbiter 2</div>
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">Name</label><input type="text" id="dca2Name" class="field-input" placeholder="Deputy Chief Arbiter name"/></div>
+            <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="dca2FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINKS -->
+      <div class="form-section">
+        <div class="section-title">Links <span class="optional">(All Optional)</span></div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">📄 Brochure Link</label><input type="url" id="brochureLink" class="field-input" placeholder="https://..."/></div>
+          <div class="field-group"><label class="field-label">♟ Chess Results Link</label><input type="url" id="chessResultsLink" class="field-input" placeholder="https://chess-results.com/..."/></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">📍 Map Link</label><input type="url" id="mapLink" class="field-input" placeholder="https://maps.google.com/..."/></div>
+          <div class="field-group"><label class="field-label">🎥 Live Games Link</label><input type="url" id="liveGamesLink" class="field-input" placeholder="https://..."/></div>
+        </div>
+        <div class="field-group half"><label class="field-label">🏆 Prize List Link</label><input type="url" id="prizeListLink" class="field-input" placeholder="https://..."/></div>
+      </div>
+
+      <!-- PIN VERIFICATION -->
+      <div class="form-section pin-section">
+        <div class="section-title">PIN Verification <span class="req">*</span></div>
+        <div class="pin-note" id="pinNote">Select Admin or Organizer above to continue.</div>
+        <div class="field-group half">
+          <label class="field-label" id="pinLabel">Enter PIN <span class="req">*</span></label>
+          <input type="password" id="pinInput" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+          <div class="field-error" id="err-pin"></div>
+        </div>
+      </div>
+
+      <div class="submit-section">
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span class="btn-text">Submit Event</span><span class="btn-icon">→</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="overlay" id="successOverlay">
+    <div class="overlay-card">
+      <div class="overlay-icon">✅</div>
+      <h3 id="overlayTitle">Event Registered!</h3>
+      <p id="successMsg">Event saved successfully.</p>
+      <button class="overlay-btn" onclick="window.location.reload()">Register Another Event</button>
+    </div>
+  </div>
+
+  <script type="module" src="stateselectiongjform.js"></script>
+</body>
+</html>

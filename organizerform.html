@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Organizer Registration - Gujarat Chess Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="organizerform.css"/>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">♟</div>
+  <h1 class="header-title">Gujarat Chess Club</h1>
+  <div class="form-badge">FORM_02</div>
+  <h2 class="form-subtitle" id="formSubtitle">Organizer Registration Form</h2>
+</div>
+
+<div class="form-container">
+  <form id="organizerForm" novalidate>
+    <input type="hidden" id="editDocId" value=""/>
+    <input type="hidden" id="editOrganizerID" value=""/>
+    <input type="hidden" id="editSource" value=""/>
+    <!-- editSource: "" = new | "admin" = admin edit | "organizer" = organizer edit -->
+
+    <!-- SECTION 1: ENTRY TYPE -->
+    <div class="form-section" id="entryTypeSection">
+      <div class="section-title">Entry Type <span class="req">*</span></div>
+      <div class="radio-group">
+        <label class="radio-card">
+          <input type="radio" name="enteredBy" value="Admin" required/>
+          <span class="radio-box"><span class="radio-icon">🛡</span><span>Admin</span></span>
+        </label>
+        <label class="radio-card">
+          <input type="radio" name="enteredBy" value="Organizer" required/>
+          <span class="radio-box"><span class="radio-icon">🏆</span><span>Organizer</span></span>
+        </label>
+      </div>
+      <div class="field-error" id="err-enteredBy"></div>
+    </div>
+
+    <!-- SECTION 2: ORGANIZER DETAILS -->
+    <div class="form-section">
+      <div class="section-title">Organizer Details</div>
+      <div class="field-group">
+        <label class="field-label">Organizer Name <span class="req">*</span></label>
+        <input type="text" id="organizerName" class="field-input" placeholder="Enter organizer / club name"/>
+        <div class="field-error" id="err-organizerName"></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">District <span class="req">*</span></label>
+        <select id="district" class="field-input">
+          <option value="">-- Select District --</option>
+          <option>Ahmedabad</option><option>Amreli</option><option>Anand</option>
+          <option>Aravalli</option><option>Banaskantha</option><option>Bharuch</option>
+          <option>Bhavnagar</option><option>Botad</option><option>Chhota Udepur</option>
+          <option>Dahod</option><option>Dang</option><option>Devbhoomi Dwarka</option>
+          <option>Gandhinagar</option><option>Gir Somnath</option><option>Jamnagar</option>
+          <option>Junagadh</option><option>Kachchh</option><option>Kheda</option>
+          <option>Mahisagar</option><option>Mehsana</option><option>Morbi</option>
+          <option>Narmada</option><option>Navsari</option><option>Panchmahal</option>
+          <option>Patan</option><option>Porbandar</option><option>Rajkot</option>
+          <option>Sabarkantha</option><option>Surat</option><option>Surendranagar</option>
+          <option>Tapi</option><option>Vadodara</option><option>Valsad</option>
+        </select>
+        <div class="field-error" id="err-district"></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Address <span class="optional">(Optional)</span></label>
+        <textarea id="address" class="field-input field-textarea" placeholder="Enter full address (optional)"></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION 3: CONTACT PERSON 1 -->
+    <div class="form-section">
+      <div class="section-title">Contact Person 1 <span class="req">*</span></div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Name <span class="req">*</span></label>
+          <input type="text" id="cp1Name" class="field-input" placeholder="Full name"/>
+          <div class="field-error" id="err-cp1Name"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Designation <span class="req">*</span></label>
+          <input type="text" id="cp1Designation" class="field-input" placeholder="e.g. President, Secretary"/>
+          <div class="field-error" id="err-cp1Designation"></div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Contact No <span class="req">*</span></label>
+          <input type="tel" id="cp1Contact" class="field-input" placeholder="10-digit mobile" maxlength="10"/>
+          <div class="field-error" id="err-cp1Contact"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">WhatsApp No <span class="req">*</span></label>
+          <input type="tel" id="cp1Whatsapp" class="field-input" placeholder="10-digit WhatsApp" maxlength="10"/>
+          <div class="field-error" id="err-cp1Whatsapp"></div>
+        </div>
+      </div>
+      <div class="field-group half">
+        <label class="field-label">Email <span class="optional">(Optional)</span></label>
+        <input type="email" id="cp1Email" class="field-input" placeholder="Email address"/>
+      </div>
+    </div>
+
+    <!-- SECTION 4: CONTACT PERSON 2 (collapsible) -->
+    <div class="form-section optional-section">
+      <div class="section-title collapsible-title" id="cp2Toggle">
+        Contact Person 2 <span class="optional">(Optional)</span>
+        <button type="button" class="plus-btn" id="cp2PlusBtn">＋</button>
+      </div>
+      <div class="collapsible-body" id="cp2Body" style="display:none;">
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Name</label>
+            <input type="text" id="cp2Name" class="field-input" placeholder="Full name"/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Designation</label>
+            <input type="text" id="cp2Designation" class="field-input" placeholder="e.g. Treasurer"/>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Contact No</label>
+            <input type="tel" id="cp2Contact" class="field-input" placeholder="10-digit mobile" maxlength="10"/>
+            <div class="field-error" id="err-cp2Contact"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">WhatsApp No</label>
+            <input type="tel" id="cp2Whatsapp" class="field-input" placeholder="10-digit WhatsApp" maxlength="10"/>
+            <div class="field-error" id="err-cp2Whatsapp"></div>
+          </div>
+        </div>
+        <div class="field-group half">
+          <label class="field-label">Email <span class="optional">(Optional)</span></label>
+          <input type="email" id="cp2Email" class="field-input" placeholder="Email address"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: CONTACT PERSON 3 (collapsible) -->
+    <div class="form-section optional-section">
+      <div class="section-title collapsible-title" id="cp3Toggle">
+        Contact Person 3 <span class="optional">(Optional)</span>
+        <button type="button" class="plus-btn" id="cp3PlusBtn">＋</button>
+      </div>
+      <div class="collapsible-body" id="cp3Body" style="display:none;">
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Name</label>
+            <input type="text" id="cp3Name" class="field-input" placeholder="Full name"/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Designation</label>
+            <input type="text" id="cp3Designation" class="field-input" placeholder="e.g. Manager"/>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Contact No</label>
+            <input type="tel" id="cp3Contact" class="field-input" placeholder="10-digit mobile" maxlength="10"/>
+            <div class="field-error" id="err-cp3Contact"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">WhatsApp No</label>
+            <input type="tel" id="cp3Whatsapp" class="field-input" placeholder="10-digit WhatsApp" maxlength="10"/>
+            <div class="field-error" id="err-cp3Whatsapp"></div>
+          </div>
+        </div>
+        <div class="field-group half">
+          <label class="field-label">Email <span class="optional">(Optional)</span></label>
+          <input type="email" id="cp3Email" class="field-input" placeholder="Email address"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: PIN -->
+    <div class="form-section pin-section">
+      <div class="section-title">PIN Verification <span class="req">*</span></div>
+
+      <!-- NEW ENTRY: Admin -->
+      <div id="pinBlock-newAdmin" style="display:none;">
+        <p class="pin-note">Admin PIN required. Also create a PIN for this Organizer.</p>
+        <div class="field-group half">
+          <label class="field-label">Admin PIN <span class="req">*</span></label>
+          <input type="password" id="newAdminPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+          <div class="field-error" id="err-newAdminPin"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field-group">
+            <label class="field-label">Create PIN for Organizer <span class="req">*</span></label>
+            <input type="password" id="newOrgPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+            <div class="field-error" id="err-newOrgPin"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Confirm PIN <span class="req">*</span></label>
+            <input type="password" id="newOrgPinConfirm" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+            <div class="field-error" id="err-newOrgPinConfirm"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW ENTRY: Organizer -->
+      <div id="pinBlock-newOrg" style="display:none;">
+        <p class="pin-note">Create a 6-digit PIN for your account.</p>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Create PIN <span class="req">*</span></label>
+            <input type="password" id="orgPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+            <div class="field-error" id="err-orgPin"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Confirm PIN <span class="req">*</span></label>
+            <input type="password" id="orgPinConfirm" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+            <div class="field-error" id="err-orgPinConfirm"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT: Admin login -->
+      <div id="pinBlock-editAdmin" style="display:none;">
+        <p class="pin-note">Verify Admin PIN. Organizer PIN change is optional.</p>
+        <div class="field-group half">
+          <label class="field-label">Admin PIN <span class="req">*</span></label>
+          <input type="password" id="editAdminPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+          <div class="field-error" id="err-editAdminPin"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field-group">
+            <label class="field-label">Change Organizer PIN <span class="optional">(Optional)</span></label>
+            <input type="password" id="editAdminNewOrgPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+            <div class="field-error" id="err-editAdminNewOrgPin"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Confirm PIN <span class="optional">(Optional)</span></label>
+            <input type="password" id="editAdminNewOrgPinConfirm" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+            <div class="field-error" id="err-editAdminNewOrgPinConfirm"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT: Organizer login -->
+      <div id="pinBlock-editOrg" style="display:none;">
+        <p class="pin-note">Enter your current PIN to verify. You may optionally change your PIN.</p>
+        <div class="field-group half">
+          <label class="field-label">Current PIN <span class="req">*</span></label>
+          <input type="password" id="editOrgCurrentPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+          <div class="field-error" id="err-editOrgCurrentPin"></div>
+        </div>
+        <div class="field-row" style="margin-top:12px;">
+          <div class="field-group">
+            <label class="field-label">Change PIN <span class="optional">(Optional)</span></label>
+            <input type="password" id="editOrgNewPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+            <div class="field-error" id="err-editOrgNewPin"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Confirm PIN <span class="optional">(Optional)</span></label>
+            <input type="password" id="editOrgNewPinConfirm" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+            <div class="field-error" id="err-editOrgNewPinConfirm"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-section">
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span class="btn-text">Submit Registration</span>
+        <span class="btn-icon">→</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="overlay" id="successOverlay">
+  <div class="overlay-card">
+    <div class="overlay-icon">✅</div>
+    <h3 id="overlayTitle">Registration Submitted!</h3>
+    <p id="overlayMsg">Your Organizer ID:</p>
+    <div class="organizer-id-display" id="displayOrgID"></div>
+    <p class="overlay-note" id="overlayNote"></p>
+    <button class="overlay-btn" onclick="window.location.reload()">Done</button>
+  </div>
+</div>
+
+<script type="module" src="organizerform.js"></script>
+</body>
+</html>

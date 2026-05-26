@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blitz Rankings GJ - Gujarat Chess Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="blitzrankings.css"/>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="date-pill" id="datePill"></div>
+  </div>
+  <div class="header-logo">♟</div>
+  <h1 class="header-title">Gujarat Chess Club</h1>
+  <p class="header-sub">Blitz Rankings GJ</p>
+</div>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" class="search-input" placeholder="Search by name, FIDE ID..."/>
+  </div>
+  <div class="range-wrap">
+    <input type="number" id="ratingFrom" class="range-input" placeholder="Rating From" min="0" max="9999"/>
+    <span class="range-sep">—</span>
+    <input type="number" id="ratingTo" class="range-input" placeholder="Rating To" min="0" max="9999"/>
+  </div>
+  <select id="districtFilter" class="filter-select">
+    <option value="">All Districts</option>
+    <option>Ahmedabad</option><option>Amreli</option><option>Anand</option>
+    <option>Aravalli</option><option>Banaskantha</option><option>Bharuch</option>
+    <option>Bhavnagar</option><option>Botad</option><option>Chhota Udepur</option>
+    <option>Dahod</option><option>Dang</option><option>Devbhoomi Dwarka</option>
+    <option>Gandhinagar</option><option>Gir Somnath</option><option>Jamnagar</option>
+    <option>Junagadh</option><option>Kachchh</option><option>Kheda</option>
+    <option>Mahisagar</option><option>Mehsana</option><option>Morbi</option>
+    <option>Narmada</option><option>Navsari</option><option>Panchmahal</option>
+    <option>Patan</option><option>Porbandar</option><option>Rajkot</option>
+    <option>Sabarkantha</option><option>Surat</option><option>Surendranagar</option>
+    <option>Tapi</option><option>Vadodara</option><option>Valsad</option>
+  </select>
+  <select id="genderFilter" class="filter-select">
+    <option value="">All Genders</option>
+    <option>Male</option><option>Female</option>
+  </select>
+  <div class="count-badge" id="countBadge">Loading...</div>
+</div>
+
+<div class="table-wrap">
+  <div id="loadingMsg" class="status-msg">⏳ Loading rankings...</div>
+  <div id="emptyMsg" class="status-msg" style="display:none;">No rated players found.</div>
+  <table class="rank-table" id="rankTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Std Rating</th>
+        <th>FIDE ID</th>
+        <th>Title</th>
+        <th>Name</th>
+        <th>Birth Year</th>
+        <th>Gender</th>
+        <th>District</th>
+        <th>Profile</th>
+      </tr>
+    </thead>
+    <tbody id="rankBody"></tbody>
+  </table>
+</div>
+
+<!-- PROFILE POPUP -->
+<div class="popup-overlay" id="profilePopup">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closeProfile()">✕</button>
+    <div id="profileContent"></div>
+  </div>
+</div>
+
+<script type="module" src="blitzrankings.js"></script>
+</body>
+</html>

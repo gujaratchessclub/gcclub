@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rated Event Tool — Gujarat Chess Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #1565C0; --blue-dark: #0D47A1; --blue-light: #1976D2;
+      --blue-pale: #E3F2FD; --white: #FFFFFF; --bg: #F0F4FF;
+      --border: #BBDEFB; --text: #1A237E; --text-body: #37474F;
+      --text-light: #546E7A; --error: #D32F2F; --optional: #78909C;
+      --gold: #FFB300; --success: #2E7D32;
+      --shadow: 0 4px 24px rgba(21,101,192,0.10);
+      --shadow-md: 0 8px 32px rgba(21,101,192,0.16);
+      --radius: 14px; --tr: 0.2s ease;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Lexend', sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 60%, #1E88E5 100%);
+      color: var(--white); text-align: center; padding: 22px 20px 32px;
+      position: relative; overflow: hidden;
+    }
+    .header::before { content:''; position:absolute; top:-50px; right:-50px; width:220px; height:220px; background:rgba(255,255,255,0.05); border-radius:50%; }
+    .header::after  { content:''; position:absolute; bottom:-30px; left:-30px; width:140px; height:140px; background:rgba(255,255,255,0.04); border-radius:50%; }
+    .header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; position:relative; z-index:1; }
+    .date-pill { background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.95); font-size:12px; font-weight:600; padding:5px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.25); letter-spacing:0.3px; }
+    .tool-pill  { background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.20); letter-spacing:1px; text-transform:uppercase; }
+    .header-logo   { font-size:48px; margin-bottom:6px; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.2)); position:relative; z-index:1; }
+    .header-title  { font-size:26px; font-weight:800; color:var(--white); position:relative; z-index:1; }
+    .form-badge    { display:inline-block; background:var(--gold); color:var(--blue-dark); font-size:12px; font-weight:800; padding:4px 16px; border-radius:20px; margin:10px auto 6px; letter-spacing:1.5px; box-shadow:0 2px 8px rgba(0,0,0,0.15); position:relative; z-index:1; }
+    .form-subtitle { font-size:15px; font-weight:500; color:rgba(255,255,255,0.88); position:relative; z-index:1; }
+
+    /* STEP NAV */
+    .step-nav { position:sticky; top:0; z-index:100; background:rgba(255,255,255,0.97); backdrop-filter:blur(10px); border-bottom:1px solid var(--border); box-shadow:0 2px 16px rgba(21,101,192,0.08); }
+    .step-nav-inner { max-width:860px; margin:0 auto; display:flex; overflow-x:auto; scrollbar-width:none; padding:0 12px; }
+    .step-nav-inner::-webkit-scrollbar { display:none; }
+    .step-btn { display:flex; align-items:center; gap:7px; padding:12px 14px; border:none; background:none; cursor:pointer; font-family:'Lexend',sans-serif; font-size:12px; font-weight:600; color:var(--text-light); white-space:nowrap; border-bottom:2.5px solid transparent; transition:all var(--tr); flex-shrink:0; }
+    .step-btn:hover { color:var(--blue); background:var(--blue-pale); }
+    .step-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+    .step-btn.done   { color:var(--success); }
+    .step-num { width:20px; height:20px; border-radius:50%; background:var(--bg); border:1.5px solid var(--border); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; transition:all var(--tr); flex-shrink:0; }
+    .step-btn.active .step-num { background:var(--blue); border-color:var(--blue); color:var(--white); }
+    .step-btn.done   .step-num { background:var(--success); border-color:var(--success); color:var(--white); }
+
+    /* FORM */
+    .form-container { max-width:860px; margin:28px auto 60px; padding:0 16px; }
+    .form-section { background:var(--white); border-radius:var(--radius); padding:26px 28px 20px; margin-bottom:16px; box-shadow:var(--shadow); border:1px solid var(--border); transition:box-shadow var(--tr),border-color var(--tr); }
+    .form-section:focus-within { box-shadow:var(--shadow-md); border-color:#90CAF9; }
+    .section-title { font-size:13px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:1px; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid var(--blue-pale); }
+
+    /* RADIO */
+    .radio-group { display:flex; gap:12px; flex-wrap:wrap; }
+    .radio-card input[type="radio"] { display:none; }
+    .radio-box { display:flex; align-items:center; gap:10px; padding:12px 24px; border:2px solid var(--border); border-radius:10px; cursor:pointer; font-size:14px; font-weight:600; color:var(--text-light); background:var(--bg); transition:all var(--tr); user-select:none; }
+    .radio-box:hover { border-color:var(--blue-light); background:var(--blue-pale); color:var(--blue); transform:translateY(-1px); }
+    .radio-card input[type="radio"]:checked + .radio-box { border-color:var(--blue); background:var(--blue-pale); color:var(--blue-dark); box-shadow:0 0 0 3px rgba(21,101,192,0.12); }
+    .radio-icon { font-size:18px; }
+
+    /* FIELDS */
+    .field-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:580px){ .field-row{grid-template-columns:1fr;} .form-section{padding:18px 16px;} }
+    .field-group { display:flex; flex-direction:column; margin-bottom:14px; }
+    .field-group.half { max-width:50%; }
+    @media(max-width:580px){ .field-group.half{max-width:100%;} }
+    .field-label { font-size:12px; font-weight:600; color:var(--text); margin-bottom:6px; letter-spacing:0.2px; }
+    .hint { font-size:11px; color:var(--optional); font-weight:400; }
+    .field-input { font-family:'Lexend',sans-serif; font-size:14px; font-weight:400; padding:11px 14px; border:1.5px solid var(--border); border-radius:9px; background:#FAFCFF; color:var(--text); outline:none; transition:all var(--tr); width:100%; }
+    .field-input::placeholder { color:#AABCD4; }
+    .field-input:focus { border-color:var(--blue-light); background:var(--white); box-shadow:0 0 0 3px rgba(21,101,192,0.10); }
+    .field-input.error { border-color:var(--error); background:#FFF5F5; }
+    .field-textarea { resize:vertical; min-height:76px; }
+    select.field-input { cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231565C0' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; }
+    input[type="url"].field-input { font-size:13px; }
+
+    /* DROPDOWN */
+    .searchable-wrap { position:relative; }
+    .dropdown-list { position:absolute; top:calc(100% + 3px); left:0; right:0; background:var(--white); border:1.5px solid var(--blue-light); border-radius:10px; max-height:210px; overflow-y:auto; z-index:200; display:none; box-shadow:0 8px 24px rgba(21,101,192,0.16); }
+    .dropdown-list.open { display:block; animation:dropIn 0.15s ease; }
+    @keyframes dropIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+    .dropdown-item { padding:11px 14px; font-size:14px; cursor:pointer; color:var(--text-body); transition:background 0.12s; border-bottom:1px solid var(--blue-pale); }
+    .dropdown-item:last-child { border-bottom:none; }
+    .dropdown-item:hover { background:var(--blue-pale); color:var(--blue); }
+    .dropdown-empty { padding:14px; font-size:13px; color:var(--optional); text-align:center; }
+
+    /* PRIZE */
+    .prize-preview { font-size:12px; font-weight:600; color:var(--success); margin-top:5px; min-height:16px; }
+
+    /* FEES */
+    .fees-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:6px; }
+    @media(max-width:660px){ .fees-grid{grid-template-columns:1fr;} }
+    .fee-card { background:var(--bg); border-radius:10px; padding:16px 14px 8px; border:1px solid var(--border); transition:border-color var(--tr); }
+    .fee-card:focus-within { border-color:var(--blue-light); }
+    .fee-card-title { font-size:12px; font-weight:700; color:var(--blue); margin-bottom:12px; }
+
+    /* ARBITERS */
+    .arbiter-block { background:var(--bg); border-radius:10px; padding:16px 16px 6px; border:1px solid var(--border); margin-bottom:12px; transition:border-color var(--tr); }
+    .arbiter-block:focus-within { border-color:var(--blue-light); }
+    .arbiter-label { font-size:11px; font-weight:700; color:var(--blue); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.8px; }
+
+    /* LINKS */
+    .links-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:580px){ .links-grid{grid-template-columns:1fr;} }
+
+    /* PIN */
+    .pin-section { border:2px solid var(--blue-pale); }
+    .pin-note { font-size:13px; color:var(--optional); margin-bottom:16px; padding:10px 14px; background:var(--bg); border-radius:8px; }
+    .pin-input { letter-spacing:8px; font-size:22px; font-weight:700; text-align:center; }
+
+    /* LABELS */
+    .req { color:var(--error); font-weight:700; }
+    .optional { color:var(--optional); font-size:11px; font-weight:400; }
+    .field-error { font-size:12px; color:var(--error); font-weight:500; margin-top:4px; min-height:16px; }
+
+    /* SUBMIT */
+    .submit-section { text-align:center; margin-top:8px; padding-bottom:12px; }
+    .submit-btn { font-family:'Lexend',sans-serif; display:inline-flex; align-items:center; gap:12px; background:linear-gradient(135deg,var(--blue-dark),var(--blue-light)); color:var(--white); font-size:15px; font-weight:700; padding:16px 48px; border:none; border-radius:50px; cursor:pointer; transition:all 0.25s ease; box-shadow:0 6px 24px rgba(21,101,192,0.32); }
+    .submit-btn:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(21,101,192,0.35); }
+    .submit-btn:active { transform:translateY(0); }
+    .submit-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+    .btn-icon { font-size:18px; transition:transform 0.2s; }
+    .submit-btn:hover .btn-icon { transform:translateX(5px); }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:#1B3A6B; color:var(--white); padding:13px 26px; border-radius:30px; font-size:14px; font-weight:600; box-shadow:0 8px 28px rgba(0,0,0,0.22); opacity:0; transition:all 0.3s ease; z-index:2000; white-space:nowrap; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* OVERLAY */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(13,71,161,0.50); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+    .overlay.active { display:flex; }
+    .overlay-card { background:var(--white); border-radius:20px; padding:48px 44px; text-align:center; max-width:400px; width:90%; box-shadow:0 24px 64px rgba(0,0,0,0.20); animation:popIn 0.32s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes popIn { from{transform:scale(0.82);opacity:0} to{transform:scale(1);opacity:1} }
+    .overlay-icon { font-size:56px; margin-bottom:14px; }
+    .overlay-card h3 { font-size:20px; font-weight:800; color:var(--blue-dark); margin-bottom:8px; }
+    .overlay-card p { font-size:14px; color:var(--text-light); margin-bottom:14px; line-height:1.6; }
+    .overlay-btn { font-family:'Lexend',sans-serif; margin-top:14px; background:var(--blue); color:var(--white); border:none; border-radius:30px; padding:13px 30px; font-size:14px; font-weight:600; cursor:pointer; transition:background 0.2s,transform 0.15s; box-shadow:0 4px 14px rgba(21,101,192,0.28); }
+    .overlay-btn:hover { background:var(--blue-dark); transform:translateY(-1px); }
+
+    /* SCROLL TOP */
+    .scroll-top { position:fixed; bottom:28px; right:24px; width:42px; height:42px; border-radius:50%; background:var(--blue); color:var(--white); border:none; cursor:pointer; font-size:18px; box-shadow:0 4px 16px rgba(21,101,192,0.32); opacity:0; transition:all 0.3s; z-index:500; display:flex; align-items:center; justify-content:center; }
+    .scroll-top.visible { opacity:1; }
+    .scroll-top:hover { background:var(--blue-dark); transform:translateY(-2px); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="date-pill" id="datePill"></div>
+    <div class="tool-pill">⚙ Organizer Tool</div>
+  </div>
+  <div class="header-logo">♟</div>
+  <h1 class="header-title">Gujarat Chess Club</h1>
+  <div class="form-badge">FORM_04</div>
+  <h2 class="form-subtitle">Rated Tournament Registration</h2>
+</div>
+
+<nav class="step-nav">
+  <div class="step-nav-inner">
+    <button class="step-btn active" data-idx="0" onclick="scrollToSection(0)"><span class="step-num">1</span>Entry Type</button>
+    <button class="step-btn" data-idx="1" onclick="scrollToSection(1)"><span class="step-num">2</span>Organizer</button>
+    <button class="step-btn" data-idx="2" onclick="scrollToSection(2)"><span class="step-num">3</span>Event Details</button>
+    <button class="step-btn" data-idx="3" onclick="scrollToSection(3)"><span class="step-num">4</span>Prize &amp; Fees</button>
+    <button class="step-btn" data-idx="4" onclick="scrollToSection(4)"><span class="step-num">5</span>TD &amp; Arbiters</button>
+    <button class="step-btn" data-idx="5" onclick="scrollToSection(5)"><span class="step-num">6</span>Links</button>
+    <button class="step-btn" data-idx="6" onclick="scrollToSection(6)"><span class="step-num">7</span>PIN &amp; Submit</button>
+  </div>
+</nav>
+
+<div class="form-container">
+  <form id="eventForm" novalidate autocomplete="off">
+    <input type="hidden" id="editDocId"/>
+    <input type="hidden" id="editMode" value="false"/>
+
+    <!-- ENTRY TYPE -->
+    <div class="form-section" id="section-0">
+      <div class="section-title">🔖 Entry Type <span class="req">*</span></div>
+      <div class="radio-group">
+        <label class="radio-card"><input type="radio" name="enteredBy" value="Admin" required/><span class="radio-box"><span class="radio-icon">🛡</span><span>Admin</span></span></label>
+        <label class="radio-card"><input type="radio" name="enteredBy" value="Organizer" required checked/><span class="radio-box"><span class="radio-icon">🏆</span><span>Organizer</span></span></label>
+      </div>
+      <div class="field-error" id="err-enteredBy"></div>
+    </div>
+
+    <!-- ORGANIZER -->
+    <div class="form-section" id="section-1">
+      <div class="section-title">🏢 Organizer</div>
+      <div class="field-group">
+        <label class="field-label">Organizer Name <span class="req">*</span></label>
+        <div class="searchable-wrap">
+          <input type="text" id="organizerSearch" class="field-input" placeholder="Type to search organizer…" autocomplete="off"/>
+          <input type="hidden" id="organizerID"/>
+          <input type="hidden" id="organizerNameVal"/>
+          <div class="dropdown-list" id="organizerDropdown"></div>
+        </div>
+        <div class="field-error" id="err-organizer"></div>
+      </div>
+    </div>
+
+    <!-- EVENT DETAILS -->
+    <div class="form-section" id="section-2">
+      <div class="section-title">📋 Event Details</div>
+      <div class="field-group">
+        <label class="field-label">Event Name <span class="req">*</span> <span class="hint">(auto UPPERCASE)</span></label>
+        <input type="text" id="eventName" class="field-input uppercase-input" placeholder="Enter event name"/>
+        <div class="field-error" id="err-eventName"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><label class="field-label">Start Date <span class="req">*</span></label><input type="date" id="startDate" class="field-input"/><div class="field-error" id="err-startDate"></div></div>
+        <div class="field-group"><label class="field-label">End Date <span class="req">*</span></label><input type="date" id="endDate" class="field-input"/><div class="field-error" id="err-endDate"></div></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">System <span class="req">*</span></label>
+          <select id="system" class="field-input"><option value="">-- Select System --</option><option>Swiss</option><option>Round Robin</option><option>Knockout</option></select>
+          <div class="field-error" id="err-system"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Format <span class="req">*</span></label>
+          <select id="format" class="field-input"><option value="">-- Select Format --</option><option>Standard</option><option>Rapid</option><option>Blitz</option></select>
+          <div class="field-error" id="err-format"></div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><label class="field-label">Time Control <span class="optional">(Optional)</span></label><input type="text" id="timeControl" class="field-input" placeholder="e.g. 90+30, 25+10"/></div>
+        <div class="field-group">
+          <label class="field-label">District <span class="req">*</span></label>
+          <select id="district" class="field-input">
+            <option value="">-- Select District --</option>
+            <option>Ahmedabad</option><option>Amreli</option><option>Anand</option><option>Aravalli</option><option>Banaskantha</option><option>Bharuch</option><option>Bhavnagar</option><option>Botad</option><option>Chhota Udepur</option><option>Dahod</option><option>Dang</option><option>Devbhoomi Dwarka</option><option>Gandhinagar</option><option>Gir Somnath</option><option>Jamnagar</option><option>Junagadh</option><option>Kachchh</option><option>Kheda</option><option>Mahisagar</option><option>Mehsana</option><option>Morbi</option><option>Narmada</option><option>Navsari</option><option>Panchmahal</option><option>Patan</option><option>Porbandar</option><option>Rajkot</option><option>Sabarkantha</option><option>Surat</option><option>Surendranagar</option><option>Tapi</option><option>Vadodara</option><option>Valsad</option>
+          </select>
+          <div class="field-error" id="err-district"></div>
+        </div>
+      </div>
+      <div class="field-group"><label class="field-label">Venue <span class="optional">(Optional — auto UPPERCASE)</span></label><textarea id="venue" class="field-input field-textarea uppercase-input" placeholder="Leave blank = Declare Soon / Update Soon"></textarea></div>
+    </div>
+
+    <!-- PRIZE & FEES -->
+    <div class="form-section" id="section-3">
+      <div class="section-title">💰 Prize &amp; Entry Fees</div>
+      <div class="field-group"><label class="field-label">Prize Fund <span class="optional">(Optional)</span></label><input type="text" id="prizeFund" class="field-input" placeholder="Type amount e.g. 100000" inputmode="numeric"/><div class="prize-preview" id="prizePreview"></div></div>
+      <div class="fees-grid">
+        <div class="fee-card">
+          <div class="fee-card-title">🕐 Write Full Early Bird Entry Fees</div>
+          <div class="field-group"><label class="field-label">Till Date</label><input type="date" id="earlyBirdDate" class="field-input"/></div>
+          <div class="field-group"><label class="field-label">Fees</label><input type="text" id="earlyBirdFees" class="field-input" placeholder="e.g. 500" inputmode="numeric"/><div class="prize-preview" id="earlyBirdPreview"></div></div>
+        </div>
+        <div class="fee-card">
+          <div class="fee-card-title">✅ Actual Entry Fees</div>
+          <div class="field-group" style="margin-bottom:0"><label class="field-label">Fees</label><input type="text" id="actualFees" class="field-input" placeholder="e.g. 700" inputmode="numeric"/><div class="prize-preview" id="actualFeesPreview"></div></div>
+        </div>
+        <div class="fee-card">
+          <div class="fee-card-title">⏰ Write Full Late Entry Fees</div>
+          <div class="field-group"><label class="field-label">From Date</label><input type="date" id="lateEntryDate" class="field-input"/></div>
+          <div class="field-group"><label class="field-label">Fees</label><input type="text" id="lateEntryFees" class="field-input" placeholder="e.g. 1000" inputmode="numeric"/><div class="prize-preview" id="lateEntryPreview"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TD + ARBITERS -->
+    <div class="form-section" id="section-4">
+      <div class="section-title">👤 Tournament Director <span class="optional">(Optional)</span></div>
+      <div class="field-row">
+        <div class="field-group"><label class="field-label">Tournament Director Name</label><input type="text" id="tdName" class="field-input" placeholder="Full name"/></div>
+        <div class="field-group"><label class="field-label">FIDE ID <span class="optional">(Optional)</span></label><input type="text" id="tdFideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+      </div>
+      <div class="section-title" style="margin-top:20px">⚖️ Arbiters <span class="optional">(Optional)</span></div>
+      <div class="arbiter-block">
+        <div class="arbiter-label">Chief Arbiter</div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">Name</label><input type="text" id="ca1Name" class="field-input" placeholder="Chief Arbiter name"/></div>
+          <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="ca1FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+        </div>
+      </div>
+      <div class="arbiter-block">
+        <div class="arbiter-label">Deputy Chief Arbiter 1</div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">Name</label><input type="text" id="dca1Name" class="field-input" placeholder="Deputy Chief Arbiter name"/></div>
+          <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="dca1FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+        </div>
+      </div>
+      <div class="arbiter-block">
+        <div class="arbiter-label">Deputy Chief Arbiter 2</div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">Name</label><input type="text" id="dca2Name" class="field-input" placeholder="Deputy Chief Arbiter name"/></div>
+          <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="dca2FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LINKS -->
+    <div class="form-section" id="section-5">
+      <div class="section-title">🔗 Links <span class="optional">(All Optional)</span></div>
+      <div class="links-grid">
+        <div class="field-group"><label class="field-label">📄 Brochure Link</label><input type="url" id="brochureLink" class="field-input" placeholder="https://..."/></div>
+        <div class="field-group"><label class="field-label">♟ Chess Results Link</label><input type="url" id="chessResultsLink" class="field-input" placeholder="https://chess-results.com/..."/></div>
+        <div class="field-group"><label class="field-label">📍 Map Link</label><input type="url" id="mapLink" class="field-input" placeholder="https://maps.google.com/..."/></div>
+        <div class="field-group"><label class="field-label">🎥 Live Games Link</label><input type="url" id="liveGamesLink" class="field-input" placeholder="https://..."/></div>
+        <div class="field-group"><label class="field-label">🏆 Prize List Link</label><input type="url" id="prizeListLink" class="field-input" placeholder="https://..."/></div>
+        <div class="field-group"><label class="field-label">📝 Register Link</label><input type="url" id="registerLink" class="field-input" placeholder="https://..."/></div>
+        <div class="field-group"><label class="field-label">♟ Register through GCC Link</label><input type="url" id="registerGccLink" class="field-input" placeholder="https://..."/></div>
+        <div class="field-group"><label class="field-label">📸 Event Photographs Link</label><input type="url" id="photographsLink" class="field-input" placeholder="https://..."/></div>
+      </div>
+    </div>
+
+    <!-- PIN -->
+    <div class="form-section pin-section" id="section-6">
+      <div class="section-title">🔐 PIN Verification <span class="req">*</span></div>
+      <div class="pin-note" id="pinNote">Enter your Organizer PIN to submit.</div>
+      <div class="field-group half">
+        <label class="field-label" id="pinLabel">Organizer PIN <span class="req">*</span></label>
+        <input type="password" id="pinInput" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+        <div class="field-error" id="err-pin"></div>
+      </div>
+    </div>
+
+    <div class="submit-section">
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span class="btn-text">Submit Event</span><span class="btn-icon">→</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="successOverlay">
+  <div class="overlay-card">
+    <div class="overlay-icon">✅</div>
+    <h3 id="overlayTitle">Event Registered!</h3>
+    <p id="successMsg">Event saved successfully.</p>
+    <button class="overlay-btn" onclick="window.location.reload()">Register Another Event</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = { apiKey:"AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s", authDomain:"ratedeventsgj.firebaseapp.com", projectId:"ratedeventsgj", storageBucket:"ratedeventsgj.firebasestorage.app", messagingSenderId:"527826897689", appId:"1:527826897689:web:fb0439fff04a695a599388" };
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  const ADMIN_PIN = "270620";
+
+  const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const now = new Date();
+  document.getElementById("datePill").textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  const $ = id => document.getElementById(id);
+  function getVal(id){ return $(id)?.value.trim()||""; }
+  function setVal(id,v){ const e=$(id); if(e) e.value=v||""; }
+  function showError(id,msg){ const e=$("err-"+id); if(e) e.textContent=msg; const i=$(id); if(i) i.classList.add("error"); }
+  function clearAllErrors(){ document.querySelectorAll(".field-error").forEach(e=>e.textContent=""); document.querySelectorAll(".field-input").forEach(e=>e.classList.remove("error")); }
+  function showToast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3000); }
+
+  function formatIndianCurrency(val){
+    const num=val.replace(/\D/g,""); if(!num) return "";
+    let last3=num.substring(num.length-3), other=num.substring(0,num.length-3);
+    if(other!=="") last3=","+last3;
+    return other.replace(/\B(?=(\d{2})+(?!\d))/g,",")+last3+" Rs.";
+  }
+  function attachCurrencyPreview(inputId,previewId){
+    const inp=$(inputId), prev=$(previewId);
+    inp.addEventListener("input",()=>{ inp.value=inp.value.replace(/\D/g,""); const f=formatIndianCurrency(inp.value); prev.textContent=f?`→ ${f}`:""; });
+  }
+  attachCurrencyPreview("prizeFund","prizePreview");
+  attachCurrencyPreview("earlyBirdFees","earlyBirdPreview");
+  attachCurrencyPreview("actualFees","actualFeesPreview");
+  attachCurrencyPreview("lateEntryFees","lateEntryPreview");
+
+  document.querySelectorAll(".uppercase-input").forEach(el=>{ el.addEventListener("input",()=>{ el.value=el.value.toUpperCase(); }); });
+  ["ca1FideId","dca1FideId","dca2FideId","tdFideId"].forEach(id=>{ $(id).addEventListener("input",function(){ this.value=this.value.replace(/\D/g,""); }); });
+
+  document.querySelectorAll('input[name="enteredBy"]').forEach(r=>{
+    r.addEventListener("change",()=>{
+      const v=r.value;
+      $("pinNote").textContent=v==="Admin"?"Enter the Admin PIN to submit.":"Enter your Organizer PIN to submit.";
+      $("pinLabel").innerHTML=`${v} PIN <span class="req">*</span>`;
+    });
+  });
+
+  $("startDate").addEventListener("change",()=>{
+    const sd=$("startDate").value; $("endDate").min=sd;
+    if($("endDate").value&&$("endDate").value<sd) $("endDate").value=sd;
+  });
+
+  // Step nav
+  const sections=Array.from({length:7},(_,i)=>$("section-"+i));
+  const stepBtns=Array.from(document.querySelectorAll(".step-btn"));
+  window.scrollToSection=idx=>{ const el=$("section-"+idx); if(el) el.scrollIntoView({behavior:"smooth",block:"start"}); };
+  function updateSteps(){
+    const sy=window.scrollY+130; let active=0;
+    sections.forEach((el,i)=>{ if(el&&el.offsetTop<=sy) active=i; });
+    stepBtns.forEach((b,i)=>{ b.classList.toggle("active",i===active); b.classList.toggle("done",i<active); });
+  }
+  window.addEventListener("scroll",updateSteps,{passive:true}); updateSteps();
+  window.addEventListener("scroll",()=>{ $("scrollTopBtn").classList.toggle("visible",window.scrollY>300); },{passive:true});
+
+  // Organizer search
+  let orgList=[];
+  getDocs(collection(db,"organizerdb")).then(snap=>{ orgList=snap.docs.map(d=>({id:d.id,...d.data()})); });
+  const srch=$("organizerSearch"), ddrop=$("organizerDropdown");
+  srch.addEventListener("input",()=>{
+    const q=srch.value.toLowerCase().trim(); ddrop.innerHTML="";
+    if(!q){ ddrop.classList.remove("open"); return; }
+    const matches=orgList.filter(o=>(o.organizerName||"").toLowerCase().includes(q));
+    if(!matches.length){ ddrop.innerHTML=`<div class="dropdown-empty">No organizer found</div>`; }
+    else { matches.forEach(org=>{ const item=document.createElement("div"); item.className="dropdown-item"; item.textContent=org.organizerName; item.addEventListener("click",()=>{ srch.value=org.organizerName; $("organizerID").value=org.organizerID||org.id; $("organizerNameVal").value=org.organizerName; srch.dataset.pin=org.pin||""; ddrop.classList.remove("open"); $("err-organizer").textContent=""; srch.classList.remove("error"); }); ddrop.appendChild(item); }); }
+    ddrop.classList.add("open");
+  });
+  document.addEventListener("click",e=>{ if(!e.target.closest(".searchable-wrap")) ddrop.classList.remove("open"); });
+
+  function fmtDate(s){ if(!s) return "—"; const[y,m,d]=s.split("-"); return `${d}/${m}/${y}`; }
+  function fmtToInput(s){ if(!s||s==="—") return ""; const p=s.split("/"); return p.length===3?`${p[2]}-${p[1]}-${p[0]}`:""; }
+
+  // Edit mode
+  const urlParams=new URLSearchParams(window.location.search);
+  const editDocId=urlParams.get("editDocId");
+  let isEditMode=false, editDocFirebaseId=null;
+  async function initEditMode(){
+    if(!editDocId) return;
+    isEditMode=true; editDocFirebaseId=editDocId;
+    document.querySelector(".form-subtitle").textContent="Edit Rated Event";
+    $("submitBtn").querySelector(".btn-text").textContent="Update Event";
+    const snap=await getDocs(collection(db,"RTDeventdb"));
+    const found=snap.docs.find(d=>d.id===editDocId);
+    if(found) fillForm(found.data());
+  }
+  function fillForm(data){
+    if(data.enteredBy){ const r=document.querySelector(`input[name="enteredBy"][value="${data.enteredBy}"]`); if(r){r.checked=true;r.dispatchEvent(new Event("change"));} }
+    if(data.organizerName){ srch.value=data.organizerName; $("organizerNameVal").value=data.organizerName; $("organizerID").value=data.organizerID||""; }
+    setVal("eventName",data.eventName); setVal("startDate",data.startDate); setVal("endDate",data.endDate);
+    setVal("system",data.system); setVal("format",data.format);
+    setVal("timeControl",data.timeControl==="—"?"":data.timeControl);
+    setVal("district",data.district);
+    setVal("venue",data.venue==="DECLARE SOON / UPDATE SOON"?"":data.venue);
+    if(data.prizeFund&&data.prizeFund!=="To Be Announced"){ setVal("prizeFund",data.prizeFund.replace(/[^0-9]/g,"")); $("prizePreview").textContent=`→ ${data.prizeFund}`; }
+    const ef=data.entryFees||{};
+    setVal("earlyBirdDate",fmtToInput(ef.earlyBird?.date));
+    if(ef.earlyBird?.fees&&ef.earlyBird.fees!=="—"){ setVal("earlyBirdFees",ef.earlyBird.fees.replace(/[^0-9]/g,"")); $("earlyBirdPreview").textContent=`→ ${ef.earlyBird.fees}`; }
+    if(ef.actual?.fees&&ef.actual.fees!=="To Be Announced"){ setVal("actualFees",ef.actual.fees.replace(/[^0-9]/g,"")); $("actualFeesPreview").textContent=`→ ${ef.actual.fees}`; }
+    setVal("lateEntryDate",fmtToInput(ef.lateEntry?.date));
+    if(ef.lateEntry?.fees&&ef.lateEntry.fees!=="—"){ setVal("lateEntryFees",ef.lateEntry.fees.replace(/[^0-9]/g,"")); $("lateEntryPreview").textContent=`→ ${ef.lateEntry.fees}`; }
+    const td=data.tournamentDirector||{}; setVal("tdName",td.name); setVal("tdFideId",td.fideId);
+    const arb=data.arbiters||{};
+    setVal("ca1Name",arb.chiefArbiter?.name); setVal("ca1FideId",arb.chiefArbiter?.fideId);
+    setVal("dca1Name",arb.deputyCA1?.name);   setVal("dca1FideId",arb.deputyCA1?.fideId);
+    setVal("dca2Name",arb.deputyCA2?.name);   setVal("dca2FideId",arb.deputyCA2?.fideId);
+    const lk=data.links||{};
+    setVal("brochureLink",lk.brochure); setVal("chessResultsLink",lk.chessResults);
+    setVal("mapLink",lk.map); setVal("liveGamesLink",lk.liveGames); setVal("prizeListLink",lk.prizeList);
+    setVal("registerLink",lk.register); setVal("registerGccLink",lk.registerGcc); setVal("photographsLink",lk.photographs);
+  }
+  initEditMode();
+
+  function validateForm(){
+    let ok=true; clearAllErrors();
+    if(!document.querySelector('input[name="enteredBy"]:checked')?.value){ $("err-enteredBy").textContent="Please select Admin or Organizer."; ok=false; }
+    if(!$("organizerNameVal").value){ showError("organizer","Please select an organizer."); srch.classList.add("error"); ok=false; }
+    if(!getVal("eventName")){ showError("eventName","Event name is required."); ok=false; }
+    if(!getVal("startDate")){ showError("startDate","Start date is required."); ok=false; }
+    if(!getVal("endDate")){ showError("endDate","End date is required."); ok=false; }
+    if(getVal("startDate")&&getVal("endDate")&&getVal("endDate")<getVal("startDate")){ showError("endDate","End date cannot be before start date."); ok=false; }
+    if(!getVal("system")){ showError("system","Please select a system."); ok=false; }
+    if(!getVal("format")){ showError("format","Please select a format."); ok=false; }
+    if(!getVal("district")){ showError("district","Please select a district."); ok=false; }
+    if(!getVal("pinInput")){ showError("pin","PIN is required."); ok=false; }
+    return ok;
+  }
+
+  async function verifyPin(enteredBy,pin){
+    if(enteredBy==="Admin") return pin===ADMIN_PIN;
+    return pin===srch.dataset.pin;
+  }
+
+  $("eventForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    if(!validateForm()){ const fe=document.querySelector(".field-input.error"); if(fe) fe.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+    const btn=$("submitBtn"); btn.disabled=true; btn.querySelector(".btn-text").textContent="Verifying…";
+    try{
+      const enteredBy=document.querySelector('input[name="enteredBy"]:checked').value;
+      const pin=getVal("pinInput");
+      if(!(await verifyPin(enteredBy,pin))){
+        $("err-pin").textContent=enteredBy==="Admin"?"Wrong Admin PIN.":"Wrong Organizer PIN.";
+        $("pinInput").classList.add("error");
+        btn.disabled=false; btn.querySelector(".btn-text").textContent=isEditMode?"Update Event":"Submit Event"; return;
+      }
+      btn.querySelector(".btn-text").textContent="Saving…";
+      const nd=new Date();
+      const dd=String(nd.getDate()).padStart(2,"0"), mm=String(nd.getMonth()+1).padStart(2,"0"), yyyy=nd.getFullYear();
+      const data={
+        enteredBy, entryDate:`${dd}/${mm}/${yyyy}`,
+        entryTime:nd.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),
+        organizerID:$("organizerID").value, organizerName:$("organizerNameVal").value,
+        eventName:getVal("eventName"), startDate:getVal("startDate"), startDateDisplay:fmtDate(getVal("startDate")),
+        endDate:getVal("endDate"), endDateDisplay:fmtDate(getVal("endDate")),
+        system:getVal("system"), format:getVal("format"), timeControl:getVal("timeControl")||"—",
+        district:getVal("district"), venue:getVal("venue")||"DECLARE SOON / UPDATE SOON",
+        prizeFund:getVal("prizeFund")?formatIndianCurrency(getVal("prizeFund")):"To Be Announced",
+        entryFees:{
+          earlyBird:{date:fmtDate(getVal("earlyBirdDate")), fees:getVal("earlyBirdFees")?formatIndianCurrency(getVal("earlyBirdFees")):"—"},
+          actual:{fees:getVal("actualFees")?formatIndianCurrency(getVal("actualFees")):"To Be Announced"},
+          lateEntry:{date:fmtDate(getVal("lateEntryDate")), fees:getVal("lateEntryFees")?formatIndianCurrency(getVal("lateEntryFees")):"—"}
+        },
+        tournamentDirector:{name:getVal("tdName"),fideId:getVal("tdFideId")},
+        arbiters:{chiefArbiter:{name:getVal("ca1Name"),fideId:getVal("ca1FideId")},deputyCA1:{name:getVal("dca1Name"),fideId:getVal("dca1FideId")},deputyCA2:{name:getVal("dca2Name"),fideId:getVal("dca2FideId")}},
+        links:{brochure:getVal("brochureLink"),chessResults:getVal("chessResultsLink"),map:getVal("mapLink"),liveGames:getVal("liveGamesLink"),prizeList:getVal("prizeListLink"),register:getVal("registerLink"),registerGcc:getVal("registerGccLink"),photographs:getVal("photographsLink")}
+      };
+      if(isEditMode&&editDocFirebaseId){
+        await updateDoc(doc(db,"RTDeventdb",editDocFirebaseId),data);
+        $("overlayTitle").textContent="Event Updated!"; $("successMsg").textContent="Event details updated successfully.";
+      } else {
+        await addDoc(collection(db,"RTDeventdb"),data);
+        $("overlayTitle").textContent="Event Registered!"; $("successMsg").textContent="Event saved and now live on Rated Events GJ page.";
+      }
+      $("successOverlay").classList.add("active");
+    } catch(err){ showToast("❌ Error: "+err.message); console.error(err); }
+    finally{ btn.disabled=false; btn.querySelector(".btn-text").textContent=isEditMode?"Update Event":"Submit Event"; }
+  });
+</script>
+</body>
+</html>

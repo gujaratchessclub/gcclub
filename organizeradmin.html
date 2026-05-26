@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Review - Gujarat Chess Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="organizeradmin.css"/>
+</head>
+<body>
+
+  <!-- PASSWORD GATE -->
+  <div class="password-gate" id="passwordGate">
+    <div class="gate-card">
+      <div class="gate-logo">♟</div>
+      <h2>Gujarat Chess Club</h2>
+      <p>Admin Access Required</p>
+      <div class="gate-field">
+        <input type="password" id="adminPassword" class="gate-input" placeholder="Enter Admin Password" maxlength="20"/>
+      </div>
+      <div class="gate-error" id="gateError"></div>
+      <button class="gate-btn" id="gateBtn">Enter Admin Panel</button>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL (hidden until password correct) -->
+  <div class="admin-panel" id="adminPanel" style="display:none;">
+
+    <!-- HEADER -->
+    <div class="admin-header">
+      <div class="header-left">
+        <span class="header-logo">♟</span>
+        <div>
+          <h1>Gujarat Chess Club</h1>
+          <span class="header-sub">Organizer Review Panel</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="pending-badge" id="pendingCount">Loading...</span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-pending" onclick="switchTab('pending')">⏳ Pending</button>
+      <button class="tab-btn" id="tab-approved" onclick="switchTab('approved')">✅ Approved</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="panel-body">
+      <div id="loadingMsg" class="loading-msg">Loading registrations...</div>
+      <div id="emptyMsg" class="empty-msg" style="display:none;">No records found.</div>
+      <div id="recordsList"></div>
+    </div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card" id="modalCard">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modalContent"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <script type="module" src="organizeradmin.js"></script>
+</body>
+</html>

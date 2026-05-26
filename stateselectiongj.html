@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>State Selection GJ - Gujarat Chess Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="stateselectiongj.css"/>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-top">
+      <div class="date-pill" id="datePill"></div>
+      <div class="header-login-btns">
+        <button class="login-btn admin-login-btn" onclick="openAdminLogin()">🛡 Admin Login</button>
+        <button class="login-btn org-login-btn" onclick="openOrgLogin()">🏆 Organizer Login</button>
+      </div>
+    </div>
+    <div class="header-logo">♟</div>
+    <h1 class="header-title">Gujarat Chess Club</h1>
+    <p class="header-sub">State Selection GJ</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search event, organizer, district..."/>
+    </div>
+    <select id="districtFilter" class="filter-select">
+      <option value="">All Districts</option>
+      <option>Ahmedabad</option><option>Amreli</option><option>Anand</option>
+      <option>Aravalli</option><option>Banaskantha</option><option>Bharuch</option>
+      <option>Bhavnagar</option><option>Botad</option><option>Chhota Udepur</option>
+      <option>Dahod</option><option>Dang</option><option>Devbhoomi Dwarka</option>
+      <option>Gandhinagar</option><option>Gir Somnath</option><option>Jamnagar</option>
+      <option>Junagadh</option><option>Kachchh</option><option>Kheda</option>
+      <option>Mahisagar</option><option>Mehsana</option><option>Morbi</option>
+      <option>Narmada</option><option>Navsari</option><option>Panchmahal</option>
+      <option>Patan</option><option>Porbandar</option><option>Rajkot</option>
+      <option>Sabarkantha</option><option>Surat</option><option>Surendranagar</option>
+      <option>Tapi</option><option>Vadodara</option><option>Valsad</option>
+    </select>
+    <select id="formatFilter" class="filter-select">
+      <option value="">All Formats</option>
+      <option>Standard</option><option>Rapid</option><option>Blitz</option>
+    </select>
+    <select id="organizerFilter" class="filter-select" id="organizerFilter">
+      <option value="">All Organizers</option>
+    </select>
+    <div class="count-badge" id="countBadge">Loading...</div>
+  </div>
+
+  <div class="table-wrap">
+    <div id="loadingMsg" class="status-msg">⏳ Loading events...</div>
+    <div id="emptyMsg" class="status-msg" style="display:none;">No events found.</div>
+    <table class="event-table" id="eventTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Sr No</th>
+          <th>Start Date</th>
+          <th style="min-width:220px;">Event Name</th>
+          <th>Organizer</th>
+          <th>District</th>
+          <th>Prize Fund</th>
+          <th>System</th>
+          <th>Format</th>
+          <th>Time Control</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody id="eventTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- MORE DETAILS POPUP -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-box" id="popupBox">
+      <button class="popup-close" onclick="closePopup()">✕</button>
+      <div id="popupContent"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN MODAL -->
+  <div class="modal-overlay" id="adminLoginModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('adminLoginModal')">✕</button>
+      <div class="modal-logo">🛡</div>
+      <h3>Admin Login</h3>
+      <p>Enter Admin PIN</p>
+      <input type="password" id="adminPinInput" class="gate-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+      <div class="gate-error" id="adminPinError"></div>
+      <button class="gate-btn" onclick="verifyAdminPin()">Enter</button>
+    </div>
+  </div>
+
+  <!-- ORGANIZER LOGIN MODAL -->
+  <div class="modal-overlay" id="orgLoginModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('orgLoginModal')">✕</button>
+      <div class="modal-logo">🏆</div>
+      <h3>Organizer Login</h3>
+      <p>Enter your Organizer ID and PIN</p>
+      <input type="text" id="orgLoginID" class="gate-input" placeholder="Organizer ID" style="margin-bottom:10px;letter-spacing:2px;"/>
+      <input type="password" id="orgLoginPin" class="gate-input" placeholder="6-digit PIN" maxlength="6" inputmode="numeric"/>
+      <div class="gate-error" id="orgPinError"></div>
+      <button class="gate-btn" onclick="verifyOrgLogin()">Login & View My Events</button>
+    </div>
+  </div>
+
+  <!-- EVENT LIST MODAL (for organizer edit/delete) -->
+  <div class="modal-overlay" id="eventListModal">
+    <div class="modal-card wide-modal">
+      <button class="modal-close" onclick="closeModal('eventListModal')">✕</button>
+      <h3 id="eventListTitle">My Events</h3>
+      <p id="eventListSubtitle" style="font-size:13px;color:#78909C;margin-bottom:16px;"></p>
+      <div id="eventListContent"></div>
+    </div>
+  </div>
+
+  <script type="module" src="stateselectiongj.js"></script>
+</body>
+</html>
