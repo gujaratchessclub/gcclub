@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IP Self Registration — Gujarat Chess Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#1565C0;--blue-dark:#0D47A1;--blue-light:#1976D2;
+  --blue-pale:#E3F2FD;--white:#fff;--bg:#F0F4FF;
+  --border:#BBDEFB;--text:#1A237E;--text-body:#37474F;
+  --text-light:#78909C;--gold:#FFB300;
+  --success:#2E7D32;--success-bg:#E8F5E9;
+  --error:#C62828;--error-bg:#FFEBEE;
+  --shadow:0 4px 24px rgba(21,101,192,0.10);
+}
+body{font-family:'Lexend',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));color:#fff;text-align:center;padding:16px 20px 28px;}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.date-pill{background:rgba(255,255,255,0.18);color:#fff;font-size:13px;font-weight:600;padding:5px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.30);}
+.header-link-btn{font-family:'Lexend',sans-serif;background:var(--gold);color:var(--blue-dark);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;border:none;cursor:pointer;}
+.header-link-btn:hover{opacity:.88;}
+.header-logo{font-size:42px;margin-bottom:6px;}
+.header-title{font-size:24px;font-weight:800;color:#fff;}
+.tool-badge{display:inline-block;background:var(--gold);color:var(--blue-dark);font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;margin:8px auto 4px;letter-spacing:1px;}
+.header-sub{font-size:14px;color:rgba(255,255,255,0.85);margin-top:4px;}
+
+/* MAIN */
+.main{max-width:640px;margin:24px auto 48px;padding:0 20px;}
+.notice{background:var(--blue-pale);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--blue-dark);margin-bottom:20px;line-height:1.7;}
+.notice strong{font-weight:700;}
+.req{color:var(--error);font-weight:700;}
+
+/* QUESTION CARD */
+.q-card{background:#fff;border-radius:14px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;}
+
+/* QUESTION LABEL BAR */
+.q-bar{background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.q-num{background:rgba(255,255,255,0.22);color:#fff;font-size:11px;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:.5px;white-space:nowrap;}
+.q-title{color:#fff;font-size:15px;font-weight:700;flex:1;}
+.q-rule{color:rgba(255,255,255,0.80);font-size:11px;white-space:nowrap;}
+
+/* FIELD BODY */
+.q-body{padding:16px 20px;}
+
+/* INPUT FIELDS */
+.field-input{font-family:'Lexend',sans-serif;font-size:15px;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;background:#FAFCFF;color:var(--text);outline:none;transition:all .2s;width:100%;}
+.field-input:focus{border-color:var(--blue-light);background:#fff;box-shadow:0 0 0 3px rgba(21,101,192,0.10);}
+.field-input.error{border-color:var(--error);background:#FFF5F5;}
+.field-input.success{border-color:var(--success);background:#F6FFF6;}
+.field-hint{font-size:11px;color:var(--text-light);margin-top:5px;font-weight:500;}
+.field-error{font-size:12px;color:var(--error);font-weight:600;margin-top:5px;min-height:16px;}
+
+/* SELECT */
+select.field-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231565C0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+
+/* PIN GRID */
+.pin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:520px){.pin-grid{grid-template-columns:1fr;}}
+.pin-input{letter-spacing:5px;font-size:18px;font-weight:700;text-align:center;}
+
+/* SUBMIT AREA */
+.submit-card{background:#fff;border-radius:14px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.submit-card-title{font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--blue-pale);}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+.primary-btn{font-family:'Lexend',sans-serif;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));color:#fff;font-size:14px;font-weight:700;padding:13px 28px;border:none;border-radius:30px;cursor:pointer;box-shadow:0 4px 16px rgba(21,101,192,0.25);transition:all .2s;}
+.primary-btn:hover:not(:disabled){transform:translateY(-1px);}
+.primary-btn:disabled{opacity:.5;cursor:not-allowed;}
+.clear-btn{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--text-light);border:1.5px solid var(--border);border-radius:30px;padding:12px 22px;font-size:13px;font-weight:600;cursor:pointer;}
+.clear-btn:hover{background:var(--border);}
+
+/* LOADING SPINNER INSIDE BTN */
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top:2px solid #fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* SUCCESS OVERLAY */
+.result-overlay{display:none;position:fixed;inset:0;background:rgba(13,71,161,.55);z-index:2000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
+.result-overlay.active{display:flex;}
+.result-box{background:#fff;border-radius:16px;padding:32px 28px 24px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.22);animation:popIn .25s cubic-bezier(.34,1.56,.64,1);text-align:center;}
+@keyframes popIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
+.result-icon{font-size:52px;margin-bottom:10px;}
+.result-title{font-size:20px;font-weight:800;color:var(--success);margin-bottom:6px;}
+.result-sub{font-size:13px;color:var(--text-light);margin-bottom:20px;}
+.result-id-box{background:var(--blue-pale);border:2px solid var(--blue);border-radius:12px;padding:16px 20px;margin-bottom:14px;}
+.result-id-label{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.result-id-value{font-size:28px;font-weight:800;color:var(--blue-dark);letter-spacing:3px;}
+.result-pin-box{background:#FFF8E1;border:2px solid var(--gold);border-radius:12px;padding:14px 20px;margin-bottom:20px;}
+.result-pin-label{font-size:11px;font-weight:700;color:#E65100;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.result-pin-value{font-size:26px;font-weight:800;color:#BF360C;letter-spacing:5px;}
+.result-note{font-size:12px;color:var(--text-light);margin-bottom:20px;line-height:1.6;}
+.copy-btn{font-family:'Lexend',sans-serif;background:var(--success);color:#fff;border:none;border-radius:20px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;width:100%;}
+.copy-btn:hover{opacity:.88;}
+.done-btn{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--text-light);border:1.5px solid var(--border);border-radius:20px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;width:100%;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="date-pill" id="datePill"></div>
+    <button class="header-link-btn" onclick="window.location.href='IP.html'">👤 IP Database</button>
+  </div>
+  <div class="header-logo">♟</div>
+  <h1 class="header-title">Gujarat Chess Club</h1>
+  <div class="tool-badge">SELF REGISTRATION</div>
+  <p class="header-sub">Individual Person (IP) Registration — Without FIDE ID</p>
+</div>
+
+<div class="main">
+
+  <div class="notice">
+    <strong>📋 Instructions:</strong> Fill all mandatory fields marked <span class="req">★</span>. Fields marked as optional can be filled later. Your <strong>IP ID will be auto-generated</strong> after successful registration and shown to you on screen. Create a secure 6-digit PIN — you will need it to log in later.
+  </div>
+
+  <!-- Q1 — AICF ID -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q1</span>
+      <span class="q-title">AICF ID</span>
+      <span class="q-rule">Text &amp; digits · Optional</span>
+    </div>
+    <div class="q-body">
+      <input type="text" id="aicfId" class="field-input" placeholder="e.g. GUJ123456 (optional)" maxlength="30" autocomplete="off"/>
+      <div class="field-error" id="err-aicfId"></div>
+    </div>
+  </div>
+
+  <!-- Q2 — Name -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q2</span>
+      <span class="q-title">Name <span class="req">★ Mandatory</span></span>
+      <span class="q-rule">Full name · Letters only</span>
+    </div>
+    <div class="q-body">
+      <input type="text" id="name" class="field-input" placeholder="Enter your full name" maxlength="80" autocomplete="off"/>
+      <div class="field-error" id="err-name"></div>
+      <div class="field-hint">Enter your full name as it should appear in the database.</div>
+    </div>
+  </div>
+
+  <!-- Q3 — Date of Birth -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q3</span>
+      <span class="q-title">Date of Birth <span class="req">★ Mandatory</span></span>
+      <span class="q-rule">DD/MM/YYYY · Birth Year auto-extracted</span>
+    </div>
+    <div class="q-body">
+      <input type="text" id="dob" class="field-input" placeholder="DD/MM/YYYY e.g. 15/08/2000" maxlength="10" inputmode="numeric" autocomplete="off"/>
+      <div class="field-error" id="err-dob"></div>
+      <div class="field-hint">Enter in DD/MM/YYYY format exactly.</div>
+    </div>
+  </div>
+
+  <!-- Q4 — Gender -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q4</span>
+      <span class="q-title">Gender <span class="req">★ Mandatory</span></span>
+      <span class="q-rule">Select from dropdown</span>
+    </div>
+    <div class="q-body">
+      <select id="gender" class="field-input">
+        <option value="">— Select Gender —</option>
+        <option value="MALE">MALE</option>
+        <option value="FEMALE">FEMALE</option>
+      </select>
+      <div class="field-error" id="err-gender"></div>
+    </div>
+  </div>
+
+  <!-- Q5 — District -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q5</span>
+      <span class="q-title">District <span class="req">★ Mandatory</span></span>
+      <span class="q-rule">Gujarat District · Select from dropdown</span>
+    </div>
+    <div class="q-body">
+      <select id="district" class="field-input">
+        <option value="">— Select District —</option>
+        <option>AHMEDABAD</option>
+        <option>AMRELI</option>
+        <option>ANAND</option>
+        <option>ARAVALLI</option>
+        <option>BANASKANTHA</option>
+        <option>BHARUCH</option>
+        <option>BHAVNAGAR</option>
+        <option>BOTAD</option>
+        <option>CHHOTA UDAIPUR</option>
+        <option>DAHOD</option>
+        <option>DANG</option>
+        <option>DEVBHOOMI DWARKA</option>
+        <option>GANDHINAGAR</option>
+        <option>GIR SOMNATH</option>
+        <option>JAMNAGAR</option>
+        <option>JUNAGADH</option>
+        <option>KHEDA</option>
+        <option>KUTCH</option>
+        <option>MAHISAGAR</option>
+        <option>MEHSANA</option>
+        <option>MORBI</option>
+        <option>NARMADA</option>
+        <option>NAVSARI</option>
+        <option>PANCHMAHAL</option>
+        <option>PATAN</option>
+        <option>PORBANDAR</option>
+        <option>RAJKOT</option>
+        <option>SABARKANTHA</option>
+        <option>SURAT</option>
+        <option>SURENDRANAGAR</option>
+        <option>TAPI</option>
+        <option>VADODARA</option>
+        <option>VALSAD</option>
+      </select>
+      <div class="field-error" id="err-district"></div>
+    </div>
+  </div>
+
+  <!-- Q6 — Contact No -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q6</span>
+      <span class="q-title">Contact No <span class="req">★ Mandatory</span></span>
+      <span class="q-rule">Exactly 10 digits</span>
+    </div>
+    <div class="q-body">
+      <input type="text" id="contactNo" class="field-input" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" autocomplete="off"/>
+      <div class="field-error" id="err-contactNo"></div>
+    </div>
+  </div>
+
+  <!-- Q7 — Email ID -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q7</span>
+      <span class="q-title">Email ID <span class="req">★ Mandatory</span></span>
+      <span class="q-rule">Valid email format</span>
+    </div>
+    <div class="q-body">
+      <input type="email" id="email" class="field-input" placeholder="e.g. yourname@gmail.com" autocomplete="off"/>
+      <div class="field-error" id="err-email"></div>
+    </div>
+  </div>
+
+  <!-- Q8 — Lichess ID -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q8</span>
+      <span class="q-title">Lichess ID</span>
+      <span class="q-rule">Optional</span>
+    </div>
+    <div class="q-body">
+      <input type="text" id="lichessId" class="field-input" placeholder="Your Lichess username (optional)" maxlength="30" autocomplete="off"/>
+      <div class="field-error" id="err-lichessId"></div>
+    </div>
+  </div>
+
+  <!-- Q9 — Chess.com ID -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q9</span>
+      <span class="q-title">Chess.com ID</span>
+      <span class="q-rule">Optional</span>
+    </div>
+    <div class="q-body">
+      <input type="text" id="chesscomId" class="field-input" placeholder="Your Chess.com username (optional)" maxlength="30" autocomplete="off"/>
+      <div class="field-error" id="err-chesscomId"></div>
+    </div>
+  </div>
+
+  <!-- Q10 — Create IP PIN + Confirm IP PIN -->
+  <div class="q-card">
+    <div class="q-bar">
+      <span class="q-num">Q10</span>
+      <span class="q-title">Create IP PIN + Confirm IP PIN <span class="req">★ Mandatory</span></span>
+      <span class="q-rule">6 digits · both must match</span>
+    </div>
+    <div class="q-body">
+      <div class="pin-grid">
+        <div>
+          <div class="field-hint" style="margin-bottom:6px;font-weight:600;color:var(--blue);">Create IP PIN ★</div>
+          <input type="password" id="ipPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="new-password"/>
+          <div class="field-error" id="err-ipPin"></div>
+        </div>
+        <div>
+          <div class="field-hint" style="margin-bottom:6px;font-weight:600;color:var(--blue);">Confirm IP PIN ★</div>
+          <input type="password" id="ipPinConfirm" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="new-password"/>
+          <div class="field-error" id="err-ipPinConfirm"></div>
+        </div>
+      </div>
+      <div class="field-hint" style="margin-top:10px;">Choose any 6-digit number as your personal PIN. Keep it safe — you will need it to access your profile.</div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-card">
+    <div class="submit-card-title">Register ♟</div>
+    <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;line-height:1.7;">
+      By registering you confirm that all details are correct. Your <strong>IP ID will be auto-generated</strong> after registration. Ratings, Title, and Status will be updated by the Admin after verification.
+    </p>
+    <div class="btn-row">
+      <button class="primary-btn" id="registerBtn" onclick="submitRegistration()">⚡ Register Now</button>
+      <button class="clear-btn" onclick="clearForm()">✕ Clear</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- SUCCESS OVERLAY -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box">
+    <div class="result-icon">✅</div>
+    <div class="result-title">Registration Successful!</div>
+    <div class="result-sub">Your IP profile has been created in the Gujarat Chess Club database.</div>
+    <div class="result-id-box">
+      <div class="result-id-label">Your IP ID</div>
+      <div class="result-id-value" id="resultIpId">—</div>
+    </div>
+    <div class="result-pin-box">
+      <div class="result-pin-label">Your IP PIN</div>
+      <div class="result-pin-value" id="resultPin">—</div>
+    </div>
+    <div class="result-note">
+      📌 Please note down your <strong>IP ID</strong> and <strong>IP PIN</strong>. You will need both to access your profile. This PIN cannot be recovered if forgotten.
+    </div>
+    <button class="copy-btn" id="copyResultBtn" onclick="copyResult()">📋 Copy IP ID &amp; PIN</button>
+    <button class="done-btn" onclick="doneRegistration()">👤 View IP Database</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s",
+  authDomain: "ratedeventsgj.firebaseapp.com",
+  projectId: "ratedeventsgj",
+  storageBucket: "ratedeventsgj.firebasestorage.app",
+  messagingSenderId: "527826897689",
+  appId: "1:527826897689:web:fb0439fff04a695a599388"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const DB_NAME = "IPdb";
+
+/* ── Date Pill ── */
+const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const NOW = new Date();
+document.getElementById("datePill").textContent =
+  `${DAYS[NOW.getDay()]}, ${NOW.getDate()} ${MONTHS[NOW.getMonth()]} ${NOW.getFullYear()}`;
+
+/* ── Field references ── */
+const aicfEl     = document.getElementById("aicfId");
+const nameEl     = document.getElementById("name");
+const dobEl      = document.getElementById("dob");
+const contactEl  = document.getElementById("contactNo");
+const ipPinEl    = document.getElementById("ipPin");
+const ipPinCEl   = document.getElementById("ipPinConfirm");
+
+/* ── Input event listeners ── */
+
+// AICF ID — uppercase
+aicfEl.addEventListener("input", function(){
+  const pos = this.selectionStart;
+  this.value = this.value.toUpperCase();
+  try{ this.setSelectionRange(pos,pos); }catch(e){}
+});
+
+// Name — uppercase
+nameEl.addEventListener("input", function(){
+  const pos = this.selectionStart;
+  this.value = this.value.toUpperCase();
+  try{ this.setSelectionRange(pos,pos); }catch(e){}
+  clearErr("name");
+});
+
+// DOB — format helper DD/MM/YYYY
+dobEl.addEventListener("input", function(){
+  let v = this.value.replace(/[^0-9/]/g,"");
+  if(v.length===2 && !v.includes("/")) v = v+"/";
+  else if(v.length===5 && v.split("/").length===2) v = v+"/";
+  this.value = v.slice(0,10);
+  clearErr("dob");
+});
+
+// Contact — digits only, max 10
+contactEl.addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,10);
+  clearErr("contactNo");
+});
+
+// PIN — digits only, max 6
+ipPinEl.addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,6);
+  clearErr("ipPin");
+});
+ipPinCEl.addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,6);
+  clearErr("ipPinConfirm");
+});
+
+/* ── Helpers ── */
+function clearErr(id){
+  const errEl = document.getElementById("err-"+id);
+  if(errEl) errEl.textContent="";
+  const inp = document.getElementById(id);
+  if(inp) inp.classList.remove("error");
+}
+function showErr(id, msg){
+  const errEl = document.getElementById("err-"+id);
+  if(errEl) errEl.textContent=msg;
+  const inp = document.getElementById(id);
+  if(inp){ inp.classList.add("error"); inp.focus(); }
+}
+function clearAllErrors(){
+  ["aicfId","name","dob","gender","district","contactNo","email","lichessId","chesscomId","ipPin","ipPinConfirm"]
+    .forEach(id=>{ clearErr(id); });
+}
+
+function convertDOB(dob){
+  if(!dob) return "";
+  const p = dob.split("/");
+  if(p.length!==3||p[2].length!==4) return "";
+  return `${p[2]}-${p[1].padStart(2,"0")}-${p[0].padStart(2,"0")}`;
+}
+function extractYear(dob){
+  if(!dob) return "";
+  const p = dob.split("/");
+  return (p.length===3&&p[2].length===4) ? p[2] : "";
+}
+function isValidDOB(dob){
+  if(!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) return false;
+  const [d,m,y] = dob.split("/").map(Number);
+  if(m<1||m>12||d<1||d>31) return false;
+  const dt = new Date(y,m-1,d);
+  return dt.getFullYear()===y && dt.getMonth()===m-1 && dt.getDate()===d;
+}
+function isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+/* ── IP ID Generator ── */
+// Format: IP + DDMMYYYY + 3-digit global sequence (e.g. IP27052026001)
+// The sequence number is global across ALL IPdb entries whose ipId starts with "IP"
+// It always increments from the current highest number, regardless of date.
+async function generateIpId(dateStr) {
+  // dateStr = "DDMMYYYY" e.g. "27052026"
+  // Fetch ALL docs in IPdb whose ipId starts with "IP" to find highest sequence
+  const snap = await getDocs(collection(db, DB_NAME));
+  let maxSeq = 0;
+  snap.forEach(doc => {
+    const data = doc.data();
+    const id = data.ipId || "";
+    // Match pattern: IP + 8 digits (DDMMYYYY) + 3 digits (sequence)
+    const match = id.match(/^IP\d{8}(\d{3})$/);
+    if(match){
+      const seq = parseInt(match[1], 10);
+      if(seq > maxSeq) maxSeq = seq;
+    }
+  });
+  const nextSeq = maxSeq + 1;
+  const seqStr = String(nextSeq).padStart(3,"0");
+  return `IP${dateStr}${seqStr}`;
+}
+
+let savedIpId="", savedPin="";
+
+/* ── Submit ── */
+window.submitRegistration = async function(){
+  clearAllErrors();
+  const btn = document.getElementById("registerBtn");
+
+  // Gather values
+  const aicfId    = aicfEl.value.trim();
+  const name      = nameEl.value.trim();
+  const dobRaw    = dobEl.value.trim();
+  const gender    = document.getElementById("gender").value;
+  const district  = document.getElementById("district").value;
+  const contactNo = contactEl.value.trim();
+  const email     = document.getElementById("email").value.trim();
+  const lichessId = document.getElementById("lichessId").value.trim();
+  const chesscomId= document.getElementById("chesscomId").value.trim();
+  const ipPin     = ipPinEl.value.trim();
+  const ipPinConf = ipPinCEl.value.trim();
+
+  // Validate
+  let valid = true;
+  if(!name){ showErr("name","Full name is required."); valid=false; }
+  if(valid && !dobRaw){ showErr("dob","Date of Birth is required."); valid=false; }
+  if(valid && !isValidDOB(dobRaw)){ showErr("dob","Enter a valid date in DD/MM/YYYY format."); valid=false; }
+  if(valid && !gender){ showErr("gender","Please select your gender."); valid=false; }
+  if(valid && !district){ showErr("district","Please select your district."); valid=false; }
+  if(valid && !/^\d{10}$/.test(contactNo)){ showErr("contactNo","Contact number must be exactly 10 digits."); valid=false; }
+  if(valid && !isValidEmail(email)){ showErr("email","Enter a valid email address."); valid=false; }
+  if(valid && !/^\d{6}$/.test(ipPin)){ showErr("ipPin","IP PIN must be exactly 6 digits."); valid=false; }
+  if(valid && ipPin !== ipPinConf){ showErr("ipPinConfirm","PINs do not match. Please re-enter."); valid=false; }
+  if(!valid) return;
+
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Generating IP ID...';
+
+  // Build date string for IP ID: DDMMYYYY from today
+  const now2 = new Date();
+  const dd   = String(now2.getDate()).padStart(2,"0");
+  const mm   = String(now2.getMonth()+1).padStart(2,"0");
+  const yy   = now2.getFullYear();
+  const dateStr = `${dd}${mm}${yy}`;
+
+  // Generate IP ID
+  let ipId;
+  try{
+    ipId = await generateIpId(dateStr);
+  } catch(err){
+    alert("Network error while generating IP ID. Please try again.\n"+err.message);
+    btn.disabled=false;
+    btn.innerHTML='⚡ Register Now';
+    return;
+  }
+
+  btn.innerHTML='<span class="spinner"></span> Registering...';
+
+  // Auto-computed fields
+  const dateOfEntry = `${dd}/${mm}/${yy}`;
+  const timeOfEntry = now2.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
+
+  const dob        = convertDOB(dobRaw);
+  const birthYear  = extractYear(dobRaw);
+
+  // Hidden auto-fields — blank for non-FIDE registration
+  const enteredBy   = "IP";
+  const adminId     = "";
+  const fideId      = "";
+  const fideArbiter = "";
+  const fideTrainer = "";
+  const ratedPlayer = "";
+  const stdRating   = "";
+  const rapidRating = "";
+  const blitzRating = "";
+  const title       = "";
+  const arenaTitle  = "";
+  const arbiterTitle= "";
+  const trainerTitle= "";
+  const status      = "";
+  const pageURL     = "";
+  const stdranking  = "";
+
+  const docData = {
+    // Visible fields
+    aicfId, name,
+    dob, dobRaw,
+    gender, district,
+    contactNo, email,
+    lichessId, chesscomId,
+    ipPin,
+    // Auto-generated
+    ipId,
+    // Hidden auto-fields
+    enteredBy, birthYear,
+    dateOfEntry, timeOfEntry,
+    // Blank FIDE-related fields
+    adminId,
+    fideId, fideArbiter, fideTrainer,
+    ratedPlayer,
+    stdRating, rapidRating, blitzRating,
+    stdranking,
+    title, arenaTitle,
+    arbiterTitle, trainerTitle,
+    status, pageURL,
+  };
+
+  try{
+    await addDoc(collection(db, DB_NAME), docData);
+    savedIpId = ipId;
+    savedPin  = ipPin;
+    document.getElementById("resultIpId").textContent = savedIpId;
+    document.getElementById("resultPin").textContent  = savedPin;
+    document.getElementById("resultOverlay").classList.add("active");
+  } catch(err){
+    alert("Registration failed. Please try again.\nError: "+err.message);
+  }
+
+  btn.disabled=false;
+  btn.innerHTML='⚡ Register Now';
+};
+
+/* ── Copy Result ── */
+window.copyResult = function(){
+  const text = `Gujarat Chess Club — IP Registration\nIP ID: ${savedIpId}\nIP PIN: ${savedPin}\nPlease keep this information safe.`;
+  navigator.clipboard.writeText(text)
+    .then(()=>{
+      const btn = document.getElementById("copyResultBtn");
+      btn.textContent="✅ Copied!";
+      setTimeout(()=>{ btn.textContent="📋 Copy IP ID & PIN"; },2500);
+    })
+    .catch(()=>{ prompt("Copy this:",text); });
+};
+
+/* ── Done ── */
+window.doneRegistration = function(){
+  window.location.href="IP.html";
+};
+
+/* ── Clear Form ── */
+window.clearForm = function(){
+  ["aicfId","name","dob","contactNo","email","lichessId","chesscomId","ipPin","ipPinConfirm"]
+    .forEach(id=>{ document.getElementById(id).value=""; });
+  document.getElementById("gender").value="";
+  document.getElementById("district").value="";
+  clearAllErrors();
+};
+
+</script>
+</body>
+</html>
