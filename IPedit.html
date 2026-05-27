@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IP Edit — Gujarat Chess Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#1565C0;--blue-dark:#0D47A1;--blue-light:#1976D2;
+  --blue-pale:#E3F2FD;--white:#fff;--bg:#F0F4FF;
+  --border:#BBDEFB;--text:#1A237E;--text-body:#37474F;
+  --text-light:#78909C;--gold:#FFB300;
+  --success:#2E7D32;--success-bg:#E8F5E9;
+  --error:#C62828;--error-bg:#FFEBEE;
+  --warn:#E65100;--warn-bg:#FFF8E1;
+  --shadow:0 4px 24px rgba(21,101,192,0.10);
+  --disabled-bg:#F5F5F5;--disabled-border:#E0E0E0;--disabled-text:#BDBDBD;
+}
+body{font-family:'Lexend',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));color:#fff;text-align:center;padding:16px 20px 28px;}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.date-pill{background:rgba(255,255,255,0.18);color:#fff;font-size:13px;font-weight:600;padding:5px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.30);}
+.header-link-btn{font-family:'Lexend',sans-serif;background:var(--gold);color:var(--blue-dark);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;border:none;cursor:pointer;}
+.header-link-btn:hover{opacity:.88;}
+.header-logo{font-size:42px;margin-bottom:6px;}
+.header-title{font-size:24px;font-weight:800;color:#fff;}
+.tool-badge{display:inline-block;background:var(--gold);color:var(--blue-dark);font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;margin:8px auto 4px;letter-spacing:1px;}
+.header-sub{font-size:14px;color:rgba(255,255,255,0.85);margin-top:4px;}
+
+/* MAIN */
+.main{max-width:640px;margin:24px auto 48px;padding:0 20px;}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* NOTICE */
+.notice{background:var(--blue-pale);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--blue-dark);margin-bottom:20px;line-height:1.7;}
+.notice strong{font-weight:700;}
+.req{color:var(--error);font-weight:700;}
+
+/* Q-CARD */
+.q-card{background:#fff;border-radius:14px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;}
+.q-bar{background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.q-num{background:rgba(255,255,255,0.22);color:#fff;font-size:11px;font-weight:800;padding:3px 12px;border-radius:20px;letter-spacing:.5px;white-space:nowrap;}
+.q-title{color:#fff;font-size:15px;font-weight:700;flex:1;}
+.q-rule{color:rgba(255,255,255,0.80);font-size:11px;white-space:nowrap;}
+.q-body{padding:16px 20px;}
+
+/* LOCKED ID DISPLAY */
+.locked-id-card{background:#fff;border-radius:14px;margin-bottom:20px;box-shadow:var(--shadow);border:2px solid var(--blue);overflow:hidden;}
+.locked-id-bar{background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));padding:12px 20px;display:flex;align-items:center;gap:10px;}
+.locked-id-bar .lock-icon{font-size:18px;}
+.locked-id-bar .lock-label{color:#fff;font-size:13px;font-weight:700;flex:1;}
+.locked-id-bar .lock-note{color:rgba(255,255,255,0.75);font-size:11px;}
+.locked-id-body{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.locked-id-value{font-size:26px;font-weight:800;color:var(--blue-dark);letter-spacing:3px;}
+.locked-badge{background:var(--error-bg);color:var(--error);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;border:1px solid var(--error);display:flex;align-items:center;gap:5px;}
+
+/* INPUT FIELDS */
+.field-input{font-family:'Lexend',sans-serif;font-size:15px;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;background:#FAFCFF;color:var(--text);outline:none;transition:all .2s;width:100%;}
+.field-input:focus{border-color:var(--blue-light);background:#fff;box-shadow:0 0 0 3px rgba(21,101,192,0.10);}
+.field-input.error{border-color:var(--error);background:#FFF5F5;}
+.field-input.success{border-color:var(--success);background:#F6FFF6;}
+.field-input:disabled{background:var(--disabled-bg);border-color:var(--disabled-border);color:var(--disabled-text);cursor:not-allowed;}
+.field-hint{font-size:11px;color:var(--text-light);margin-top:5px;font-weight:500;}
+.field-error{font-size:12px;color:var(--error);font-weight:600;margin-top:5px;min-height:16px;}
+
+/* SELECT */
+select.field-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231565C0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+select.field-input:disabled{cursor:not-allowed;background-image:none;}
+
+/* PIN GRID */
+.pin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:520px){.pin-grid{grid-template-columns:1fr;}}
+.pin-input{letter-spacing:5px;font-size:18px;font-weight:700;text-align:center;}
+
+/* SECTION DIVIDER */
+.section-divider{display:flex;align-items:center;gap:12px;margin:24px 0 16px;}
+.section-divider-line{flex:1;height:2px;background:var(--blue-pale);}
+.section-divider-label{font-size:12px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+
+/* STATUS QUESTION CARD — special */
+.status-q-card{background:#fff;border-radius:14px;margin-bottom:20px;box-shadow:var(--shadow);border:2px solid var(--gold);overflow:hidden;}
+.status-q-bar{background:linear-gradient(135deg,#E65100,#FFB300);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.status-q-bar .q-num{background:rgba(255,255,255,0.22);}
+.status-q-body{padding:16px 20px;}
+.status-q-desc{font-size:13px;color:var(--text-body);line-height:1.7;margin-bottom:14px;background:var(--warn-bg);border:1px solid #FFD54F;border-radius:8px;padding:10px 14px;}
+
+/* CHECKBOX TOGGLE */
+.checkbox-row{display:flex;gap:14px;flex-wrap:wrap;}
+.checkbox-opt{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 18px;border-radius:30px;border:2px solid var(--border);background:#FAFCFF;transition:all .2s;user-select:none;}
+.checkbox-opt input[type=checkbox]{display:none;}
+.checkbox-opt .chk-box{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.checkbox-opt .chk-label{font-size:14px;font-weight:700;color:var(--text-light);}
+.checkbox-opt.selected{border-color:var(--blue);background:var(--blue-pale);}
+.checkbox-opt.selected .chk-box{background:var(--blue);border-color:var(--blue);}
+.checkbox-opt.selected .chk-box::after{content:"✓";color:#fff;font-size:13px;font-weight:900;}
+.checkbox-opt.selected .chk-label{color:var(--blue-dark);}
+.checkbox-opt.yes-opt.selected{border-color:var(--success);background:var(--success-bg);}
+.checkbox-opt.yes-opt.selected .chk-box{background:var(--success);border-color:var(--success);}
+.checkbox-opt.yes-opt.selected .chk-label{color:var(--success);}
+
+/* FIDE ID ENTRY */
+.fide-entry-area{margin-top:16px;animation:fadeSlide .25s ease;}
+.fide-notice{background:var(--success-bg);border:1px solid var(--success);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--success);font-weight:600;margin-bottom:12px;line-height:1.6;}
+
+/* DISABLED OVERLAY */
+.section-disabled-wrap{position:relative;}
+.section-disabled-overlay{display:none;position:absolute;inset:0;background:rgba(240,244,255,0.75);border-radius:14px;z-index:5;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.section-disabled-overlay.show{display:flex;}
+.section-disabled-msg{background:#fff;border:2px solid var(--gold);border-radius:12px;padding:16px 22px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.10);}
+.section-disabled-msg .dis-icon{font-size:28px;margin-bottom:6px;}
+.section-disabled-msg .dis-text{font-size:13px;font-weight:700;color:var(--warn);line-height:1.5;}
+
+/* SUBMIT AREA */
+.submit-card{background:#fff;border-radius:14px;padding:24px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.submit-card-title{font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--blue-pale);}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+.primary-btn{font-family:'Lexend',sans-serif;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));color:#fff;font-size:14px;font-weight:700;padding:13px 28px;border:none;border-radius:30px;cursor:pointer;box-shadow:0 4px 16px rgba(21,101,192,0.25);transition:all .2s;}
+.primary-btn:hover:not(:disabled){transform:translateY(-1px);}
+.primary-btn:disabled{opacity:.5;cursor:not-allowed;}
+.primary-btn.gold-btn{background:linear-gradient(135deg,#E65100,#FFB300);}
+.clear-btn{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--text-light);border:1.5px solid var(--border);border-radius:30px;padding:12px 22px;font-size:13px;font-weight:600;cursor:pointer;}
+.clear-btn:hover{background:var(--border);}
+
+/* LOGIN CARD */
+.login-card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 8px 40px rgba(21,101,192,0.13);border:1px solid var(--border);max-width:400px;margin:0 auto;}
+.login-title{font-size:18px;font-weight:800;color:var(--blue-dark);margin-bottom:6px;text-align:center;}
+.login-sub{font-size:13px;color:var(--text-light);text-align:center;margin-bottom:20px;line-height:1.6;}
+.login-field{margin-bottom:16px;}
+.login-label{font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:block;}
+.login-error{font-size:13px;color:var(--error);font-weight:600;background:var(--error-bg);border:1px solid var(--error);border-radius:8px;padding:9px 14px;margin-bottom:14px;text-align:center;display:none;}
+.login-error.show{display:block;}
+
+/* SPINNER */
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top:2px solid #fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* OVERLAY / POPUP */
+.overlay{display:none;position:fixed;inset:0;background:rgba(13,71,161,.55);z-index:2000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
+.overlay.active{display:flex;}
+.popup-box{background:#fff;border-radius:16px;padding:32px 28px 24px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.22);animation:popIn .25s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
+.popup-icon{font-size:48px;text-align:center;margin-bottom:10px;}
+.popup-title{font-size:19px;font-weight:800;color:var(--success);text-align:center;margin-bottom:6px;}
+.popup-title.status-change{color:#E65100;}
+.popup-sub{font-size:13px;color:var(--text-light);text-align:center;margin-bottom:20px;line-height:1.6;}
+.popup-row{background:var(--blue-pale);border:1.5px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+.popup-row-label{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.6px;min-width:110px;}
+.popup-row-value{font-size:15px;font-weight:700;color:var(--blue-dark);word-break:break-all;}
+.popup-row.gold-row{background:#FFF8E1;border-color:#FFD54F;}
+.popup-row.gold-row .popup-row-label{color:#E65100;}
+.popup-row.gold-row .popup-row-value{color:#BF360C;}
+.popup-row.success-row{background:var(--success-bg);border-color:#A5D6A7;}
+.popup-row.success-row .popup-row-label{color:var(--success);}
+.popup-row.success-row .popup-row-value{color:var(--success);}
+.popup-note{font-size:12px;color:var(--text-light);margin:14px 0 18px;line-height:1.7;text-align:center;}
+.popup-changed-section{margin-top:10px;margin-bottom:14px;}
+.popup-changed-title{font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.copy-btn{font-family:'Lexend',sans-serif;background:var(--success);color:#fff;border:none;border-radius:20px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;width:100%;}
+.copy-btn:hover{opacity:.88;}
+.done-btn{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--text-light);border:1.5px solid var(--border);border-radius:20px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;width:100%;}
+
+/* VERIFICATION CARD (PIN confirm before submit) */
+.verify-card{background:linear-gradient(135deg,var(--blue-pale),#FFF8E1);border:2px solid var(--blue);border-radius:14px;padding:22px 20px;margin-bottom:20px;box-shadow:var(--shadow);}
+.verify-card-title{font-size:13px;font-weight:800;color:var(--blue-dark);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.verify-card-desc{font-size:12px;color:var(--text-body);margin-bottom:14px;line-height:1.6;}
+
+/* ANIMATIONS */
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeSlide .25s ease;}
+
+/* STATUS CHANGE FLOW */
+.change-status-btn{font-family:'Lexend',sans-serif;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#E65100,#FFB300);color:#fff;font-size:14px;font-weight:700;padding:13px 28px;border:none;border-radius:30px;cursor:pointer;box-shadow:0 4px 16px rgba(230,81,0,0.25);transition:all .2s;width:100%;justify-content:center;margin-top:12px;}
+.change-status-btn:hover:not(:disabled){transform:translateY(-1px);}
+.change-status-btn:disabled{opacity:.5;cursor:not-allowed;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="date-pill" id="datePill"></div>
+    <button class="header-link-btn" onclick="window.location.href='IP.html'">👤 IP Database</button>
+  </div>
+  <div class="header-logo">♟</div>
+  <h1 class="header-title">Gujarat Chess Club</h1>
+  <div class="tool-badge">IP EDIT</div>
+  <p class="header-sub">Edit Your Individual Person (IP) Profile</p>
+</div>
+
+<div class="main">
+
+  <!-- ══════════════════════════════════════
+       SCREEN 1 — LOGIN
+  ══════════════════════════════════════ -->
+  <div class="screen active" id="screenLogin">
+
+    <div class="notice">
+      <strong>🔐 Secure Login Required:</strong> Enter your <strong>IP ID</strong> and <strong>IP PIN</strong> to access your profile for editing. Your IP ID and PIN were given to you during registration.
+    </div>
+
+    <div class="login-card">
+      <div class="login-title">🔑 Login to Edit</div>
+      <div class="login-sub">Verify your identity before editing your IP profile.</div>
+
+      <div class="login-error" id="loginError"></div>
+
+      <div class="login-field">
+        <label class="login-label" for="loginIpId">IP ID</label>
+        <input type="text" id="loginIpId" class="field-input" placeholder="e.g. IP27052026001" maxlength="20" autocomplete="off"/>
+        <div class="field-error" id="err-loginIpId"></div>
+      </div>
+
+      <div class="login-field">
+        <label class="login-label" for="loginPin">IP PIN</label>
+        <input type="password" id="loginPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="current-password"/>
+        <div class="field-error" id="err-loginPin"></div>
+      </div>
+
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="primary-btn" id="loginBtn" onclick="doLogin()" style="width:100%;justify-content:center;">
+          🔓 Verify &amp; Continue
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /screenLogin -->
+
+
+  <!-- ══════════════════════════════════════
+       SCREEN 2 — EDIT FORM
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screenEdit">
+
+    <div class="notice">
+      <strong>✏️ Edit Mode:</strong> Your IP ID is <strong>locked</strong> and cannot be changed here. Update any field below and confirm with your current PIN at the bottom. Fields left empty will retain their existing values.
+    </div>
+
+    <!-- LOCKED IP ID -->
+    <div class="locked-id-card">
+      <div class="locked-id-bar">
+        <span class="lock-icon">🔒</span>
+        <span class="lock-label">Your IP ID</span>
+        <span class="lock-note">Not editable</span>
+      </div>
+      <div class="locked-id-body">
+        <div class="locked-id-value" id="displayIpId">—</div>
+        <div class="locked-badge">🔒 LOCKED</div>
+      </div>
+    </div>
+
+    <!-- ── STATUS QUESTION ── -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">⭐ Status Question</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="status-q-card">
+      <div class="status-q-bar">
+        <span class="q-num">SQ</span>
+        <span class="q-title">FIDE ID Status Change</span>
+        <span class="q-rule">Important · Read Carefully</span>
+      </div>
+      <div class="status-q-body">
+        <div class="status-q-desc">
+          📌 <strong>Do you have a FIDE ID?</strong><br>
+          If your FIDE ID has been generated or you already have a FIDE ID, you must change your IP ID to your FIDE ID. This is called a <strong>Status Change</strong>. After status change, your IP ID and FIDE ID will be the same.
+        </div>
+
+        <div class="checkbox-row" id="statusCheckboxRow">
+          <label class="checkbox-opt yes-opt" id="optYes" onclick="selectStatus('yes')">
+            <div class="chk-box" id="chkYes"></div>
+            <span class="chk-label">✅ YES — I have a FIDE ID</span>
+          </label>
+          <label class="checkbox-opt" id="optNo" onclick="selectStatus('no')">
+            <div class="chk-box" id="chkNo"></div>
+            <span class="chk-label">❌ NO — I don't have a FIDE ID</span>
+          </label>
+        </div>
+
+        <!-- FIDE ID entry — shown when YES -->
+        <div class="fide-entry-area" id="fideEntryArea" style="display:none;">
+          <div class="fide-notice">
+            ✅ Great! Enter your FIDE ID below. After verification, your IP ID will be updated to match your FIDE ID, and your name will be removed from the IP-only record.
+          </div>
+          <label class="login-label" for="fideIdInput">Enter Your FIDE ID <span class="req">★ Required</span></label>
+          <input type="text" id="fideIdInput" class="field-input" placeholder="e.g. 5026450 or FIDE number" maxlength="20" autocomplete="off"/>
+          <div class="field-error" id="err-fideId"></div>
+          <button class="change-status-btn" id="changeStatusBtn" onclick="initiateStatusChange()">
+            🔄 CHANGE STATUS
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 2 WRAPPER ── -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">📝 Section 2 — Edit Details</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <!-- Section 2 disabled overlay wrapper -->
+    <div class="section-disabled-wrap" id="section2Wrap">
+      <div class="section-disabled-overlay" id="section2Overlay">
+        <div class="section-disabled-msg">
+          <div class="dis-icon">🚫</div>
+          <div class="dis-text">Section 2 is disabled.<br>You selected Status Change (FIDE ID).<br>Editing fields is not required.</div>
+        </div>
+      </div>
+
+      <!-- Q1 — AICF ID -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q1</span>
+          <span class="q-title">AICF ID</span>
+          <span class="q-rule">Optional · Leave blank to keep current</span>
+        </div>
+        <div class="q-body">
+          <input type="text" id="e_aicfId" class="field-input" placeholder="Leave blank to keep current value" maxlength="30" autocomplete="off"/>
+          <div class="field-error" id="err-e_aicfId"></div>
+          <div class="field-hint">Current value will remain if left blank.</div>
+        </div>
+      </div>
+
+      <!-- Q2 — Date of Birth -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q2</span>
+          <span class="q-title">Date of Birth</span>
+          <span class="q-rule">DD/MM/YYYY · Optional</span>
+        </div>
+        <div class="q-body">
+          <input type="text" id="e_dob" class="field-input" placeholder="DD/MM/YYYY — leave blank to keep current" maxlength="10" inputmode="numeric" autocomplete="off"/>
+          <div class="field-error" id="err-e_dob"></div>
+          <div class="field-hint">Enter in DD/MM/YYYY format. Leave blank to keep existing value.</div>
+        </div>
+      </div>
+
+      <!-- Q3 — Gender -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q3</span>
+          <span class="q-title">Gender</span>
+          <span class="q-rule">Optional · Select only to change</span>
+        </div>
+        <div class="q-body">
+          <select id="e_gender" class="field-input">
+            <option value="">— Keep current value —</option>
+            <option value="MALE">MALE</option>
+            <option value="FEMALE">FEMALE</option>
+          </select>
+          <div class="field-error" id="err-e_gender"></div>
+        </div>
+      </div>
+
+      <!-- Q4 — District -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q4</span>
+          <span class="q-title">District</span>
+          <span class="q-rule">Gujarat District · Optional</span>
+        </div>
+        <div class="q-body">
+          <select id="e_district" class="field-input">
+            <option value="">— Keep current value —</option>
+            <option>AHMEDABAD</option><option>AMRELI</option><option>ANAND</option>
+            <option>ARAVALLI</option><option>BANASKANTHA</option><option>BHARUCH</option>
+            <option>BHAVNAGAR</option><option>BOTAD</option><option>CHHOTA UDAIPUR</option>
+            <option>DAHOD</option><option>DANG</option><option>DEVBHOOMI DWARKA</option>
+            <option>GANDHINAGAR</option><option>GIR SOMNATH</option><option>JAMNAGAR</option>
+            <option>JUNAGADH</option><option>KHEDA</option><option>KACHCHH</option>
+            <option>MAHISAGAR</option><option>MEHSANA</option><option>MORBI</option>
+            <option>NARMADA</option><option>NAVSARI</option><option>PANCHMAHAL</option>
+            <option>PATAN</option><option>PORBANDAR</option><option>RAJKOT</option>
+            <option>SABARKANTHA</option><option>SURAT</option><option>SURENDRANAGAR</option>
+            <option>TAPI</option><option>VADODARA</option><option>VALSAD</option>
+          </select>
+          <div class="field-error" id="err-e_district"></div>
+        </div>
+      </div>
+
+      <!-- Q5 — Contact No -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q5</span>
+          <span class="q-title">Contact No</span>
+          <span class="q-rule">10 digits · Optional</span>
+        </div>
+        <div class="q-body">
+          <input type="text" id="e_contactNo" class="field-input" placeholder="Leave blank to keep current value" maxlength="10" inputmode="numeric" autocomplete="off"/>
+          <div class="field-error" id="err-e_contactNo"></div>
+        </div>
+      </div>
+
+      <!-- Q6 — Email -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q6</span>
+          <span class="q-title">Email ID</span>
+          <span class="q-rule">Valid email · Optional</span>
+        </div>
+        <div class="q-body">
+          <input type="email" id="e_email" class="field-input" placeholder="Leave blank to keep current value" autocomplete="off"/>
+          <div class="field-error" id="err-e_email"></div>
+        </div>
+      </div>
+
+      <!-- Q7 — Lichess ID -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q7</span>
+          <span class="q-title">Lichess ID</span>
+          <span class="q-rule">Optional</span>
+        </div>
+        <div class="q-body">
+          <input type="text" id="e_lichessId" class="field-input" placeholder="Leave blank to keep current value" maxlength="30" autocomplete="off"/>
+          <div class="field-error" id="err-e_lichessId"></div>
+        </div>
+      </div>
+
+      <!-- Q8 — Chess.com ID -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q8</span>
+          <span class="q-title">Chess.com ID</span>
+          <span class="q-rule">Optional</span>
+        </div>
+        <div class="q-body">
+          <input type="text" id="e_chesscomId" class="field-input" placeholder="Leave blank to keep current value" maxlength="30" autocomplete="off"/>
+          <div class="field-error" id="err-e_chesscomId"></div>
+        </div>
+      </div>
+
+      <!-- Q9 — Change IP PIN -->
+      <div class="q-card">
+        <div class="q-bar">
+          <span class="q-num">Q9</span>
+          <span class="q-title">Change IP PIN</span>
+          <span class="q-rule">Optional · Both fields required to change</span>
+        </div>
+        <div class="q-body">
+          <div class="pin-grid">
+            <div>
+              <div class="field-hint" style="margin-bottom:6px;font-weight:600;color:var(--blue);">New IP PIN (Optional)</div>
+              <input type="password" id="e_newPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="new-password"/>
+              <div class="field-error" id="err-e_newPin"></div>
+            </div>
+            <div>
+              <div class="field-hint" style="margin-bottom:6px;font-weight:600;color:var(--blue);">Confirm New PIN (Optional)</div>
+              <input type="password" id="e_newPinConf" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="new-password"/>
+              <div class="field-error" id="err-e_newPinConf"></div>
+            </div>
+          </div>
+          <div class="field-hint" style="margin-top:10px;">Leave both blank to keep your current PIN. Both fields must match if changing.</div>
+        </div>
+      </div>
+
+    </div><!-- /section2Wrap -->
+
+    <!-- ── VERIFY & SUBMIT ── -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">🔐 Verify &amp; Update</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="verify-card">
+      <div class="verify-card-title">🔐 Confirm Your Current IP PIN</div>
+      <div class="verify-card-desc">Enter your <strong>current IP PIN</strong> to authorise this update. Your IP ID is <strong id="verifyIpIdInline">—</strong>.</div>
+      <input type="password" id="verifyPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="current-password" style="max-width:200px;"/>
+      <div class="field-error" id="err-verifyPin"></div>
+    </div>
+
+    <div class="submit-card">
+      <div class="submit-card-title">Update Entry ✏️</div>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;line-height:1.7;">
+        Only fields you have changed will be updated. Empty fields will keep their existing values.
+      </p>
+      <div class="btn-row">
+        <button class="primary-btn" id="updateBtn" onclick="submitUpdate()">💾 Update Entry</button>
+        <button class="clear-btn" onclick="clearEditForm()">✕ Clear Changes</button>
+      </div>
+    </div>
+
+  </div><!-- /screenEdit -->
+
+</div><!-- /main -->
+
+
+<!-- ══════════════════════════════════════
+     POPUP — NORMAL UPDATE SUCCESS
+══════════════════════════════════════ -->
+<div class="overlay" id="updateOverlay">
+  <div class="popup-box">
+    <div class="popup-icon">✅</div>
+    <div class="popup-title">Update Successful!</div>
+    <div class="popup-sub">Your IP profile has been updated in the Gujarat Chess Club database.</div>
+
+    <div class="popup-row">
+      <span class="popup-row-label">IP ID</span>
+      <span class="popup-row-value" id="pop_ipId">—</span>
+    </div>
+    <div class="popup-row gold-row">
+      <span class="popup-row-label">Current PIN</span>
+      <span class="popup-row-value" id="pop_pin">—</span>
+    </div>
+
+    <div class="popup-changed-section" id="popChangedSection">
+      <div class="popup-changed-title">Fields Updated:</div>
+      <div id="popChangedList"></div>
+    </div>
+
+    <div class="popup-note">📌 Please check your updated info in the IP Database. Keep your IP ID and PIN safe.</div>
+    <button class="copy-btn" id="copyUpdateBtn" onclick="copyUpdateResult()">📋 Copy Summary</button>
+    <button class="done-btn" onclick="window.location.href='IP.html'">👤 View IP Database</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     POPUP — STATUS CHANGE SUCCESS
+══════════════════════════════════════ -->
+<div class="overlay" id="statusChangeOverlay">
+  <div class="popup-box">
+    <div class="popup-icon">🔄</div>
+    <div class="popup-title status-change">Status Change Successful!</div>
+    <div class="popup-sub">Your IP ID has been updated to your FIDE ID in the Gujarat Chess Club database.</div>
+
+    <div class="popup-row success-row">
+      <span class="popup-row-label">Your New IP ID</span>
+      <span class="popup-row-value" id="pop_newFideId">—</span>
+    </div>
+    <div class="popup-row gold-row">
+      <span class="popup-row-label">Current PIN</span>
+      <span class="popup-row-value" id="pop_statusPin">—</span>
+    </div>
+
+    <div class="popup-note" style="background:var(--success-bg);border:1px solid #A5D6A7;border-radius:8px;padding:12px 14px;color:var(--success);font-size:13px;font-weight:600;margin-top:10px;">
+      ✅ Your IP ID and FIDE ID are now the same.<br>Please check your updated info in the <strong>IP Database</strong>.
+    </div>
+
+    <button class="copy-btn" style="margin-top:14px;" id="copyStatusBtn" onclick="copyStatusResult()">📋 Copy Summary</button>
+    <button class="done-btn" onclick="window.location.href='IP.html'">👤 View IP Database</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     STATUS CHANGE — PIN VERIFY POPUP
+══════════════════════════════════════ -->
+<div class="overlay" id="statusVerifyOverlay">
+  <div class="popup-box">
+    <div class="popup-icon">🔐</div>
+    <div class="popup-title" style="color:var(--blue-dark);">Confirm Status Change</div>
+    <div class="popup-sub">Enter your current IP PIN to authorise the status change to FIDE ID <strong id="confirmFideIdDisplay">—</strong>.</div>
+
+    <div class="popup-row">
+      <span class="popup-row-label">IP ID</span>
+      <span class="popup-row-value" id="pop_verifyIpId">—</span>
+    </div>
+
+    <div style="margin-top:14px;margin-bottom:6px;">
+      <label class="login-label" for="statusVerifyPin">Current IP PIN <span class="req">★ Required</span></label>
+      <input type="password" id="statusVerifyPin" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" style="max-width:200px;margin-top:6px;" autocomplete="current-password"/>
+      <div class="field-error" id="err-statusVerifyPin"></div>
+    </div>
+
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="primary-btn gold-btn" id="confirmStatusBtn" onclick="confirmStatusChange()">🔄 Confirm Status Change</button>
+      <button class="clear-btn" onclick="closeStatusVerify()">✕ Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s",
+  authDomain: "ratedeventsgj.firebaseapp.com",
+  projectId: "ratedeventsgj",
+  storageBucket: "ratedeventsgj.firebasestorage.app",
+  messagingSenderId: "527826897689",
+  appId: "1:527826897689:web:fb0439fff04a695a599388"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const DB_NAME = "IPdb";
+
+/* ── Date Pill ── */
+const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const NOW = new Date();
+document.getElementById("datePill").textContent =
+  `${DAYS[NOW.getDay()]}, ${NOW.getDate()} ${MONTHS[NOW.getMonth()]} ${NOW.getFullYear()}`;
+
+/* ── STATE ── */
+let currentIpId = "";
+let currentDocId = "";
+let currentDocData = {};
+let statusSelection = ""; // 'yes' or 'no'
+let pendingFideId = "";
+
+/* ── Input formatters ── */
+document.getElementById("loginIpId").addEventListener("input", function(){
+  const p = this.selectionStart;
+  this.value = this.value.toUpperCase();
+  try{ this.setSelectionRange(p,p); }catch(e){}
+});
+document.getElementById("loginPin").addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,6);
+});
+document.getElementById("e_aicfId").addEventListener("input", function(){
+  const p = this.selectionStart; this.value = this.value.toUpperCase();
+  try{ this.setSelectionRange(p,p); }catch(e){}
+});
+document.getElementById("e_dob").addEventListener("input", function(){
+  let v = this.value.replace(/[^0-9/]/g,"");
+  if(v.length===2 && !v.includes("/")) v = v+"/";
+  else if(v.length===5 && v.split("/").length===2) v = v+"/";
+  this.value = v.slice(0,10);
+});
+document.getElementById("e_contactNo").addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,10);
+});
+document.getElementById("e_newPin").addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,6);
+});
+document.getElementById("e_newPinConf").addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,6);
+});
+document.getElementById("verifyPin").addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,6);
+});
+document.getElementById("fideIdInput").addEventListener("input", function(){
+  const p = this.selectionStart; this.value = this.value.toUpperCase();
+  try{ this.setSelectionRange(p,p); }catch(e){}
+});
+document.getElementById("statusVerifyPin").addEventListener("input", function(){
+  this.value = this.value.replace(/\D/g,"").slice(0,6);
+});
+
+/* ── Allow Enter key on login ── */
+document.getElementById("loginPin").addEventListener("keydown", e => {
+  if(e.key==="Enter") window.doLogin();
+});
+
+/* ── Helpers ── */
+function showErr(id, msg){
+  const e = document.getElementById("err-"+id);
+  if(e) e.textContent = msg;
+  const inp = document.getElementById(id);
+  if(inp){ inp.classList.add("error"); }
+}
+function clearErr(id){
+  const e = document.getElementById("err-"+id);
+  if(e) e.textContent = "";
+  const inp = document.getElementById(id);
+  if(inp) inp.classList.remove("error");
+}
+function setLoginError(msg){
+  const el = document.getElementById("loginError");
+  el.textContent = msg;
+  el.classList.toggle("show", !!msg);
+}
+function isValidDOB(dob){
+  if(!/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) return false;
+  const [d,m,y] = dob.split("/").map(Number);
+  if(m<1||m>12||d<1||d>31) return false;
+  const dt = new Date(y,m-1,d);
+  return dt.getFullYear()===y && dt.getMonth()===m-1 && dt.getDate()===d;
+}
+function convertDOB(dob){
+  if(!dob) return "";
+  const p = dob.split("/");
+  if(p.length!==3||p[2].length!==4) return "";
+  return `${p[2]}-${p[1].padStart(2,"0")}-${p[0].padStart(2,"0")}`;
+}
+function extractYear(dob){
+  const p = dob.split("/");
+  return (p.length===3&&p[2].length===4) ? p[2] : "";
+}
+function isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+/* ── LOGIN ── */
+window.doLogin = async function(){
+  clearErr("loginIpId"); clearErr("loginPin"); setLoginError("");
+  const ipId = document.getElementById("loginIpId").value.trim();
+  const pin  = document.getElementById("loginPin").value.trim();
+
+  if(!ipId){ showErr("loginIpId","Please enter your IP ID."); return; }
+  if(!pin || pin.length!==6){ showErr("loginPin","PIN must be exactly 6 digits."); return; }
+
+  const btn = document.getElementById("loginBtn");
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Verifying...';
+
+  try {
+    const q = query(collection(db, DB_NAME), where("ipId","==",ipId));
+    const snap = await getDocs(q);
+
+    if(snap.empty){
+      setLoginError("❌ IP ID not found in the database. Please check and try again.");
+      btn.disabled=false; btn.innerHTML='🔓 Verify & Continue'; return;
+    }
+
+    let found = false;
+    snap.forEach(d => {
+      const data = d.data();
+      if(data.ipPin === pin){
+        found = true;
+        currentIpId  = ipId;
+        currentDocId = d.id;
+        currentDocData = data;
+      }
+    });
+
+    if(!found){
+      setLoginError("❌ Incorrect PIN. Please try again.");
+      btn.disabled=false; btn.innerHTML='🔓 Verify & Continue'; return;
+    }
+
+    // Success — show edit screen
+    document.getElementById("screenLogin").classList.remove("active");
+    document.getElementById("screenEdit").classList.add("active");
+    document.getElementById("displayIpId").textContent = currentIpId;
+    document.getElementById("verifyIpIdInline").textContent = currentIpId;
+    window.scrollTo({top:0, behavior:"smooth"});
+
+  } catch(err){
+    setLoginError("Network error. Please try again.\n"+err.message);
+  }
+
+  btn.disabled=false; btn.innerHTML='🔓 Verify & Continue';
+};
+
+/* ── STATUS SELECTION ── */
+window.selectStatus = function(val){
+  statusSelection = val;
+  const optYes = document.getElementById("optYes");
+  const optNo  = document.getElementById("optNo");
+  const fideArea = document.getElementById("fideEntryArea");
+  const sec2Overlay = document.getElementById("section2Overlay");
+
+  optYes.classList.toggle("selected", val==="yes");
+  optNo.classList.toggle("selected",  val==="no");
+
+  if(val==="yes"){
+    fideArea.style.display="block";
+    sec2Overlay.classList.add("show");
+  } else {
+    fideArea.style.display="none";
+    sec2Overlay.classList.remove("show");
+    // Clear FIDE input
+    document.getElementById("fideIdInput").value="";
+    clearErr("fideId");
+  }
+};
+
+/* ── INITIATE STATUS CHANGE (open pin verify popup) ── */
+window.initiateStatusChange = function(){
+  const fideId = document.getElementById("fideIdInput").value.trim();
+  clearErr("fideId");
+  if(!fideId){ showErr("fideId","Please enter your FIDE ID."); return; }
+
+  pendingFideId = fideId;
+  document.getElementById("confirmFideIdDisplay").textContent = fideId;
+  document.getElementById("pop_verifyIpId").textContent = currentIpId;
+  document.getElementById("statusVerifyPin").value="";
+  clearErr("statusVerifyPin");
+  document.getElementById("statusVerifyOverlay").classList.add("active");
+};
+
+window.closeStatusVerify = function(){
+  document.getElementById("statusVerifyOverlay").classList.remove("active");
+};
+
+/* ── CONFIRM STATUS CHANGE ── */
+window.confirmStatusChange = async function(){
+  clearErr("statusVerifyPin");
+  const pin = document.getElementById("statusVerifyPin").value.trim();
+  if(!pin || pin.length!==6){ showErr("statusVerifyPin","PIN must be exactly 6 digits."); return; }
+  if(pin !== currentDocData.ipPin){ showErr("statusVerifyPin","Incorrect PIN. Please try again."); return; }
+
+  const btn = document.getElementById("confirmStatusBtn");
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Updating...';
+
+  try {
+    const docRef = doc(db, DB_NAME, currentDocId);
+
+    // Update: set fideId = pendingFideId, set ipId = pendingFideId, delete name
+    await updateDoc(docRef, {
+      fideId: pendingFideId,
+      ipId:   pendingFideId,
+      name:   ""   // Remove name as per requirement
+    });
+
+    // Show status change success popup
+    document.getElementById("pop_newFideId").textContent = pendingFideId;
+    document.getElementById("pop_statusPin").textContent = pin;
+    document.getElementById("statusVerifyOverlay").classList.remove("active");
+    document.getElementById("statusChangeOverlay").classList.add("active");
+
+    // Update local state
+    currentIpId = pendingFideId;
+    currentDocData.ipId   = pendingFideId;
+    currentDocData.fideId = pendingFideId;
+    currentDocData.name   = "";
+
+  } catch(err){
+    alert("Update failed. Please try again.\n"+err.message);
+  }
+
+  btn.disabled=false; btn.innerHTML='🔄 Confirm Status Change';
+};
+
+/* ── COPY STATUS RESULT ── */
+window.copyStatusResult = function(){
+  const text = `Gujarat Chess Club — IP Status Change\nNew IP ID (FIDE ID): ${document.getElementById("pop_newFideId").textContent}\nCurrent PIN: ${document.getElementById("pop_statusPin").textContent}\nPlease check your info in IP Database.`;
+  navigator.clipboard.writeText(text).then(()=>{
+    const b = document.getElementById("copyStatusBtn");
+    b.textContent="✅ Copied!";
+    setTimeout(()=>{ b.textContent="📋 Copy Summary"; },2500);
+  }).catch(()=>{ prompt("Copy this:",text); });
+};
+
+/* ── SUBMIT UPDATE (Section 2) ── */
+window.submitUpdate = async function(){
+  // Clear all errors
+  ["e_aicfId","e_dob","e_gender","e_district","e_contactNo","e_email","e_lichessId","e_chesscomId","e_newPin","e_newPinConf","verifyPin"]
+    .forEach(id=>clearErr(id));
+
+  const verifyPin = document.getElementById("verifyPin").value.trim();
+  if(!verifyPin || verifyPin.length!==6){ showErr("verifyPin","Enter your current 6-digit PIN."); return; }
+  if(verifyPin !== currentDocData.ipPin){ showErr("verifyPin","Incorrect current PIN. Please try again."); return; }
+
+  // Gather changed fields
+  const aicfId     = document.getElementById("e_aicfId").value.trim();
+  const dobRaw     = document.getElementById("e_dob").value.trim();
+  const gender     = document.getElementById("e_gender").value;
+  const district   = document.getElementById("e_district").value;
+  const contactNo  = document.getElementById("e_contactNo").value.trim();
+  const email      = document.getElementById("e_email").value.trim();
+  const lichessId  = document.getElementById("e_lichessId").value.trim();
+  const chesscomId = document.getElementById("e_chesscomId").value.trim();
+  const newPin     = document.getElementById("e_newPin").value.trim();
+  const newPinConf = document.getElementById("e_newPinConf").value.trim();
+
+  // Validate filled fields
+  let valid = true;
+  if(dobRaw && !isValidDOB(dobRaw)){
+    showErr("e_dob","Enter a valid date in DD/MM/YYYY format or leave blank.");
+    valid = false;
+  }
+  if(contactNo && !/^\d{10}$/.test(contactNo)){
+    showErr("e_contactNo","Contact number must be exactly 10 digits.");
+    valid = false;
+  }
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showErr("e_email","Enter a valid email address.");
+    valid = false;
+  }
+  if(newPin && !/^\d{6}$/.test(newPin)){
+    showErr("e_newPin","New PIN must be exactly 6 digits.");
+    valid = false;
+  }
+  if(newPin && newPin !== newPinConf){
+    showErr("e_newPinConf","PINs do not match.");
+    valid = false;
+  }
+  if(!valid) return;
+
+  // Build update object with only changed fields
+  const updates = {};
+  const changedLabels = [];
+
+  if(aicfId)    { updates.aicfId    = aicfId;    changedLabels.push({label:"AICF ID", val:aicfId}); }
+  if(dobRaw)    {
+    updates.dobRaw   = dobRaw;
+    updates.dob      = convertDOB(dobRaw);
+    updates.birthYear= extractYear(dobRaw);
+    changedLabels.push({label:"Date of Birth", val:dobRaw});
+  }
+  if(gender)    { updates.gender    = gender;    changedLabels.push({label:"Gender", val:gender}); }
+  if(district)  { updates.district  = district;  changedLabels.push({label:"District", val:district}); }
+  if(contactNo) { updates.contactNo = contactNo; changedLabels.push({label:"Contact No", val:contactNo}); }
+  if(email)     { updates.email     = email;     changedLabels.push({label:"Email ID", val:email}); }
+  if(lichessId) { updates.lichessId = lichessId; changedLabels.push({label:"Lichess ID", val:lichessId}); }
+  if(chesscomId){ updates.chesscomId= chesscomId;changedLabels.push({label:"Chess.com ID", val:chesscomId}); }
+  if(newPin)    { updates.ipPin     = newPin;    changedLabels.push({label:"IP PIN", val:"(changed)"}); }
+
+  if(Object.keys(updates).length === 0){
+    alert("No changes detected. Please update at least one field.");
+    return;
+  }
+
+  const btn = document.getElementById("updateBtn");
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Updating...';
+
+  try {
+    const docRef = doc(db, DB_NAME, currentDocId);
+    await updateDoc(docRef, updates);
+
+    // Update local cache
+    Object.assign(currentDocData, updates);
+    if(newPin) currentDocData.ipPin = newPin;
+
+    // Show popup
+    document.getElementById("pop_ipId").textContent = currentIpId;
+    document.getElementById("pop_pin").textContent  = newPin || verifyPin;
+
+    // Build changed fields list
+    const listEl = document.getElementById("popChangedList");
+    listEl.innerHTML = "";
+    changedLabels.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "popup-row";
+      row.style.marginBottom="6px";
+      row.innerHTML = `<span class="popup-row-label">${item.label}</span><span class="popup-row-value">${item.val}</span>`;
+      listEl.appendChild(row);
+    });
+
+    document.getElementById("updateOverlay").classList.add("active");
+
+  } catch(err){
+    alert("Update failed. Please try again.\n"+err.message);
+  }
+
+  btn.disabled=false; btn.innerHTML='💾 Update Entry';
+};
+
+/* ── COPY UPDATE RESULT ── */
+window.copyUpdateResult = function(){
+  const ipId = document.getElementById("pop_ipId").textContent;
+  const pin  = document.getElementById("pop_pin").textContent;
+  const rows = document.querySelectorAll("#popChangedList .popup-row");
+  let fields = "";
+  rows.forEach(r=>{
+    const label = r.querySelector(".popup-row-label").textContent;
+    const val   = r.querySelector(".popup-row-value").textContent;
+    fields += `\n  ${label}: ${val}`;
+  });
+  const text = `Gujarat Chess Club — IP Profile Update\nIP ID: ${ipId}\nCurrent PIN: ${pin}\nFields Updated:${fields}\n\nPlease check your info in IP Database.`;
+  navigator.clipboard.writeText(text).then(()=>{
+    const b = document.getElementById("copyUpdateBtn");
+    b.textContent="✅ Copied!";
+    setTimeout(()=>{ b.textContent="📋 Copy Summary"; },2500);
+  }).catch(()=>{ prompt("Copy this:", text); });
+};
+
+/* ── CLEAR EDIT FORM ── */
+window.clearEditForm = function(){
+  ["e_aicfId","e_dob","e_contactNo","e_email","e_lichessId","e_chesscomId","e_newPin","e_newPinConf","verifyPin"]
+    .forEach(id=>{ document.getElementById(id).value=""; });
+  document.getElementById("e_gender").value="";
+  document.getElementById("e_district").value="";
+  // Reset status question
+  statusSelection="";
+  document.getElementById("optYes").classList.remove("selected");
+  document.getElementById("optNo").classList.remove("selected");
+  document.getElementById("fideEntryArea").style.display="none";
+  document.getElementById("section2Overlay").classList.remove("show");
+  document.getElementById("fideIdInput").value="";
+};
+
+</script>
+</body>
+</html>
