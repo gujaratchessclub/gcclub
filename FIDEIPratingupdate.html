@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IP Fide Rating Fetch Tool — Gujarat Chess Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --blue:#1565C0;--blue-dark:#0D47A1;--blue-light:#1976D2;
+  --blue-pale:#E3F2FD;--white:#fff;--bg:#F0F4FF;
+  --border:#BBDEFB;--text:#1A237E;--text-body:#37474F;
+  --text-light:#78909C;--gold:#FFB300;
+  --success:#2E7D32;--success-bg:#E8F5E9;
+  --error:#C62828;--error-bg:#FFEBEE;
+  --warn:#E65100;--warn-bg:#FFF3E0;
+  --shadow:0 4px 24px rgba(21,101,192,0.10);
+}
+body{font-family:'Lexend',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);}
+
+/* GATE */
+.gate-overlay{position:fixed;inset:0;background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));display:flex;align-items:center;justify-content:center;z-index:9999;}
+.gate-card{background:#fff;border-radius:20px;padding:44px 38px;text-align:center;width:90%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,0.25);}
+.gate-logo{font-size:48px;margin-bottom:10px;}
+.gate-card h2{font-size:20px;font-weight:800;color:var(--blue-dark);margin-bottom:4px;}
+.gate-card p{font-size:13px;color:var(--text-light);margin-bottom:18px;}
+.gate-input{font-family:'Lexend',sans-serif;width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:10px;font-size:16px;font-weight:700;outline:none;text-align:center;letter-spacing:5px;margin-bottom:8px;transition:border-color .2s;}
+.gate-input:focus{border-color:var(--blue);}
+.gate-error{color:var(--error);font-size:12px;min-height:18px;margin-bottom:8px;font-weight:600;}
+.gate-btn{font-family:'Lexend',sans-serif;width:100%;background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));color:#fff;border:none;border-radius:30px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;}
+.gate-btn:hover{opacity:.9;}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));color:#fff;text-align:center;padding:16px 20px 28px;}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.date-pill{background:rgba(255,255,255,0.18);color:#fff;font-size:13px;font-weight:600;padding:5px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.30);}
+.header-link-btn{font-family:'Lexend',sans-serif;background:var(--gold);color:var(--blue-dark);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;border:none;cursor:pointer;}
+.header-link-btn:hover{opacity:.88;}
+.header-logo{font-size:42px;margin-bottom:6px;}
+.header-title{font-size:24px;font-weight:800;color:#fff;}
+.tool-badge{display:inline-block;background:var(--gold);color:var(--blue-dark);font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;margin:8px auto 4px;letter-spacing:1px;}
+.header-sub{font-size:14px;color:rgba(255,255,255,0.85);margin-top:4px;}
+
+/* MAIN */
+.main{max-width:900px;margin:24px auto 48px;padding:0 20px;}
+.notice{background:var(--blue-pale);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--blue-dark);margin-bottom:16px;line-height:1.7;}
+.notice strong{font-weight:700;}
+.req{color:var(--error);font-weight:700;}
+
+/* SECTION CARD */
+.section-card{background:#fff;border-radius:14px;padding:22px 24px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.section-title{font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--blue-pale);}
+
+/* JSON INPUT */
+.json-label{font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;display:block;}
+.json-textarea{font-family:'Lexend',monospace;width:100%;min-height:280px;padding:14px;border:2px solid var(--border);border-radius:10px;font-size:12.5px;color:var(--text-body);resize:vertical;outline:none;line-height:1.7;background:#FAFCFF;transition:border-color .2s;}
+.json-textarea:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(21,101,192,0.08);}
+.json-textarea.error{border-color:var(--error);background:#FFF5F5;}
+.json-count{font-size:11px;color:var(--text-light);margin-top:6px;font-weight:600;text-align:right;}
+.json-count.ok{color:var(--success);}
+.json-count.warn{color:var(--warn);}
+
+/* VALIDATE ROW */
+.validate-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;}
+.validate-btn{font-family:'Lexend',sans-serif;background:linear-gradient(135deg,#1565C0,#1976D2);color:#fff;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;}
+.validate-btn:hover{opacity:.88;}
+.validate-result{font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;}
+.validate-ok{background:var(--success-bg);color:var(--success);}
+.validate-err{background:var(--error-bg);color:var(--error);}
+
+/* PREVIEW TABLE */
+.preview-wrap{overflow-x:auto;margin-top:16px;border-radius:10px;border:1px solid var(--border);}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px;min-width:700px;}
+.preview-table thead tr{background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));}
+.preview-table thead th{color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:9px 12px;text-align:left;white-space:nowrap;}
+.preview-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+.preview-table tbody tr:hover{background:var(--blue-pale);}
+.preview-table tbody td{padding:8px 12px;color:var(--text-body);vertical-align:middle;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;}
+.badge-active{background:#E8F5E9;color:#2E7D32;}
+.badge-inactive{background:#FFEBEE;color:#C62828;}
+.badge-rated{background:#E3F2FD;color:#1565C0;}
+.badge-unrated{background:#F5F5F5;color:#9E9E9E;}
+
+/* ADMIN CARD */
+.admin-card{background:#fff;border-radius:14px;padding:22px 24px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.admin-card-title{font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--blue-pale);}
+.field-group{display:flex;flex-direction:column;gap:4px;}
+.field-label{font-size:12px;font-weight:600;color:var(--text);}
+.field-input{font-family:'Lexend',sans-serif;font-size:14px;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;background:#FAFCFF;color:var(--text);outline:none;transition:all .2s;width:100%;}
+.field-input:focus{border-color:var(--blue-light);background:#fff;box-shadow:0 0 0 3px rgba(21,101,192,0.10);}
+.field-input.error{border-color:var(--error);background:#FFF5F5;}
+.pin-input{letter-spacing:5px;font-size:18px;font-weight:700;text-align:center;}
+.field-error{font-size:11px;color:var(--error);font-weight:600;min-height:16px;margin-top:2px;}
+.wrong-pin-msg{background:#FFEBEE;border:2px solid var(--error);border-radius:10px;padding:12px 16px;color:var(--error);font-weight:700;font-size:13px;display:none;margin-top:12px;}
+.wrong-pin-msg.show{display:block;}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;}
+.primary-btn{font-family:'Lexend',sans-serif;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));color:#fff;font-size:14px;font-weight:700;padding:13px 28px;border:none;border-radius:30px;cursor:pointer;box-shadow:0 4px 16px rgba(21,101,192,0.25);transition:all .2s;}
+.primary-btn:hover:not(:disabled){transform:translateY(-1px);}
+.primary-btn:disabled{opacity:.5;cursor:not-allowed;}
+.clear-btn{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--text-light);border:1.5px solid var(--border);border-radius:30px;padding:12px 22px;font-size:13px;font-weight:600;cursor:pointer;}
+.clear-btn:hover{background:var(--border);}
+
+/* PROGRESS */
+.progress-card{background:#fff;border-radius:14px;padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.progress-card-title{font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--blue-pale);}
+.progress-bar-bg{background:var(--blue-pale);border-radius:20px;height:10px;overflow:hidden;margin-bottom:8px;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue-light),var(--blue-dark));border-radius:20px;transition:width .3s;}
+.progress-text{font-size:13px;color:var(--text-light);font-weight:500;}
+.progress-text b{color:var(--blue);}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.stat-box{background:var(--bg);border-radius:10px;padding:8px 14px;border:1px solid var(--border);text-align:center;flex:1;min-width:70px;}
+.stat-num{font-size:18px;font-weight:800;}
+.stat-num.s{color:var(--success);}
+.stat-num.e{color:var(--error);}
+.stat-num.b{color:var(--blue);}
+.stat-num.w{color:var(--warn);}
+.stat-label{font-size:10px;color:var(--text-light);font-weight:700;text-transform:uppercase;margin-top:1px;}
+.log-box{background:#0D1B4B;border-radius:10px;padding:10px 12px;margin-top:12px;max-height:180px;overflow-y:auto;}
+.log-line{font-family:monospace;font-size:11px;line-height:1.7;}
+.log-ok{color:#A5D6A7;}.log-err{color:#EF9A9A;}.log-info{color:#FFE082;}.log-warn{color:#FFCC80;}
+
+/* RESULT POPUP */
+.result-overlay{display:none;position:fixed;inset:0;background:rgba(13,71,161,.55);z-index:2000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
+.result-overlay.active{display:flex;}
+.result-box{background:#fff;border-radius:16px;padding:28px 24px 20px;width:100%;max-width:760px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);animation:popIn .25s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
+.result-title{font-size:18px;font-weight:800;color:var(--blue-dark);margin-bottom:6px;}
+.result-subtitle{font-size:13px;color:var(--text-light);margin-bottom:14px;}
+.copy-all-btn{font-family:'Lexend',sans-serif;background:var(--success);color:#fff;border:none;border-radius:20px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px;}
+.copy-all-btn:hover{opacity:.88;}
+.result-table{width:100%;border-collapse:collapse;font-size:12px;}
+.result-table thead tr{background:linear-gradient(135deg,var(--blue-dark),var(--blue-light));}
+.result-table thead th{color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:9px 12px;text-align:left;}
+.result-table tbody tr{border-bottom:1px solid var(--border);}
+.result-table tbody td{padding:8px 12px;color:var(--text-body);vertical-align:middle;font-size:11px;}
+.result-table tbody td:nth-child(2){font-weight:700;color:var(--blue);}
+.result-ok-row td{background:#F1F8E9;}
+.result-notfound-row td{background:var(--warn-bg)!important;color:var(--warn)!important;}
+.result-error-row td{background:var(--error-bg)!important;color:var(--error)!important;}
+.close-result-btn{font-family:'Lexend',sans-serif;background:var(--bg);color:var(--text-light);border:1.5px solid var(--border);border-radius:20px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;margin-top:14px;display:block;width:100%;text-align:center;}
+</style>
+</head>
+<body>
+
+<!-- ADMIN GATE -->
+<div class="gate-overlay" id="gateOverlay">
+  <div class="gate-card">
+    <div class="gate-logo">♟</div>
+    <h2>Gujarat Chess Club</h2>
+    <p>Admin access required for Rating Update Tool</p>
+    <input type="text" id="gateAdminId" class="gate-input" placeholder="Admin ID" maxlength="30" autocomplete="off" style="letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;"/>
+    <input type="password" id="gatePin" class="gate-input" placeholder="Admin PIN (6 digits)" maxlength="6" inputmode="numeric" autocomplete="off"/>
+    <div class="gate-error" id="gateError"></div>
+    <button class="gate-btn" id="gateBtnEl" onclick="verifyGate()">Enter</button>
+  </div>
+</div>
+
+<!-- MAIN TOOL -->
+<div id="mainTool" style="display:none;">
+
+  <div class="header">
+    <div class="header-top">
+      <div class="date-pill" id="datePill"></div>
+      <button class="header-link-btn" onclick="window.location.href='IP.html'">👤 IP Database</button>
+    </div>
+    <div class="header-logo">♟</div>
+    <h1 class="header-title">Gujarat Chess Club</h1>
+    <div class="tool-badge">ADMIN TOOL</div>
+    <p class="header-sub">IP Fide Rating Fetch Tool — Bulk Rating Updater</p>
+  </div>
+
+  <div class="main">
+
+    <div class="notice">
+      <strong>📋 How it works:</strong> Paste FIDE JSON data below (exported from FIDE website). The tool will search each entry's <strong>FIDE ID</strong> in IPdb. If found, it updates: <strong>Name, Birth Year, Status, Standard Rating, Rapid Rating, Blitz Rating, Gender, Rated Player</strong>. Entries not found in IPdb are <strong>skipped</strong> — no new records are created. All values are saved in <strong>UPPERCASE</strong>. Supports up to <strong>100+ entries</strong> per batch.
+    </div>
+
+    <!-- JSON INPUT -->
+    <div class="section-card">
+      <div class="section-title">📥 Step 1 — Paste FIDE JSON Data</div>
+      <label class="json-label">Paste JSON Array (min 1, recommended up to 100+ entries) <span class="req">★ Required</span></label>
+      <textarea class="json-textarea" id="jsonInput" placeholder='[
+  {
+    "id": 25918397,
+    "name": "Harsh P Ruparel",
+    "federation": "IND",
+    "year": 2000,
+    "inactive": true,
+    "standard": 1727,
+    "rapid": 1694,
+    "blitz": 1731,
+    "gender": "M"
+  },
+  {
+    "id": 25671782,
+    "name": "Parth R Kanani",
+    "federation": "IND",
+    "year": 1997,
+    "inactive": false,
+    "standard": 1850,
+    "rapid": 0,
+    "blitz": 0,
+    "gender": "M"
+  }
+]' spellcheck="false"></textarea>
+      <div class="json-count" id="jsonCount">0 entries detected</div>
+      <div class="validate-row">
+        <button class="validate-btn" onclick="validateJSON()">🔍 Validate &amp; Preview</button>
+        <span id="validateResult"></span>
+      </div>
+      <!-- PREVIEW TABLE -->
+      <div id="previewWrap" style="display:none;">
+        <div style="margin-top:16px;font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 Preview — Data to be Updated</div>
+        <div class="preview-wrap">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>FIDE ID</th>
+                <th>Name</th>
+                <th>Birth Year</th>
+                <th>Status</th>
+                <th>Std</th>
+                <th>Rapid</th>
+                <th>Blitz</th>
+                <th>Gender</th>
+                <th>Rated?</th>
+              </tr>
+            </thead>
+            <tbody id="previewBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN VERIFICATION -->
+    <div class="admin-card">
+      <div class="admin-card-title">🔐 Step 2 — Admin Verification <span class="req">★</span></div>
+      <div style="max-width:340px;display:flex;flex-direction:column;gap:12px;">
+        <div class="field-group">
+          <label class="field-label">Admin ID <span class="req">★</span></label>
+          <input type="text" id="adminIdFinal" class="field-input" placeholder="Enter Admin ID" maxlength="30" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px;"/>
+          <div class="field-error" id="err-adminId"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Admin PIN <span class="req">★</span></label>
+          <input type="password" id="adminPinFinal" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="off"/>
+          <div class="field-error" id="err-adminPin"></div>
+        </div>
+      </div>
+      <div class="wrong-pin-msg" id="wrongPinMsg">❌ Wrong Admin ID or PIN! No data has been updated. Enter the correct credentials and try again.</div>
+      <div class="btn-row">
+        <button class="primary-btn" id="submitBtn" onclick="submitUpdate()">⚡ Update Ratings in IPdb</button>
+        <button class="clear-btn" onclick="clearAll()">✕ Clear All</button>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-card" id="progressCard" style="display:none;">
+      <div class="progress-card-title">⚡ Updating Ratings...</div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-text">Processing <b id="pCurrent">0</b> of <b id="pTotal">0</b> — <b id="pPct">0</b>%</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="stat-num s" id="cUpdated">0</div><div class="stat-label">✅ Updated</div></div>
+        <div class="stat-box"><div class="stat-num w" id="cNotFound">0</div><div class="stat-label">⚠️ Not Found</div></div>
+        <div class="stat-box"><div class="stat-num e" id="cFailed">0</div><div class="stat-label">❌ Error</div></div>
+        <div class="stat-box"><div class="stat-num b" id="cTotal">0</div><div class="stat-label">📋 Total</div></div>
+      </div>
+      <div class="log-box" id="logBox"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /mainTool -->
+
+<!-- RESULT POPUP -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box">
+    <div class="result-title">✅ Rating Update Complete!</div>
+    <div class="result-subtitle" id="resultSubtitle"></div>
+    <button class="copy-all-btn" onclick="copyResults()">📋 Copy Updated FIDE IDs</button>
+    <table class="result-table">
+      <thead>
+        <tr><th>#</th><th>FIDE ID</th><th>Name</th><th>Std</th><th>Rapid</th><th>Blitz</th><th>Status</th></tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+    <button class="close-result-btn" onclick="document.getElementById('resultOverlay').classList.remove('active');window.location.reload()">Done — Run Another Batch</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ══════════════════════════════════════════
+   FIREBASE CONFIG
+══════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s",
+  authDomain: "ratedeventsgj.firebaseapp.com",
+  projectId: "ratedeventsgj",
+  storageBucket: "ratedeventsgj.firebasestorage.app",
+  messagingSenderId: "527826897689",
+  appId: "1:527826897689:web:fb0439fff04a695a599388"
+};
+const app    = initializeApp(firebaseConfig);
+const db     = getFirestore(app);
+const DB_NAME   = "IPdb";
+
+// Logged-in admin ID stored after successful gate login
+let loggedInAdminId = "";
+
+/* ── Helper: verify admin from Firestore admindb ── */
+async function verifyAdminCredentials(adminId, adminPin){
+  const q = query(
+    collection(db, "admindb"),
+    where("adminid", "==", adminId.toUpperCase())
+  );
+  const snap = await getDocs(q);
+  if(snap.empty) return false;
+  let matched = false;
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    if(String(data.adminpin) === String(adminPin)){
+      matched = true;
+    }
+  });
+  return matched;
+}
+
+/* ══════════════════════════════════════════
+   DATE PILL
+══════════════════════════════════════════ */
+const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const NOW = new Date();
+document.getElementById("datePill").textContent =
+  `${DAYS[NOW.getDay()]}, ${NOW.getDate()} ${MONTHS[NOW.getMonth()]} ${NOW.getFullYear()}`;
+
+/* ══════════════════════════════════════════
+   GATE
+══════════════════════════════════════════ */
+const gateAdminIdEl = document.getElementById("gateAdminId");
+const gatePinEl     = document.getElementById("gatePin");
+
+gateAdminIdEl.addEventListener("input", function(){ this.value = this.value.toUpperCase(); });
+gatePinEl.addEventListener("input", function(){ this.value = this.value.replace(/\D/g,""); });
+gateAdminIdEl.addEventListener("keydown", e => { if(e.key==="Enter") gatePinEl.focus(); });
+gatePinEl.addEventListener("keydown", e => { if(e.key==="Enter") verifyGate(); });
+
+window.verifyGate = async function(){
+  const adminId  = gateAdminIdEl.value.trim();
+  const adminPin = gatePinEl.value.trim();
+  const err = document.getElementById("gateError");
+  const btn = document.getElementById("gateBtnEl");
+  err.textContent = "";
+
+  if(!adminId){ err.textContent="Enter your Admin ID."; return; }
+  if(!/^\d{6}$/.test(adminPin)){ err.textContent="Enter 6-digit Admin PIN."; return; }
+
+  btn.textContent = "Verifying...";
+  btn.disabled = true;
+
+  try {
+    const valid = await verifyAdminCredentials(adminId, adminPin);
+    if(valid){
+      loggedInAdminId = adminId.toUpperCase();
+      document.getElementById("gateOverlay").style.display="none";
+      document.getElementById("mainTool").style.display="block";
+    } else {
+      err.textContent="❌ Wrong Admin ID or PIN. Try again.";
+      gatePinEl.value="";
+      gatePinEl.focus();
+    }
+  } catch(e){
+    err.textContent="❌ Error connecting to database. Check internet.";
+  }
+  btn.textContent = "Enter";
+  btn.disabled = false;
+};
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function up(v){ return (v===null||v===undefined) ? "" : String(v).toUpperCase().trim(); }
+
+function parseGender(g){
+  if(!g) return "";
+  const c = String(g).trim().toUpperCase();
+  if(c==="M" || c==="MALE") return "MALE";
+  if(c==="F" || c==="FEMALE") return "FEMALE";
+  return up(g);
+}
+
+function parseStatus(inactive){
+  // inactive: true → INACTIVE, false/absent → ACTIVE
+  if(inactive === true || inactive === "true") return "INACTIVE";
+  return "ACTIVE";
+}
+
+function isRated(std, rapid, blitz){
+  return (std && Number(std)>0) || (rapid && Number(rapid)>0) || (blitz && Number(blitz)>0);
+}
+
+function ratingVal(v){
+  if(v===null||v===undefined||v===0||v==="0"||v==="") return "";
+  const n = Number(v);
+  return (n>0) ? String(n) : "";
+}
+
+function buildUpdatePayload(entry){
+  const std   = ratingVal(entry.standard);
+  const rapid = ratingVal(entry.rapid);
+  const blitz = ratingVal(entry.blitz);
+  const rated = isRated(std, rapid, blitz) ? "YES" : "NO";
+
+  const payload = {
+    name       : up(entry.name),
+    birthYear  : entry.year ? String(entry.year) : "",
+    status     : parseStatus(entry.inactive),
+    stdRating  : std,
+    rapidRating: rapid,
+    blitzRating: blitz,
+    gender     : parseGender(entry.gender),
+    ratedPlayer: rated,
+  };
+  // Remove empty-string keys so we don't accidentally blank existing data
+  // — but DO write empty string if we explicitly get 0 for ratings (means unrated)
+  return payload;
+}
+
+function addLog(msg, type="info"){
+  const box = document.getElementById("logBox");
+  const div = document.createElement("div");
+  div.className = `log-line log-${type}`;
+  div.textContent = `[${new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}] ${msg}`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ── Admin final fields ── */
+document.getElementById("adminPinFinal").addEventListener("input",function(){
+  this.value=this.value.replace(/\D/g,"");
+});
+document.getElementById("adminIdFinal").addEventListener("input",function(){
+  this.value=this.value.toUpperCase();
+});
+
+/* ══════════════════════════════════════════
+   JSON COUNT (live)
+══════════════════════════════════════════ */
+let parsedEntries = [];
+document.getElementById("jsonInput").addEventListener("input", updateCount);
+function updateCount(){
+  const raw = document.getElementById("jsonInput").value.trim();
+  const el  = document.getElementById("jsonCount");
+  if(!raw){ el.textContent="0 entries detected"; el.className="json-count"; return; }
+  try{
+    const arr = JSON.parse(raw);
+    if(!Array.isArray(arr)){ el.textContent="⚠️ Not an array — wrap entries in [ ]"; el.className="json-count warn"; return; }
+    el.textContent = `${arr.length} entr${arr.length===1?"y":"ies"} detected`;
+    el.className = arr.length > 0 ? "json-count ok" : "json-count";
+    parsedEntries = arr;
+  } catch(e){
+    el.textContent = "⚠️ Invalid JSON — check syntax";
+    el.className = "json-count warn";
+    parsedEntries = [];
+  }
+}
+
+/* ══════════════════════════════════════════
+   VALIDATE & PREVIEW
+══════════════════════════════════════════ */
+window.validateJSON = function(){
+  const raw = document.getElementById("jsonInput").value.trim();
+  const resEl = document.getElementById("validateResult");
+  const previewWrap = document.getElementById("previewWrap");
+  const previewBody = document.getElementById("previewBody");
+  document.getElementById("jsonInput").classList.remove("error");
+
+  if(!raw){
+    resEl.innerHTML = `<span class="validate-result validate-err">❌ Please paste JSON data first.</span>`;
+    previewWrap.style.display="none"; return;
+  }
+  let arr;
+  try{ arr = JSON.parse(raw); } catch(e){
+    resEl.innerHTML = `<span class="validate-result validate-err">❌ Invalid JSON: ${e.message}</span>`;
+    document.getElementById("jsonInput").classList.add("error");
+    previewWrap.style.display="none"; return;
+  }
+  if(!Array.isArray(arr)){
+    resEl.innerHTML = `<span class="validate-result validate-err">❌ JSON must be an array [ ... ]</span>`;
+    previewWrap.style.display="none"; return;
+  }
+  if(arr.length===0){
+    resEl.innerHTML = `<span class="validate-result validate-err">❌ Array is empty — no entries to process.</span>`;
+    previewWrap.style.display="none"; return;
+  }
+
+  parsedEntries = arr;
+
+  // Build preview
+  previewBody.innerHTML = "";
+  arr.forEach((e,i)=>{
+    const std   = ratingVal(e.standard);
+    const rapid = ratingVal(e.rapid);
+    const blitz = ratingVal(e.blitz);
+    const rated = isRated(std, rapid, blitz);
+    const status = parseStatus(e.inactive);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td><strong>${e.id||"—"}</strong></td>
+      <td>${up(e.name)||"—"}</td>
+      <td>${e.year||"—"}</td>
+      <td><span class="badge ${status==="ACTIVE"?"badge-active":"badge-inactive"}">${status}</span></td>
+      <td>${std||"—"}</td>
+      <td>${rapid||"—"}</td>
+      <td>${blitz||"—"}</td>
+      <td>${parseGender(e.gender)||"—"}</td>
+      <td><span class="badge ${rated?"badge-rated":"badge-unrated"}">${rated?"YES":"NO"}</span></td>
+    `;
+    previewBody.appendChild(tr);
+  });
+
+  resEl.innerHTML = `<span class="validate-result validate-ok">✅ Valid JSON — ${arr.length} entr${arr.length===1?"y":"ies"} ready for processing.</span>`;
+  previewWrap.style.display="block";
+  previewWrap.scrollIntoView({behavior:"smooth",block:"nearest"});
+};
+
+/* ══════════════════════════════════════════
+   SUBMIT — LOOK UP FIDE ID & UPDATE
+══════════════════════════════════════════ */
+let allResults = [];
+
+window.submitUpdate = async function(){
+  // Reset error UI
+  document.querySelectorAll(".field-error").forEach(e=>e.textContent="");
+  document.getElementById("adminPinFinal").classList.remove("error");
+  document.getElementById("adminIdFinal").classList.remove("error");
+  document.getElementById("wrongPinMsg").classList.remove("show");
+
+  const adminIdVal  = document.getElementById("adminIdFinal").value.trim().toUpperCase();
+  const adminPinVal = document.getElementById("adminPinFinal").value.trim();
+
+  if(!adminIdVal){
+    document.getElementById("err-adminId").textContent = "Admin ID is required.";
+    document.getElementById("adminIdFinal").classList.add("error");
+    document.getElementById("adminIdFinal").focus();
+    return;
+  }
+  if(!adminPinVal){
+    document.getElementById("err-adminPin").textContent = "Admin PIN is required.";
+    document.getElementById("adminPinFinal").classList.add("error");
+    document.getElementById("adminPinFinal").focus();
+    return;
+  }
+
+  // Validate JSON
+  const raw = document.getElementById("jsonInput").value.trim();
+  if(!raw || parsedEntries.length===0){
+    alert("Please paste and validate JSON data first (click Validate & Preview).");
+    return;
+  }
+
+  // Verify admin from Firebase
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("submitBtn").textContent = "⏳ Verifying Admin...";
+  let adminValid = false;
+  try {
+    adminValid = await verifyAdminCredentials(adminIdVal, adminPinVal);
+  } catch(e){
+    alert("Error connecting to database. Check internet connection.");
+    document.getElementById("submitBtn").disabled = false;
+    document.getElementById("submitBtn").textContent = "⚡ Update Ratings in IPdb";
+    return;
+  }
+
+  if(!adminValid){
+    document.getElementById("wrongPinMsg").classList.add("show");
+    document.getElementById("err-adminPin").textContent = "Wrong Admin ID or PIN.";
+    document.getElementById("adminPinFinal").classList.add("error");
+    document.getElementById("adminIdFinal").classList.add("error");
+    document.getElementById("adminPinFinal").focus();
+    document.getElementById("submitBtn").disabled = false;
+    document.getElementById("submitBtn").textContent = "⚡ Update Ratings in IPdb";
+    return;
+  }
+
+  const entries = parsedEntries;
+
+  // UI setup
+  allResults = [];
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("progressCard").style.display = "block";
+  document.getElementById("logBox").innerHTML = "";
+  document.getElementById("resultBody").innerHTML = "";
+  document.getElementById("progressCard").scrollIntoView({behavior:"smooth"});
+  document.getElementById("pTotal").textContent = entries.length;
+  document.getElementById("cTotal").textContent = entries.length;
+
+  addLog(`Starting update of ${entries.length} entries into "${DB_NAME}"...`, "info");
+
+  let updated=0, notFound=0, failed=0;
+
+  for(let i=0; i<entries.length; i++){
+    const entry  = entries[i];
+    const fideId = String(entry.id || "").trim();
+    document.getElementById("pCurrent").textContent = i+1;
+    const pct = Math.round((i / entries.length)*100);
+    document.getElementById("pPct").textContent = pct;
+    document.getElementById("progressFill").style.width = pct+"%";
+
+    if(!fideId){
+      addLog(`[${i+1}] Skipped — no FIDE ID found in entry`, "warn");
+      notFound++;
+      allResults.push({idx:i+1, fideId:"—", name:up(entry.name)||"—", std:"—", rapid:"—", blitz:"—", status:"skipped", detail:"No FIDE ID in JSON"});
+      document.getElementById("cNotFound").textContent = notFound;
+      continue;
+    }
+
+    try{
+      // Search IPdb for this fideId
+      const q = query(collection(db, DB_NAME), where("fideId","==", fideId));
+      const snap = await getDocs(q);
+
+      if(snap.empty){
+        addLog(`⚠️ [${i+1}] FIDE ${fideId} (${up(entry.name)||"Unknown"}) — NOT FOUND in IPdb, skipped`, "warn");
+        notFound++;
+        allResults.push({idx:i+1, fideId, name:up(entry.name)||"—", std:ratingVal(entry.standard)||"—", rapid:ratingVal(entry.rapid)||"—", blitz:ratingVal(entry.blitz)||"—", status:"notfound", detail:"FIDE ID not in IPdb"});
+        document.getElementById("cNotFound").textContent = notFound;
+        continue;
+      }
+
+      // Update ALL matching documents (usually just 1)
+      const payload = buildUpdatePayload(entry);
+      const updatePromises = [];
+      snap.forEach(docSnap => {
+        updatePromises.push(updateDoc(docSnap.ref, payload));
+      });
+      await Promise.all(updatePromises);
+
+      const std   = ratingVal(entry.standard)||"—";
+      const rapid = ratingVal(entry.rapid)||"—";
+      const blitz = ratingVal(entry.blitz)||"—";
+      addLog(`✅ [${i+1}] FIDE ${fideId} → ${up(entry.name)||"?"} | Std:${std} Rapid:${rapid} Blitz:${blitz} | ${parseStatus(entry.inactive)}`, "ok");
+      updated++;
+      allResults.push({idx:i+1, fideId, name:up(entry.name)||"—", std, rapid, blitz, status:"updated", detail:"✅ Updated"});
+      document.getElementById("cUpdated").textContent = updated;
+
+    } catch(err){
+      addLog(`❌ [${i+1}] FIDE ${fideId}: ${err.message}`, "err");
+      failed++;
+      allResults.push({idx:i+1, fideId, name:up(entry.name)||"—", std:"—", rapid:"—", blitz:"—", status:"error", detail:"❌ "+err.message});
+      document.getElementById("cFailed").textContent = failed;
+    }
+  }
+
+  // Final
+  document.getElementById("progressFill").style.width = "100%";
+  document.getElementById("pPct").textContent = "100";
+  addLog(`✅ Done! ${updated} updated, ${notFound} not found/skipped, ${failed} errors.`, "info");
+  document.getElementById("submitBtn").disabled = false;
+  document.getElementById("submitBtn").textContent = "⚡ Update Ratings in IPdb";
+
+  // Populate result popup
+  document.getElementById("resultSubtitle").textContent =
+    `${updated} updated successfully${notFound>0?`, ${notFound} not found in IPdb`:""}${failed>0?`, ${failed} errors`:""}`;
+
+  const tbody = document.getElementById("resultBody");
+  allResults.forEach(r => {
+    const tr = document.createElement("tr");
+    if(r.status==="updated")   tr.className="result-ok-row";
+    else if(r.status==="notfound"||r.status==="skipped") tr.className="result-notfound-row";
+    else tr.className="result-error-row";
+    tr.innerHTML = `<td>${r.idx}</td><td>${r.fideId}</td><td>${r.name}</td><td>${r.std}</td><td>${r.rapid}</td><td>${r.blitz}</td><td>${r.detail}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById("resultOverlay").classList.add("active");
+};
+
+/* ══════════════════════════════════════════
+   COPY RESULTS
+══════════════════════════════════════════ */
+window.copyResults = function(){
+  const lines = allResults
+    .filter(r=>r.status==="updated")
+    .map(r=>`FIDE:${r.fideId} | ${r.name} | Std:${r.std} | Rapid:${r.rapid} | Blitz:${r.blitz}`)
+    .join("\n");
+  navigator.clipboard.writeText(lines)
+    .then(()=>{
+      const btn = document.querySelector(".copy-all-btn");
+      btn.textContent="✅ Copied!";
+      setTimeout(()=>{ btn.textContent="📋 Copy Updated FIDE IDs"; }, 2500);
+    })
+    .catch(()=>{ prompt("Copy this:", lines); });
+};
+
+/* ══════════════════════════════════════════
+   CLEAR ALL
+══════════════════════════════════════════ */
+window.clearAll = function(){
+  document.getElementById("jsonInput").value = "";
+  document.getElementById("adminPinFinal").value = "";
+  document.getElementById("adminIdFinal").value = "";
+  document.getElementById("jsonCount").textContent = "0 entries detected";
+  document.getElementById("jsonCount").className = "json-count";
+  document.getElementById("validateResult").innerHTML = "";
+  document.getElementById("previewWrap").style.display = "none";
+  document.getElementById("progressCard").style.display = "none";
+  document.getElementById("wrongPinMsg").classList.remove("show");
+  document.getElementById("jsonInput").classList.remove("error");
+  document.getElementById("adminPinFinal").classList.remove("error");
+  document.getElementById("adminIdFinal").classList.remove("error");
+  document.getElementById("submitBtn").textContent = "⚡ Update Ratings in IPdb";
+  parsedEntries = [];
+  allResults = [];
+};
+
+</script>
+</body>
+</html>
