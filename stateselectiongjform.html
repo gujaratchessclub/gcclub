@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>State Selection GJ Registration - Gujarat Chess Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #1565C0;
+      --blue-dark: #0D47A1;
+      --blue-light: #1976D2;
+      --blue-pale: #E3F2FD;
+      --white: #FFFFFF;
+      --bg: #F0F4FF;
+      --border: #BBDEFB;
+      --text: #1A237E;
+      --text-body: #37474F;
+      --text-light: #546E7A;
+      --error: #D32F2F;
+      --optional: #78909C;
+      --gold: #FFB300;
+      --success-bg: #E8F5E9;
+      --success: #2E7D32;
+      --shadow: 0 4px 24px rgba(21,101,192,0.10);
+      --transition-fast: 0.15s ease;
+      --transition-med: 0.22s ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+
+    body {
+      font-family: 'Lexend', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 60%, #1E88E5 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 20px 20px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,0.05); border-radius: 50%;
+      pointer-events: none;
+    }
+    .header-top {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 8px;
+    }
+    .date-pill {
+      background: rgba(255,255,255,0.18);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.30);
+      letter-spacing: 0.3px;
+    }
+    .header-logo { font-size: 44px; margin-bottom: 6px; }
+    .header-title { font-size: 26px; font-weight: 800; color: var(--white); }
+    .form-badge {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--blue-dark);
+      font-size: 13px; font-weight: 700;
+      padding: 4px 16px; border-radius: 20px;
+      margin: 8px auto 5px; letter-spacing: 1px;
+    }
+    .form-subtitle { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.90); }
+
+    /* ── FORM CONTAINER ── */
+    .form-container { max-width: 860px; margin: 28px auto 48px; padding: 0 16px; }
+
+    /* ── SECTION ── */
+    .form-section {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 26px 28px 18px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      transition: box-shadow var(--transition-med);
+    }
+    .form-section:focus-within {
+      box-shadow: 0 6px 30px rgba(21,101,192,0.14);
+    }
+    .section-title {
+      font-size: 14px; font-weight: 700;
+      color: var(--blue); text-transform: uppercase;
+      letter-spacing: 0.8px; margin-bottom: 16px;
+      padding-bottom: 10px; border-bottom: 2px solid var(--blue-pale);
+    }
+
+    /* ── RADIO ── */
+    .radio-group { display: flex; gap: 14px; flex-wrap: wrap; }
+    .radio-card input[type="radio"] { display: none; }
+    .radio-box {
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 26px; border: 2px solid var(--border);
+      border-radius: 10px; cursor: pointer;
+      font-size: 14px; font-weight: 600;
+      color: var(--text-light); background: var(--bg);
+      transition: all var(--transition-fast); user-select: none;
+    }
+    .radio-box:hover { border-color: var(--blue-light); background: var(--blue-pale); color: var(--blue); }
+    .radio-box:active { transform: scale(0.97); }
+    .radio-card input[type="radio"]:checked + .radio-box {
+      border-color: var(--blue); background: var(--blue-pale);
+      color: var(--blue-dark); box-shadow: 0 0 0 3px rgba(21,101,192,0.12);
+    }
+    .radio-icon { font-size: 18px; }
+
+    /* ── FIELDS ── */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:580px){ .field-row { grid-template-columns: 1fr; } .form-section { padding: 18px 14px; } }
+    .field-group { display: flex; flex-direction: column; margin-bottom: 13px; }
+    .field-group.half { max-width: 50%; }
+    @media(max-width:580px){ .field-group.half { max-width: 100%; } }
+    .field-label { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 5px; letter-spacing: 0.2px; }
+    .hint { font-size: 11px; color: var(--optional); font-weight: 400; }
+    .field-input {
+      font-family: 'Lexend', sans-serif;
+      font-size: 14px; font-weight: 400;
+      padding: 10px 13px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      background: #FAFCFF; color: var(--text);
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+      width: 100%;
+    }
+    .field-input:hover:not(:focus) { border-color: #90CAF9; }
+    .field-input:focus {
+      border-color: var(--blue-light); background: var(--white);
+      box-shadow: 0 0 0 3px rgba(21,101,192,0.10);
+    }
+    .field-input.error { border-color: var(--error); background: #FFF5F5; }
+    .field-input.valid { border-color: #43A047; }
+    .field-textarea { resize: vertical; min-height: 72px; }
+    select.field-input {
+      cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231565C0' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 13px center; padding-right: 34px;
+    }
+
+    /* ── SEARCHABLE DROPDOWN ── */
+    .searchable-wrap { position: relative; }
+    .dropdown-list {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--white); border: 1.5px solid var(--blue-light);
+      border-radius: 10px; max-height: 200px;
+      overflow-y: auto; z-index: 200; display: none;
+      box-shadow: 0 8px 24px rgba(21,101,192,0.18);
+      transform: translateY(-4px);
+      opacity: 0;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+    }
+    .dropdown-list.open {
+      display: block;
+      animation: dropDown 0.15s ease forwards;
+    }
+    @keyframes dropDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-item {
+      padding: 10px 14px; font-size: 14px; cursor: pointer;
+      color: var(--text-body);
+      transition: background var(--transition-fast), color var(--transition-fast);
+      border-bottom: 1px solid var(--blue-pale);
+    }
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover, .dropdown-item.active { background: var(--blue-pale); color: var(--blue); }
+    .dropdown-item:active { background: #BBDEFB; }
+    .dropdown-empty { padding: 12px 14px; font-size: 13px; color: var(--optional); }
+
+    /* ── PRIZE PREVIEW ── */
+    .prize-preview {
+      font-size: 12px; font-weight: 600; color: var(--success);
+      margin-top: 4px; min-height: 16px;
+      transition: opacity var(--transition-fast);
+    }
+
+    /* ── FEES GRID ── */
+    .fees-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;
+      margin-top: 4px;
+    }
+    @media(max-width:660px){ .fees-grid { grid-template-columns: 1fr; } }
+    .fee-card {
+      background: var(--bg); border-radius: 10px;
+      padding: 14px 14px 6px; border: 1px solid var(--border);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .fee-card:focus-within {
+      border-color: var(--blue-light);
+      box-shadow: 0 2px 12px rgba(21,101,192,0.10);
+    }
+    .fee-card-title { font-size: 12px; font-weight: 700; color: var(--blue); margin-bottom: 10px; letter-spacing: 0.4px; }
+
+    /* ── ARBITERS ── */
+    .arbiter-block {
+      background: var(--bg); border-radius: 10px;
+      padding: 14px 16px 4px; border: 1px solid var(--border);
+      margin-bottom: 12px;
+      transition: border-color var(--transition-fast);
+    }
+    .arbiter-block:focus-within { border-color: var(--blue-light); }
+    .arbiter-label { font-size: 12px; font-weight: 700; color: var(--blue); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── PIN SECTION ── */
+    .pin-section { border: 2px solid var(--blue-pale); }
+    .pin-note { font-size: 13px; color: var(--optional); margin-bottom: 14px; font-weight: 400; }
+    .pin-input { letter-spacing: 6px; font-size: 20px; font-weight: 700; text-align: center; }
+
+    /* ── LABELS ── */
+    .req { color: var(--error); font-weight: 700; }
+    .optional { color: var(--optional); font-size: 11px; font-weight: 400; }
+    .field-error {
+      font-size: 12px; color: var(--error); font-weight: 500; margin-top: 3px; min-height: 16px;
+      transition: opacity var(--transition-fast);
+    }
+
+    /* ── SUBMIT ── */
+    .submit-section { text-align: center; margin-top: 6px; }
+    .submit-btn {
+      font-family: 'Lexend', sans-serif;
+      display: inline-flex; align-items: center; gap: 12px;
+      background: linear-gradient(135deg, var(--blue-dark), var(--blue-light));
+      color: var(--white); font-size: 15px; font-weight: 700;
+      padding: 15px 44px; border: none; border-radius: 50px;
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+      box-shadow: 0 6px 20px rgba(21,101,192,0.28);
+      position: relative; overflow: hidden;
+    }
+    .submit-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background var(--transition-fast);
+    }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(21,101,192,0.30); }
+    .submit-btn:hover::after { background: rgba(255,255,255,0.06); }
+    .submit-btn:active { transform: translateY(0); box-shadow: 0 4px 14px rgba(21,101,192,0.22); }
+    .submit-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+    .btn-icon { font-size: 18px; transition: transform var(--transition-fast); }
+    .submit-btn:hover:not(:disabled) .btn-icon { transform: translateX(4px); }
+
+    /* ── SPINNER inside button ── */
+    .btn-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      display: none;
+      animation: spin 0.7s linear infinite;
+    }
+    .submit-btn.loading .btn-spinner { display: inline-block; }
+    .submit-btn.loading .btn-icon { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── OVERLAY ── */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(13,71,161,0.55); z-index: 1000;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .overlay.active { display: flex; }
+    .overlay-card {
+      background: var(--white); border-radius: 20px;
+      padding: 44px 40px; text-align: center;
+      max-width: 400px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+      animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes popIn { from { transform: scale(0.82); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .overlay-icon { font-size: 52px; margin-bottom: 12px; }
+    .overlay-card h3 { font-size: 20px; font-weight: 800; color: var(--blue-dark); margin-bottom: 8px; }
+    .overlay-card p { font-size: 14px; color: var(--text-light); margin-bottom: 12px; }
+    .overlay-btn {
+      font-family: 'Lexend', sans-serif;
+      margin-top: 14px; background: var(--blue); color: var(--white);
+      border: none; border-radius: 30px; padding: 12px 28px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+    .overlay-btn:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .overlay-btn:active { transform: translateY(0); }
+
+    /* ── RIPPLE ── */
+    .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      transform: scale(0);
+      animation: rippleAnim 0.5s linear;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ── SCROLL-IN sections ── */
+    .form-section {
+      animation: fadeSlideUp 0.3s ease both;
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .form-section:nth-child(1) { animation-delay: 0.04s; }
+    .form-section:nth-child(2) { animation-delay: 0.08s; }
+    .form-section:nth-child(3) { animation-delay: 0.12s; }
+    .form-section:nth-child(4) { animation-delay: 0.16s; }
+    .form-section:nth-child(5) { animation-delay: 0.20s; }
+    .form-section:nth-child(6) { animation-delay: 0.24s; }
+    .form-section:nth-child(7) { animation-delay: 0.28s; }
+    .form-section:nth-child(8) { animation-delay: 0.32s; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #263238; color: #fff; font-size: 13px; font-weight: 600;
+      padding: 10px 22px; border-radius: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.20);
+      opacity: 0; z-index: 2000;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div id="toast"></div>
+
+  <div class="header">
+    <div class="header-top"><div class="date-pill" id="datePill"></div></div>
+    <div class="header-logo">♟</div>
+    <h1 class="header-title">Gujarat Chess Club</h1>
+    <div class="form-badge">FORM_03</div>
+    <h2 class="form-subtitle">State Selection GJ Registration Form</h2>
+  </div>
+
+  <div class="form-container">
+    <form id="eventForm" novalidate autocomplete="off">
+      <input type="hidden" id="editDocId" value=""/>
+      <input type="hidden" id="editMode" value="false"/>
+
+      <!-- ENTRY TYPE -->
+      <div class="form-section">
+        <div class="section-title">Entry Type <span class="req">*</span></div>
+        <div class="radio-group">
+          <label class="radio-card"><input type="radio" name="enteredBy" value="Admin" required/><span class="radio-box"><span class="radio-icon">🛡</span><span>Admin</span></span></label>
+          <label class="radio-card"><input type="radio" name="enteredBy" value="Organizer" required/><span class="radio-box"><span class="radio-icon">🏆</span><span>Organizer</span></span></label>
+        </div>
+        <div class="field-error" id="err-enteredBy"></div>
+      </div>
+
+      <!-- ORGANIZER -->
+      <div class="form-section">
+        <div class="section-title">Organizer</div>
+        <div class="field-group">
+          <label class="field-label">Organizer Name <span class="req">*</span></label>
+          <div class="searchable-wrap">
+            <input type="text" id="organizerSearch" class="field-input" placeholder="Type to search organizer..." autocomplete="off"/>
+            <input type="hidden" id="organizerID"/>
+            <input type="hidden" id="organizerNameVal"/>
+            <div class="dropdown-list" id="organizerDropdown"></div>
+          </div>
+          <div class="field-error" id="err-organizer"></div>
+        </div>
+      </div>
+
+      <!-- EVENT DETAILS -->
+      <div class="form-section">
+        <div class="section-title">Event Details</div>
+        <div class="field-group">
+          <label class="field-label">Event Name <span class="req">*</span> <span class="hint">(auto UPPERCASE)</span></label>
+          <input type="text" id="eventName" class="field-input uppercase-input" placeholder="Enter event name"/>
+          <div class="field-error" id="err-eventName"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Start Date <span class="req">*</span></label>
+            <input type="date" id="startDate" class="field-input"/>
+            <div class="field-error" id="err-startDate"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">End Date <span class="req">*</span></label>
+            <input type="date" id="endDate" class="field-input"/>
+            <div class="field-error" id="err-endDate"></div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">System <span class="req">*</span></label>
+            <select id="system" class="field-input">
+              <option value="">-- Select System --</option>
+              <option>Swiss</option><option>Round Robin</option><option>Knockout</option>
+            </select>
+            <div class="field-error" id="err-system"></div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Format <span class="req">*</span></label>
+            <select id="format" class="field-input">
+              <option value="">-- Select Format --</option>
+              <option>Standard</option><option>Rapid</option><option>Blitz</option>
+            </select>
+            <div class="field-error" id="err-format"></div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Time Control <span class="optional">(Optional)</span></label>
+            <input type="text" id="timeControl" class="field-input" placeholder="e.g. 90+30, 25+10"/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">District <span class="req">*</span></label>
+            <select id="district" class="field-input">
+              <option value="">-- Select District --</option>
+              <option>Ahmedabad</option><option>Amreli</option><option>Anand</option>
+              <option>Aravalli</option><option>Banaskantha</option><option>Bharuch</option>
+              <option>Bhavnagar</option><option>Botad</option><option>Chhota Udepur</option>
+              <option>Dahod</option><option>Dang</option><option>Devbhoomi Dwarka</option>
+              <option>Gandhinagar</option><option>Gir Somnath</option><option>Jamnagar</option>
+              <option>Junagadh</option><option>Kachchh</option><option>Kheda</option>
+              <option>Mahisagar</option><option>Mehsana</option><option>Morbi</option>
+              <option>Narmada</option><option>Navsari</option><option>Panchmahal</option>
+              <option>Patan</option><option>Porbandar</option><option>Rajkot</option>
+              <option>Sabarkantha</option><option>Surat</option><option>Surendranagar</option>
+              <option>Tapi</option><option>Vadodara</option><option>Valsad</option>
+            </select>
+            <div class="field-error" id="err-district"></div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Venue <span class="optional">(Optional — auto UPPERCASE)</span></label>
+          <textarea id="venue" class="field-input field-textarea uppercase-input" placeholder="Leave blank = Declare Soon / Update Soon"></textarea>
+        </div>
+      </div>
+
+      <!-- PRIZE & FEES -->
+      <div class="form-section">
+        <div class="section-title">Prize & Entry Fees</div>
+        <div class="field-group">
+          <label class="field-label">Prize Fund <span class="optional">(Optional)</span></label>
+          <input type="text" id="prizeFund" class="field-input" placeholder="Type amount e.g. 100000" inputmode="numeric"/>
+          <div class="prize-preview" id="prizePreview"></div>
+        </div>
+        <div class="fees-grid">
+          <div class="fee-card">
+            <div class="fee-card-title">🕐 Write Full Early Bird Entry Fees</div>
+            <div class="field-group"><label class="field-label">Till Date</label><input type="date" id="earlyBirdDate" class="field-input"/></div>
+            <div class="field-group"><label class="field-label">Fees</label><input type="text" id="earlyBirdFees" class="field-input" placeholder="e.g. 500" inputmode="numeric"/><div class="prize-preview" id="earlyBirdPreview"></div></div>
+          </div>
+          <div class="fee-card">
+            <div class="fee-card-title">✅ Actual Entry Fees</div>
+            <div class="field-group" style="margin-bottom:0"><label class="field-label">Fees</label><input type="text" id="actualFees" class="field-input" placeholder="e.g. 700" inputmode="numeric"/><div class="prize-preview" id="actualFeesPreview"></div></div>
+          </div>
+          <div class="fee-card">
+            <div class="fee-card-title">⏰ Write Full Late Entry Fees</div>
+            <div class="field-group"><label class="field-label">From Date</label><input type="date" id="lateEntryDate" class="field-input"/></div>
+            <div class="field-group"><label class="field-label">Fees</label><input type="text" id="lateEntryFees" class="field-input" placeholder="e.g. 1000" inputmode="numeric"/><div class="prize-preview" id="lateEntryPreview"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOURNAMENT DIRECTOR -->
+      <div class="form-section">
+        <div class="section-title">Tournament Director <span class="optional">(Optional)</span></div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">Tournament Director Name</label>
+            <input type="text" id="tdName" class="field-input" placeholder="Full name"/>
+          </div>
+          <div class="field-group">
+            <label class="field-label">FIDE ID <span class="optional">(Optional)</span></label>
+            <input type="text" id="tdFideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARBITERS -->
+      <div class="form-section">
+        <div class="section-title">Arbiters <span class="optional">(Optional)</span></div>
+        <div class="arbiter-block">
+          <div class="arbiter-label">Chief Arbiter</div>
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">Name</label><input type="text" id="ca1Name" class="field-input" placeholder="Chief Arbiter name"/></div>
+            <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="ca1FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+          </div>
+        </div>
+        <div class="arbiter-block">
+          <div class="arbiter-label">Deputy Chief Arbiter 1</div>
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">Name</label><input type="text" id="dca1Name" class="field-input" placeholder="Deputy Chief Arbiter name"/></div>
+            <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="dca1FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+          </div>
+        </div>
+        <div class="arbiter-block">
+          <div class="arbiter-label">Deputy Chief Arbiter 2</div>
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">Name</label><input type="text" id="dca2Name" class="field-input" placeholder="Deputy Chief Arbiter name"/></div>
+            <div class="field-group"><label class="field-label">FIDE ID</label><input type="text" id="dca2FideId" class="field-input" placeholder="FIDE ID (digits only)" inputmode="numeric"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINKS -->
+      <div class="form-section">
+        <div class="section-title">Links <span class="optional">(All Optional)</span></div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">📄 Brochure Link</label><input type="url" id="brochureLink" class="field-input" placeholder="https://..."/></div>
+          <div class="field-group"><label class="field-label">♟ Chess Results Link</label><input type="url" id="chessResultsLink" class="field-input" placeholder="https://chess-results.com/..."/></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">📍 Map Link</label><input type="url" id="mapLink" class="field-input" placeholder="https://maps.google.com/..."/></div>
+          <div class="field-group"><label class="field-label">🎥 Live Games Link</label><input type="url" id="liveGamesLink" class="field-input" placeholder="https://..."/></div>
+        </div>
+        <div class="field-group half"><label class="field-label">🏆 Prize List Link</label><input type="url" id="prizeListLink" class="field-input" placeholder="https://..."/></div>
+      </div>
+
+      <!-- PIN VERIFICATION -->
+      <div class="form-section pin-section">
+        <div class="section-title">PIN Verification <span class="req">*</span></div>
+        <div class="pin-note" id="pinNote">Select Admin or Organizer above to continue.</div>
+        <div class="field-group half">
+          <label class="field-label" id="pinLabel">Enter PIN <span class="req">*</span></label>
+          <input type="password" id="pinInput" class="field-input pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"/>
+          <div class="field-error" id="err-pin"></div>
+        </div>
+      </div>
+
+      <div class="submit-section">
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span class="btn-spinner"></span>
+          <span class="btn-text">Submit Event</span>
+          <span class="btn-icon">→</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="overlay" id="successOverlay">
+    <div class="overlay-card">
+      <div class="overlay-icon">✅</div>
+      <h3 id="overlayTitle">Event Registered!</h3>
+      <p id="successMsg">Event saved successfully.</p>
+      <button class="overlay-btn" onclick="window.location.reload()">Register Another Event</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s",
+      authDomain: "ratedeventsgj.firebaseapp.com",
+      projectId: "ratedeventsgj",
+      storageBucket: "ratedeventsgj.firebasestorage.app",
+      messagingSenderId: "527826897689",
+      appId: "1:527826897689:web:fb0439fff04a695a599388"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const ADMIN_PIN = "270620";
+
+    // ── TOAST ────────────────────────────────────────────────
+    function showToast(msg, duration = 2600) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove("show"), duration);
+    }
+
+    // ── RIPPLE on submit btn ─────────────────────────────────
+    document.getElementById("submitBtn").addEventListener("click", function(e) {
+      const btn = this;
+      const rect = btn.getBoundingClientRect();
+      const r = document.createElement("span");
+      const size = Math.max(rect.width, rect.height);
+      r.className = "ripple";
+      r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size/2}px;top:${e.clientY - rect.top - size/2}px`;
+      btn.appendChild(r);
+      r.addEventListener("animationend", () => r.remove());
+    });
+
+    // ── DATE ─────────────────────────────────────────────────
+    const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const now = new Date();
+    document.getElementById("datePill").textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+    // ── HELPERS ──────────────────────────────────────────────
+    function getVal(id) { return document.getElementById(id)?.value.trim() || ""; }
+    function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v || ""; }
+    function showError(id, msg) {
+      const el = document.getElementById("err-" + id); if (el) el.textContent = msg;
+      const inp = document.getElementById(id); if (inp) { inp.classList.add("error"); inp.classList.remove("valid"); }
+    }
+    function clearAllErrors() {
+      document.querySelectorAll(".field-error").forEach(e => e.textContent = "");
+      document.querySelectorAll(".field-input").forEach(e => { e.classList.remove("error"); });
+    }
+    function markValid(id) {
+      const inp = document.getElementById(id);
+      if (inp) { inp.classList.remove("error"); inp.classList.add("valid"); }
+    }
+
+    function formatIndianCurrency(val) {
+      const num = val.replace(/\D/g, "");
+      if (!num) return "";
+      let x = num;
+      let lastThree = x.substring(x.length - 3);
+      let other = x.substring(0, x.length - 3);
+      if (other !== "") lastThree = "," + lastThree;
+      return other.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastThree + " Rs.";
+    }
+
+    function attachCurrencyPreview(inputId, previewId) {
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(previewId);
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/\D/g, "");
+        const fmt = formatIndianCurrency(input.value);
+        preview.textContent = fmt ? `→ ${fmt}` : "";
+      });
+    }
+    attachCurrencyPreview("prizeFund","prizePreview");
+    attachCurrencyPreview("earlyBirdFees","earlyBirdPreview");
+    attachCurrencyPreview("actualFees","actualFeesPreview");
+    attachCurrencyPreview("lateEntryFees","lateEntryPreview");
+
+    document.querySelectorAll(".uppercase-input").forEach(el => {
+      el.addEventListener("input", () => { el.value = el.value.toUpperCase(); });
+    });
+
+    document.querySelectorAll('input[name="enteredBy"]').forEach(radio => {
+      radio.addEventListener("change", () => {
+        const val = radio.value;
+        document.getElementById("pinNote").textContent = val === "Admin"
+          ? "Enter the Admin PIN to submit." : "Enter your Organizer PIN.";
+        document.getElementById("pinLabel").innerHTML = `${val} PIN <span class="req">*</span>`;
+        document.getElementById("pinInput").focus();
+      });
+    });
+
+    document.getElementById("startDate").addEventListener("change", () => {
+      const sd = document.getElementById("startDate").value;
+      document.getElementById("endDate").min = sd;
+      if (document.getElementById("endDate").value < sd) document.getElementById("endDate").value = sd;
+    });
+
+    ["ca1FideId","dca1FideId","dca2FideId","tdFideId"].forEach(id => {
+      document.getElementById(id).addEventListener("input", function() { this.value = this.value.replace(/\D/g, ""); });
+    });
+
+    // ── ORGANIZER SEARCH ─────────────────────────────────────
+    let organizersList = [];
+    async function loadOrganizers() {
+      const snap = await getDocs(collection(db, "organizerdb"));
+      organizersList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    loadOrganizers();
+
+    const searchInput = document.getElementById("organizerSearch");
+    const dropdown = document.getElementById("organizerDropdown");
+
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.toLowerCase().trim();
+      dropdown.innerHTML = "";
+      if (!q) { dropdown.classList.remove("open"); return; }
+      const matches = organizersList.filter(o => (o.organizerName || "").toLowerCase().includes(q));
+      if (matches.length === 0) {
+        dropdown.innerHTML = `<div class="dropdown-empty">No organizer found</div>`;
+      } else {
+        matches.forEach(org => {
+          const item = document.createElement("div");
+          item.className = "dropdown-item";
+          item.textContent = org.organizerName;
+          item.addEventListener("mousedown", (e) => {
+            e.preventDefault(); // prevent blur before click
+            searchInput.value = org.organizerName;
+            document.getElementById("organizerID").value = org.organizerID || org.id;
+            document.getElementById("organizerNameVal").value = org.organizerName;
+            searchInput.dataset.pin = org.pin || "";
+            dropdown.classList.remove("open");
+            document.getElementById("err-organizer").textContent = "";
+            searchInput.classList.remove("error");
+            showToast(`✓ Organizer: ${org.organizerName}`);
+          });
+          dropdown.appendChild(item);
+        });
+      }
+      dropdown.classList.add("open");
+    });
+    document.addEventListener("click", e => { if (!e.target.closest(".searchable-wrap")) dropdown.classList.remove("open"); });
+
+    function formatDateDisplay(dateStr) {
+      if (!dateStr) return "—";
+      const [y, m, d] = dateStr.split("-");
+      return `${d}/${m}/${y}`;
+    }
+
+    // ── EDIT MODE ────────────────────────────────────────────
+    const urlParams = new URLSearchParams(window.location.search);
+    const editDocId = urlParams.get("editDocId");
+    let isEditMode = false;
+    let editDocFirebaseId = null;
+
+    async function initEditMode() {
+      if (!editDocId) return;
+      isEditMode = true;
+      editDocFirebaseId = editDocId;
+      document.querySelector(".form-subtitle").textContent = "Edit Rated Event";
+      document.getElementById("submitBtn").querySelector(".btn-text").textContent = "Update Event";
+
+      const snap = await getDocs(collection(db, "stateselectiongjdb"));
+      const found = snap.docs.find(d => d.id === editDocId);
+      if (found) fillForm(found.data());
+    }
+
+    function fillForm(data) {
+      if (data.enteredBy) {
+        const r = document.querySelector(`input[name="enteredBy"][value="${data.enteredBy}"]`);
+        if (r) { r.checked = true; r.dispatchEvent(new Event("change")); }
+      }
+      if (data.organizerName) {
+        document.getElementById("organizerSearch").value = data.organizerName;
+        document.getElementById("organizerNameVal").value = data.organizerName;
+        document.getElementById("organizerID").value = data.organizerID || "";
+      }
+      setVal("eventName", data.eventName);
+      setVal("startDate", data.startDate);
+      setVal("endDate", data.endDate);
+      setVal("system", data.system);
+      setVal("format", data.format);
+      setVal("timeControl", data.timeControl === "—" ? "" : data.timeControl);
+      setVal("district", data.district);
+      setVal("venue", data.venue === "DECLARE SOON / UPDATE SOON" ? "" : data.venue);
+
+      if (data.prizeFund && data.prizeFund !== "To Be Announced") {
+        const raw = data.prizeFund.replace(/[^0-9]/g, "");
+        setVal("prizeFund", raw);
+        document.getElementById("prizePreview").textContent = `→ ${data.prizeFund}`;
+      }
+
+      const ef = data.entryFees || {};
+      setVal("earlyBirdDate", ef.earlyBird?.date !== "—" ? convertDisplayToInput(ef.earlyBird?.date) : "");
+      if (ef.earlyBird?.fees && ef.earlyBird.fees !== "—") { const r = ef.earlyBird.fees.replace(/[^0-9]/g,""); setVal("earlyBirdFees", r); document.getElementById("earlyBirdPreview").textContent = `→ ${ef.earlyBird.fees}`; }
+      if (ef.actual?.fees && ef.actual.fees !== "To Be Announced") { const r = ef.actual.fees.replace(/[^0-9]/g,""); setVal("actualFees", r); document.getElementById("actualFeesPreview").textContent = `→ ${ef.actual.fees}`; }
+      setVal("lateEntryDate", ef.lateEntry?.date !== "—" ? convertDisplayToInput(ef.lateEntry?.date) : "");
+      if (ef.lateEntry?.fees && ef.lateEntry.fees !== "—") { const r = ef.lateEntry.fees.replace(/[^0-9]/g,""); setVal("lateEntryFees", r); document.getElementById("lateEntryPreview").textContent = `→ ${ef.lateEntry.fees}`; }
+
+      const td = data.tournamentDirector || {};
+      setVal("tdName", td.name); setVal("tdFideId", td.fideId);
+      const arb = data.arbiters || {};
+      setVal("ca1Name", arb.chiefArbiter?.name); setVal("ca1FideId", arb.chiefArbiter?.fideId);
+      setVal("dca1Name", arb.deputyCA1?.name); setVal("dca1FideId", arb.deputyCA1?.fideId);
+      setVal("dca2Name", arb.deputyCA2?.name); setVal("dca2FideId", arb.deputyCA2?.fideId);
+
+      const lk = data.links || {};
+      setVal("brochureLink", lk.brochure); setVal("chessResultsLink", lk.chessResults);
+      setVal("mapLink", lk.map); setVal("liveGamesLink", lk.liveGames); setVal("prizeListLink", lk.prizeList);
+    }
+
+    function convertDisplayToInput(displayDate) {
+      if (!displayDate || displayDate === "—") return "";
+      const parts = displayDate.split("/");
+      if (parts.length !== 3) return "";
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
+    initEditMode();
+
+    // ── VALIDATION ───────────────────────────────────────────
+    function validateForm() {
+      let valid = true; clearAllErrors();
+      if (!document.querySelector('input[name="enteredBy"]:checked')?.value) {
+        document.getElementById("err-enteredBy").textContent = "Please select Admin or Organizer."; valid = false;
+      }
+      if (!document.getElementById("organizerNameVal").value) {
+        showError("organizer","Please select an organizer."); document.getElementById("organizerSearch").classList.add("error"); valid = false;
+      }
+      if (!getVal("eventName")) { showError("eventName","Event name is required."); valid = false; }
+      if (!getVal("startDate")) { showError("startDate","Start date is required."); valid = false; }
+      if (!getVal("endDate")) { showError("endDate","End date is required."); valid = false; }
+      if (getVal("startDate") && getVal("endDate") && getVal("endDate") < getVal("startDate")) { showError("endDate","End date cannot be before start date."); valid = false; }
+      if (!getVal("system")) { showError("system","Please select a system."); valid = false; }
+      if (!getVal("format")) { showError("format","Please select a format."); valid = false; }
+      if (!getVal("district")) { showError("district","Please select a district."); valid = false; }
+      if (!getVal("pinInput")) { showError("pin","PIN is required."); valid = false; }
+      return valid;
+    }
+
+    // ── PIN VERIFY ───────────────────────────────────────────
+    async function verifyPin(enteredBy, pin) {
+      if (enteredBy === "Admin") return pin === ADMIN_PIN;
+      return pin === document.getElementById("organizerSearch").dataset.pin;
+    }
+
+    // ── SUBMIT ───────────────────────────────────────────────
+    document.getElementById("eventForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!validateForm()) {
+        // Scroll to first error
+        const firstErr = document.querySelector(".field-input.error, .field-error:not(:empty)");
+        if (firstErr) firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+        showToast("⚠️ Please fix the errors above.");
+        return;
+      }
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.classList.add("loading");
+      btn.querySelector(".btn-text").textContent = "Verifying...";
+      try {
+        const enteredBy = document.querySelector('input[name="enteredBy"]:checked').value;
+        const enteredPin = getVal("pinInput");
+        if (!(await verifyPin(enteredBy, enteredPin))) {
+          document.getElementById("err-pin").textContent = enteredBy === "Admin" ? "Wrong Admin PIN." : "Wrong Organizer PIN.";
+          document.getElementById("pinInput").classList.add("error");
+          document.getElementById("pinInput").focus();
+          btn.disabled = false;
+          btn.classList.remove("loading");
+          btn.querySelector(".btn-text").textContent = isEditMode ? "Update Event" : "Submit Event";
+          return;
+        }
+        btn.querySelector(".btn-text").textContent = "Saving...";
+        const nowDate = new Date();
+        const dd = String(nowDate.getDate()).padStart(2,"0");
+        const mm = String(nowDate.getMonth()+1).padStart(2,"0");
+        const yyyy = nowDate.getFullYear();
+
+        const data = {
+          enteredBy,
+          entryDate: `${dd}/${mm}/${yyyy}`,
+          entryTime: nowDate.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",second:"2-digit"}),
+          organizerID: document.getElementById("organizerID").value,
+          organizerName: document.getElementById("organizerNameVal").value,
+          eventName: getVal("eventName"),
+          startDate: getVal("startDate"),
+          startDateDisplay: formatDateDisplay(getVal("startDate")),
+          endDate: getVal("endDate"),
+          endDateDisplay: formatDateDisplay(getVal("endDate")),
+          system: getVal("system"),
+          format: getVal("format"),
+          timeControl: getVal("timeControl") || "—",
+          district: getVal("district"),
+          venue: getVal("venue") || "DECLARE SOON / UPDATE SOON",
+          prizeFund: getVal("prizeFund") ? formatIndianCurrency(getVal("prizeFund")) : "To Be Announced",
+          entryFees: {
+            earlyBird: { date: formatDateDisplay(getVal("earlyBirdDate")), fees: getVal("earlyBirdFees") ? formatIndianCurrency(getVal("earlyBirdFees")) : "—" },
+            actual: { fees: getVal("actualFees") ? formatIndianCurrency(getVal("actualFees")) : "To Be Announced" },
+            lateEntry: { date: formatDateDisplay(getVal("lateEntryDate")), fees: getVal("lateEntryFees") ? formatIndianCurrency(getVal("lateEntryFees")) : "—" }
+          },
+          tournamentDirector: { name: getVal("tdName"), fideId: getVal("tdFideId") },
+          arbiters: {
+            chiefArbiter: { name: getVal("ca1Name"), fideId: getVal("ca1FideId") },
+            deputyCA1: { name: getVal("dca1Name"), fideId: getVal("dca1FideId") },
+            deputyCA2: { name: getVal("dca2Name"), fideId: getVal("dca2FideId") }
+          },
+          links: { brochure: getVal("brochureLink"), chessResults: getVal("chessResultsLink"), map: getVal("mapLink"), liveGames: getVal("liveGamesLink"), prizeList: getVal("prizeListLink") }
+        };
+
+        if (isEditMode && editDocFirebaseId) {
+          await updateDoc(doc(db, "stateselectiongjdb", editDocFirebaseId), data);
+          document.getElementById("overlayTitle").textContent = "Event Updated!";
+          document.getElementById("successMsg").textContent = "Event details updated successfully.";
+        } else {
+          await addDoc(collection(db, "stateselectiongjdb"), data);
+          document.getElementById("overlayTitle").textContent = "Event Registered!";
+          document.getElementById("successMsg").textContent = "Event saved and now live on State Selection GJ page.";
+        }
+        document.getElementById("successOverlay").classList.add("active");
+      } catch (err) {
+        showToast("❌ Error: " + err.message);
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove("loading");
+        btn.querySelector(".btn-text").textContent = isEditMode ? "Update Event" : "Submit Event";
+      }
+    });
+  </script>
+</body>
+</html>
