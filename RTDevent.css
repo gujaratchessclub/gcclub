@@ -393,3 +393,70 @@ body{font-family:'Lexend',sans-serif;background:var(--bg);min-height:100vh;color
 
 /* ─── HIDDEN CANVAS for share card ───────────────────────── */
 #shareCanvas{display:none;}
+
+/* ── WHATSAPP SHARE BUTTON ──────────────────────────────── */
+.share-wa-btn {
+  font-family: 'Lexend', sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%;
+  background: linear-gradient(135deg, #128C7E 0%, #25D366 60%, #075E54 100%);
+  color: #fff; border: none; border-radius: 12px;
+  padding: 13px 20px; font-size: 15px; font-weight: 700;
+  cursor: pointer; margin: 12px 0 6px;
+  transition: all 0.22s;
+  box-shadow: 0 4px 18px rgba(37,211,102,0.38);
+  letter-spacing: 0.2px;
+}
+.share-wa-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(37,211,102,0.48);
+}
+.share-wa-btn:active:not(:disabled) { transform: translateY(0); }
+.share-wa-btn:disabled { opacity: 0.72; cursor: not-allowed; }
+
+/* ── FALLBACK SHARE BOX ──────────────────────────────────── */
+.fallback-share-box {
+  background: #F0FFF4;
+  border: 1.5px solid #A5D6A7;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 8px;
+  animation: fadeSlideIn 0.3s ease;
+}
+@keyframes fadeSlideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+.fallback-preview {
+  width: 100%; border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  margin-bottom: 14px; display: block;
+  border: 2px solid #C8E6C9;
+}
+.fallback-steps { display: flex; flex-direction: column; gap: 8px; }
+.fallback-step  { font-size: 13px; color: #1B5E20; font-weight: 600; }
+.fallback-link-row {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff; border-radius: 8px;
+  padding: 8px 12px; border: 1.5px solid #A5D6A7;
+}
+.fallback-link-text {
+  font-size: 12px; color: #1565C0; flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;
+}
+.copy-link-btn {
+  font-family: 'Lexend', sans-serif;
+  background: #1565C0; color: #fff; border: none;
+  border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
+}
+.copy-link-btn:hover { background: #0D47A1; }
+
+.wa-open-btn {
+  font-family: 'Lexend', sans-serif;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #fff; border-radius: 8px; padding: 10px 16px;
+  font-size: 13px; font-weight: 700; text-decoration: none;
+  transition: all 0.2s; margin-top: 4px;
+  box-shadow: 0 3px 10px rgba(37,211,102,0.3);
+}
+.wa-open-btn:hover { opacity: 0.88; transform: translateY(-1px); }

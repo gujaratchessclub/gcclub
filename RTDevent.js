@@ -1,4 +1,4 @@
-// RTDevent.js — Enhanced with Chess Animations & Share Feature
+// RTDevent.js — Chess Vibes + WhatsApp Share (image + link in one tap)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore, collection, getDocs, deleteDoc, doc, query, where
@@ -13,65 +13,57 @@ const firebaseConfig = {
   appId: "1:527826897689:web:fb0439fff04a695a599388"
 };
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db  = getFirestore(app);
 const ADMIN_PIN = "270620";
 
 let allEvents = [];
 let currentFilteredEvents = [];
 let loggedInOrgID = null;
-let currentPopupDocId = null; // track which event popup is open
 
-// ── DATE ──────────────────────────────────────────────────
-const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const now = new Date();
+// ── DATE PILL ─────────────────────────────────────────────
+const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const now      = new Date();
 const todayStr = now.toISOString().split("T")[0];
 document.getElementById("datePill").textContent =
-  `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
 
-// ── CHESS CANVAS ANIMATION ────────────────────────────────
+// ── CHESS CANVAS (header ambient) ────────────────────────
 (function initChessCanvas() {
   const canvas = document.getElementById("chessCanvas");
   const header = canvas.parentElement;
-  const ctx = canvas.getContext("2d");
-
+  const ctx    = canvas.getContext("2d");
   const PIECES = ["♔","♕","♖","♗","♘","♙","♚","♛","♜","♝","♞","♟"];
 
   function resize() {
-    canvas.width = header.offsetWidth;
+    canvas.width  = header.offsetWidth;
     canvas.height = header.offsetHeight;
   }
   resize();
   window.addEventListener("resize", resize);
 
-  // Create floating piece objects
-  const pieces = Array.from({length: 18}, () => ({
+  const pieces = Array.from({length: 20}, () => ({
     piece: PIECES[Math.floor(Math.random() * PIECES.length)],
-    x: Math.random() * 100,      // percent
+    x: Math.random() * 100,
     y: Math.random() * 100,
     vx: (Math.random() - 0.5) * 0.06,
     vy: (Math.random() - 0.5) * 0.04,
-    size: 16 + Math.random() * 20,
-    opacity: 0.05 + Math.random() * 0.1,
+    size: 14 + Math.random() * 22,
+    opacity: 0.05 + Math.random() * 0.09,
     phase: Math.random() * Math.PI * 2,
-    speed: 0.4 + Math.random() * 0.6,
+    speed: 0.35 + Math.random() * 0.55,
   }));
 
   let frame = 0;
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     frame++;
-
     pieces.forEach(p => {
-      // Gentle drift
       p.x += p.vx * p.speed;
       p.y += p.vy * p.speed;
-      // Bounce off edges
       if (p.x < 0 || p.x > 100) p.vx *= -1;
       if (p.y < 0 || p.y > 100) p.vy *= -1;
-
-      // Breathe opacity
-      const breathe = Math.sin(frame * 0.012 + p.phase) * 0.03;
+      const breathe = Math.sin(frame * 0.012 + p.phase) * 0.025;
       ctx.globalAlpha = Math.max(0.02, p.opacity + breathe);
       ctx.font = `${p.size}px serif`;
       ctx.fillStyle = "#ffffff";
@@ -84,14 +76,14 @@ document.getElementById("datePill").textContent =
 })();
 
 // ── TOAST ─────────────────────────────────────────────────
-function showToast(msg, duration = 2600) {
+function showToast(msg, ms = 2800) {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), duration);
+  setTimeout(() => t.classList.remove("show"), ms);
 }
 
-// ── LOAD ──────────────────────────────────────────────────
+// ── LOAD EVENTS ───────────────────────────────────────────
 async function loadEvents() {
   try {
     const snap = await getDocs(collection(db, "RTDeventdb"));
@@ -101,39 +93,35 @@ async function loadEvents() {
     const orgNames = [...new Set(allEvents.map(e => e.organizerName).filter(Boolean))].sort();
     const orgFilter = document.getElementById("organizerFilter");
     orgNames.forEach(name => {
-      const opt = document.createElement("option");
-      opt.value = name; opt.textContent = name;
-      orgFilter.appendChild(opt);
+      const o = document.createElement("option");
+      o.value = name; o.textContent = name;
+      orgFilter.appendChild(o);
     });
 
     document.getElementById("loadingMsg").style.display = "none";
-    if (allEvents.length === 0) {
+    if (!allEvents.length) {
       document.getElementById("emptyMsg").style.display = "block";
       document.getElementById("countBadge").textContent = "0 Events";
       return;
     }
-    currentFilteredEvents = allEvents;
     renderTable(allEvents);
 
-    // Check for deep link: ?event=docId
-    const params = new URLSearchParams(window.location.search);
-    const deepId = params.get("event");
-    if (deepId) {
-      setTimeout(() => openPopup(deepId), 400);
-    }
+    const params  = new URLSearchParams(window.location.search);
+    const deepId  = params.get("event");
+    if (deepId) setTimeout(() => openPopup(deepId), 400);
   } catch (err) {
     document.getElementById("loadingMsg").innerHTML =
-      `<div style="text-align:center;padding:48px;color:#C62828;">⚠️ Error: ${err.message}</div>`;
+      `<div style="text-align:center;padding:48px;color:#C62828;">⚠️ ${err.message}</div>`;
   }
 }
 
-// ── RENDER ────────────────────────────────────────────────
+// ── RENDER TABLE ──────────────────────────────────────────
 function renderTable(data) {
   const tbody = document.getElementById("eventTableBody");
   const table = document.getElementById("eventTable");
   tbody.innerHTML = "";
 
-  if (data.length === 0) {
+  if (!data.length) {
     table.style.display = "none";
     document.getElementById("emptyMsg").style.display = "block";
     document.getElementById("countBadge").textContent = "0 Events";
@@ -147,17 +135,16 @@ function renderTable(data) {
   const total = data.length;
   data.forEach((ev, idx) => {
     const srNo = total - idx;
-    const isUpcoming = ev.startDate && ev.startDate >= todayStr;
+    const isUpcoming  = ev.startDate && ev.startDate >= todayStr;
     const formatClass = (ev.format || "").toLowerCase();
     const row = document.createElement("tr");
     if (isUpcoming) row.classList.add("upcoming-row");
-    // Staggered animation
-    row.style.animationDelay = `${idx * 35}ms`;
+    row.style.animationDelay = `${idx * 30}ms`;
 
-    const upcomingBadge = isUpcoming ? `<span class="upcoming-badge">UPCOMING</span>` : "";
+    const badge = isUpcoming ? `<span class="upcoming-badge">UPCOMING</span>` : "";
     row.innerHTML = `
       <td>${srNo}</td>
-      <td>${ev.startDateDisplay || ev.startDate || "—"}${upcomingBadge}</td>
+      <td>${ev.startDateDisplay || ev.startDate || "—"}${badge}</td>
       <td class="event-name-cell">${ev.eventName || "—"}</td>
       <td>${ev.organizerName || "—"}</td>
       <td>${ev.district || "—"}</td>
@@ -165,8 +152,7 @@ function renderTable(data) {
       <td>${ev.system || "—"}</td>
       <td><span class="format-pill ${formatClass}">${ev.format || "—"}</span></td>
       <td>${ev.timeControl || "—"}</td>
-      <td><button class="more-btn" onclick="openPopup('${ev._id}')">More Details</button></td>
-    `;
+      <td><button class="more-btn" onclick="openPopup('${ev._id}')">More Details</button></td>`;
     tbody.appendChild(row);
   });
   currentFilteredEvents = data;
@@ -176,40 +162,32 @@ function renderTable(data) {
 window.openPopup = function(docId) {
   const ev = allEvents.find(e => e._id === docId);
   if (!ev) return;
-  currentPopupDocId = docId;
 
   const fees = ev.entryFees || {};
-  const eb = fees.earlyBird || {}; const ac = fees.actual || {}; const le = fees.lateEntry || {};
+  const eb = fees.earlyBird || {}, ac = fees.actual || {}, le = fees.lateEntry || {};
   let feesHtml = "";
-  if (eb.fees && eb.fees !== "—") feesHtml += `<tr><td>Early Bird (till ${eb.date || "—"})</td><td>${eb.fees}</td></tr>`;
+  if (eb.fees && eb.fees !== "—") feesHtml += `<tr><td>Early Bird (till ${eb.date||"—"})</td><td>${eb.fees}</td></tr>`;
   if (ac.fees) feesHtml += `<tr><td>Actual Entry</td><td>${ac.fees}</td></tr>`;
-  if (le.fees && le.fees !== "—") feesHtml += `<tr><td>Late Entry (from ${le.date || "—"})</td><td>${le.fees}</td></tr>`;
+  if (le.fees && le.fees !== "—") feesHtml += `<tr><td>Late Entry (from ${le.date||"—"})</td><td>${le.fees}</td></tr>`;
   if (!feesHtml) feesHtml = `<tr><td colspan="2">To Be Announced</td></tr>`;
 
-  // Tournament Director
   const td = ev.tournamentDirector || {};
   let tdHtml = "";
   if (td.name) {
-    const fideLink = td.fideId
-      ? ` <a href="https://ratings.fide.com/profile/${td.fideId}/arbiter_organizer" target="_blank" style="color:var(--blue);font-size:11px;">(FIDE: ${td.fideId})</a>` : "";
+    const fl = td.fideId ? ` <a href="https://ratings.fide.com/profile/${td.fideId}/arbiter_organizer" target="_blank" style="color:var(--blue);font-size:11px;">(FIDE: ${td.fideId})</a>` : "";
     tdHtml = `<div class="popup-section-title">🎯 Tournament Director</div>
-    <table class="popup-detail-table"><tr><td>Name</td><td>${td.name}${fideLink}</td></tr></table>`;
+      <table class="popup-detail-table"><tr><td>Name</td><td>${td.name}${fl}</td></tr></table>`;
   }
 
-  // Arbiters
   const arb = ev.arbiters || {};
-  const ca = arb.chiefArbiter || {}; const d1 = arb.deputyCA1 || {}; const d2 = arb.deputyCA2 || {};
-  let arbRows = "";
+  const ca = arb.chiefArbiter || {}, d1 = arb.deputyCA1 || {}, d2 = arb.deputyCA2 || {};
   function arbRow(label, person) {
     if (!person.name) return "";
-    const fideLink = person.fideId
-      ? ` <a href="https://ratings.fide.com/profile/${person.fideId}/arbiter_organizer" target="_blank" style="color:var(--blue);font-size:11px;">(FIDE: ${person.fideId})</a>` : "";
-    return `<tr><td>${label}</td><td>${person.name}${fideLink}</td></tr>`;
+    const fl = person.fideId ? ` <a href="https://ratings.fide.com/profile/${person.fideId}/arbiter_organizer" target="_blank" style="color:var(--blue);font-size:11px;">(FIDE: ${person.fideId})</a>` : "";
+    return `<tr><td>${label}</td><td>${person.name}${fl}</td></tr>`;
   }
-  arbRows += arbRow("Chief Arbiter", ca);
-  arbRows += arbRow("Deputy Chief Arbiter 1", d1);
-  arbRows += arbRow("Deputy Chief Arbiter 2", d2);
-  const arbHtml = arbRows || `<tr><td colspan="2">Not Announced</td></tr>`;
+  const arbRows = (arbRow("Chief Arbiter", ca) + arbRow("Deputy Chief Arbiter 1", d1) + arbRow("Deputy Chief Arbiter 2", d2))
+    || `<tr><td colspan="2">Not Announced</td></tr>`;
 
   const links = ev.links || {};
   function linkBtn(label, icon, cls, url) {
@@ -217,17 +195,19 @@ window.openPopup = function(docId) {
     return `<a class="link-btn ${cls}" href="${url}" target="_blank" rel="noopener">${icon} ${label}</a>`;
   }
 
-  // Build deep link for this event
-  const deepLink = `${window.location.origin}${window.location.pathname}?event=${docId}`;
-
   document.getElementById("popupContent").innerHTML = `
     <div class="popup-event-name">${ev.eventName || "—"}</div>
     <div class="popup-organizer">🏆 ${ev.organizerName || "—"}</div>
 
-    <button class="share-event-btn" onclick="shareEvent('${docId}')">
-      <span class="share-icon">📤</span> Share Event
+    <button class="share-wa-btn" id="shareWaBtn" onclick="shareToWhatsApp('${docId}')">
+      <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <circle cx="16" cy="16" r="16" fill="#25D366"/>
+        <path d="M23.5 8.5A10.4 10.4 0 0 0 16 5.5C10.2 5.5 5.5 10.2 5.5 16c0 1.84.48 3.63 1.4 5.22L5.5 26.5l5.42-1.37A10.43 10.43 0 0 0 16 26.5c5.8 0 10.5-4.7 10.5-10.5 0-2.8-1.09-5.43-3-7.5z" fill="#25D366"/>
+        <path d="M16 24.5a8.42 8.42 0 0 1-4.28-1.16l-.31-.18-3.22.81.85-3.14-.2-.32A8.45 8.45 0 0 1 7.5 16c0-4.69 3.81-8.5 8.5-8.5S24.5 11.31 24.5 16 20.69 24.5 16 24.5zm4.65-6.33c-.25-.12-1.5-.74-1.73-.82-.23-.08-.4-.12-.57.12-.17.25-.65.82-.8.99-.14.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.25-.75-.67-1.25-1.5-1.4-1.75-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.44.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.57-1.37-.78-1.88-.2-.49-.41-.42-.57-.43h-.49c-.16 0-.44.06-.67.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.5-.61 1.71-1.2.21-.59.21-1.1.15-1.2-.06-.11-.23-.17-.48-.29z" fill="white"/>
+      </svg>
+      Share to WhatsApp
     </button>
-    <div class="share-result-area" id="shareResultArea"></div>
+    <div id="shareStatus" style="display:none;"></div>
 
     <div class="popup-section-title">🔗 Links</div>
     <div class="popup-links">
@@ -236,8 +216,8 @@ window.openPopup = function(docId) {
       ${linkBtn("Map Venue","📍","map",links.map)}
       ${linkBtn("Live Games","🎥","live",links.liveGames)}
       ${linkBtn("Prize List","🏆","prize",links.prizeList)}
-      ${linkBtn("Registration Link","📝","register",links.register)}
-      ${linkBtn("Register through GCC","♟","gcc",links.registerGcc)}
+      ${linkBtn("Registration","📝","register",links.register)}
+      ${linkBtn("Register via GCC","♟","gcc",links.registerGcc)}
       ${linkBtn("Event Photos","📸","photos",links.photographs)}
     </div>
 
@@ -246,7 +226,7 @@ window.openPopup = function(docId) {
       <tr><td>Start Date</td><td>${ev.startDateDisplay || "—"}</td></tr>
       <tr><td>End Date</td><td>${ev.endDateDisplay || "—"}</td></tr>
       <tr><td>District</td><td>${ev.district || "—"}</td></tr>
-      <tr><td>Venue</td><td>${ev.venue || "DECLARE SOON / UPDATE SOON"}</td></tr>
+      <tr><td>Venue</td><td>${ev.venue || "To Be Announced"}</td></tr>
       <tr><td>System</td><td>${ev.system || "—"}</td></tr>
       <tr><td>Format</td><td>${ev.format || "—"}</td></tr>
       <tr><td>Time Control</td><td>${ev.timeControl || "—"}</td></tr>
@@ -259,276 +239,477 @@ window.openPopup = function(docId) {
     ${tdHtml}
 
     <div class="popup-section-title">⚖️ Arbiters</div>
-    <table class="popup-detail-table">${arbHtml}</table>
+    <table class="popup-detail-table">${arbRows}</table>
   `;
+
   document.getElementById("popupOverlay").classList.add("active");
 };
 
-window.closePopup = () => {
-  document.getElementById("popupOverlay").classList.remove("active");
-  currentPopupDocId = null;
-};
+window.closePopup = () => document.getElementById("popupOverlay").classList.remove("active");
 document.getElementById("popupOverlay").addEventListener("click", e => {
   if (e.target.id === "popupOverlay") closePopup();
 });
 
-// ── SHARE EVENT ───────────────────────────────────────────
-window.shareEvent = async function(docId) {
+// ── SHARE TO WHATSAPP ─────────────────────────────────────
+// Strategy:
+//  1. Generate portrait HD share card on hidden canvas
+//  2. Try Web Share API (mobile) → shares image file + text (link) in one sheet → user picks WhatsApp
+//  3. Fallback: auto-download image + open WhatsApp with link as text
+window.shareToWhatsApp = async function(docId) {
   const ev = allEvents.find(e => e._id === docId);
   if (!ev) return;
 
-  const area = document.getElementById("shareResultArea");
-  area.classList.add("visible");
-  area.innerHTML = `<div class="share-generating"><div class="share-spinner"></div>Generating share image…</div>`;
+  const btn = document.getElementById("shareWaBtn");
+  const status = document.getElementById("shareStatus");
 
-  // Small delay for UX feel
-  await new Promise(r => setTimeout(r, 350));
+  // Show generating state
+  btn.disabled = true;
+  btn.innerHTML = `<span style="display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></span> Generating…`;
+  status.style.display = "none";
 
   try {
-    const dataURL = await generateShareCard(ev);
     const deepLink = `${window.location.origin}${window.location.pathname}?event=${docId}`;
+    const dataURL  = await generatePortraitCard(ev, deepLink);
 
-    area.innerHTML = `
-      <img src="${dataURL}" class="share-img-preview" alt="Event share card"/>
-      <div class="share-link-row">
-        <span class="share-link-text" title="${deepLink}">${deepLink}</span>
-        <button class="copy-link-btn" id="copyLinkBtn" onclick="copyDeepLink('${deepLink}')">Copy Link</button>
-      </div>
-      <div class="share-actions-row">
-        <a class="share-dl-btn" id="shareDownloadBtn" download="${(ev.eventName||'event').replace(/\s+/g,'-')}-GCC.jpg">
-          ⬇️ Download JPG
-        </a>
-        <button class="share-dl-btn" onclick="copyShareImage('${docId}')">📋 Copy Image</button>
-      </div>
-      <div style="font-size:11px;color:#78909C;margin-top:10px;line-height:1.5;">
-        💡 Save the image, then share on WhatsApp with this link as caption — viewers can tap it to open event details directly.
-      </div>
-    `;
+    // Build WhatsApp caption text
+    const caption =
+`♟ *${ev.eventName || "Chess Event"}*
+🏆 ${ev.organizerName || ""}
+📅 ${ev.startDateDisplay || ""} → ${ev.endDateDisplay || ""}
+📍 ${ev.district || ""} | ${ev.venue || "Venue TBA"}
+🎮 ${ev.format || ""} | ⏱ ${ev.timeControl || ""}
+🏆 Prize: ${ev.prizeFund || "TBA"}
 
-    // Set download href
-    document.getElementById("shareDownloadBtn").href = dataURL;
+👉 View Full Details:
+${deepLink}
 
-    // Scroll to share area
-    area.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  } catch (err) {
-    area.innerHTML = `<div style="color:#C62828;font-size:13px;padding:8px;">⚠️ Could not generate image: ${err.message}</div>`;
-  }
-};
+_Rated Events GJ — Gujarat Chess Club_`;
 
-window.copyDeepLink = function(url) {
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.getElementById("copyLinkBtn");
-    if (btn) { btn.textContent = "✓ Copied!"; btn.classList.add("copied"); }
-    showToast("✓ Link copied to clipboard!");
-    setTimeout(() => {
-      if (btn) { btn.textContent = "Copy Link"; btn.classList.remove("copied"); }
-    }, 2000);
-  }).catch(() => showToast("Could not copy — please copy manually."));
-};
-
-window.copyShareImage = async function(docId) {
-  const ev = allEvents.find(e => e._id === docId);
-  if (!ev) return;
-  try {
-    const dataURL = await generateShareCard(ev);
+    // Convert dataURL → Blob → File
     const blob = await (await fetch(dataURL)).blob();
-    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-    showToast("✓ Image copied to clipboard!");
-  } catch {
-    showToast("Copy image not supported — use Download instead.");
+    const file = new File([blob], `${(ev.eventName||"event").replace(/\s+/g,"-")}-GCC.jpg`, { type: "image/jpeg" });
+
+    // Try Web Share API (works on mobile Chrome/Safari — shows share sheet with WhatsApp option)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: ev.eventName || "Chess Event",
+        text: caption,
+      });
+      // Restore button
+      restoreShareBtn();
+      return;
+    }
+
+    // Fallback for desktop / unsupported browsers:
+    // 1) Show preview + download link in popup
+    // 2) Open WhatsApp web with caption pre-filled
+    showShareFallback(dataURL, caption, deepLink, file, ev);
+
+  } catch (err) {
+    if (err.name === "AbortError") {
+      // User cancelled share sheet — that's fine
+    } else {
+      status.style.display = "block";
+      status.innerHTML = `<div style="color:#C62828;font-size:12px;padding:6px 0;">⚠️ ${err.message}</div>`;
+    }
   }
+  restoreShareBtn();
 };
 
-// ── GENERATE SHARE CARD (HD Canvas → JPG) ─────────────────
-async function generateShareCard(ev) {
-  const W = 1080, H = 1080;
+function restoreShareBtn() {
+  const btn = document.getElementById("shareWaBtn");
+  if (!btn) return;
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><circle cx="16" cy="16" r="16" fill="#25D366"/><path d="M23.5 8.5A10.4 10.4 0 0 0 16 5.5C10.2 5.5 5.5 10.2 5.5 16c0 1.84.48 3.63 1.4 5.22L5.5 26.5l5.42-1.37A10.43 10.43 0 0 0 16 26.5c5.8 0 10.5-4.7 10.5-10.5 0-2.8-1.09-5.43-3-7.5z" fill="#25D366"/><path d="M16 24.5a8.42 8.42 0 0 1-4.28-1.16l-.31-.18-3.22.81.85-3.14-.2-.32A8.45 8.45 0 0 1 7.5 16c0-4.69 3.81-8.5 8.5-8.5S24.5 11.31 24.5 16 20.69 24.5 16 24.5zm4.65-6.33c-.25-.12-1.5-.74-1.73-.82-.23-.08-.4-.12-.57.12-.17.25-.65.82-.8.99-.14.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.25-.75-.67-1.25-1.5-1.4-1.75-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.44.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.57-1.37-.78-1.88-.2-.49-.41-.42-.57-.43h-.49c-.16 0-.44.06-.67.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.57.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.5-.61 1.71-1.2.21-.59.21-1.1.15-1.2-.06-.11-.23-.17-.48-.29z" fill="white"/></svg> Share to WhatsApp`;
+}
+
+function showShareFallback(dataURL, caption, deepLink, file, ev) {
+  const status = document.getElementById("shareStatus");
+  const waUrl  = `https://wa.me/?text=${encodeURIComponent(caption)}`;
+
+  // Auto-trigger download
+  const a = document.createElement("a");
+  a.href = dataURL;
+  a.download = `${(ev.eventName||"event").replace(/\s+/g,"-")}-GCC.jpg`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  status.style.display = "block";
+  status.innerHTML = `
+    <div class="fallback-share-box">
+      <img src="${dataURL}" class="fallback-preview" alt="Share card"/>
+      <div class="fallback-steps">
+        <div class="fallback-step">✅ Image saved to your Downloads</div>
+        <div class="fallback-step">📋 Open WhatsApp, attach image + paste the link:</div>
+        <div class="fallback-link-row">
+          <span class="fallback-link-text">${deepLink}</span>
+          <button class="copy-link-btn" onclick="copyText('${deepLink}',this)">Copy</button>
+        </div>
+        <a class="wa-open-btn" href="${waUrl}" target="_blank" rel="noopener">
+          Open WhatsApp Web →
+        </a>
+      </div>
+    </div>`;
+}
+
+window.copyText = function(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "✓ Copied";
+    btn.style.background = "#43A047";
+    setTimeout(() => { btn.textContent = "Copy"; btn.style.background = ""; }, 2000);
+    showToast("✓ Link copied!");
+  });
+};
+
+// ── PORTRAIT SHARE CARD GENERATOR ────────────────────────
+// Tall portrait card that mirrors EVERY section of the popup:
+// Header, Event Name, Organizer, Details, Fees, Arbiters, Links, Footer
+async function generatePortraitCard(ev, deepLink) {
+  const W = 1080;
   const canvas = document.getElementById("shareCanvas");
   canvas.width = W;
-  canvas.height = H;
+  // We'll calculate height dynamically and resize
+
+  // First pass: figure out height needed
+  // We'll draw on a very tall canvas, then crop
+  const TALL = 2600;
+  canvas.height = TALL;
   const c = canvas.getContext("2d");
 
-  // ── Background: chess board pattern + gradient ──
-  // Dark squares chess pattern
-  const sq = 90; // 12 squares across
-  for (let row = 0; row < H / sq; row++) {
-    for (let col = 0; col < W / sq; col++) {
+  // ── BACKGROUND: chess board + gradient ──
+  const SQ = 90;
+  for (let row = 0; row < TALL / SQ; row++) {
+    for (let col = 0; col < W / SQ; col++) {
       c.fillStyle = (row + col) % 2 === 0 ? "#0A2472" : "#0D47A1";
-      c.fillRect(col * sq, row * sq, sq, sq);
+      c.fillRect(col * SQ, row * SQ, SQ, SQ);
     }
   }
   // Gradient overlay
-  const grad = c.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, "rgba(10,36,114,0.88)");
-  grad.addColorStop(0.5, "rgba(13,71,161,0.82)");
-  grad.addColorStop(1, "rgba(21,101,192,0.88)");
-  c.fillStyle = grad;
-  c.fillRect(0, 0, W, H);
+  const bgGrad = c.createLinearGradient(0, 0, 0, TALL);
+  bgGrad.addColorStop(0,   "rgba(10,36,114,0.93)");
+  bgGrad.addColorStop(0.35,"rgba(13,71,161,0.88)");
+  bgGrad.addColorStop(0.7, "rgba(21,101,192,0.85)");
+  bgGrad.addColorStop(1,   "rgba(10,36,114,0.93)");
+  c.fillStyle = bgGrad;
+  c.fillRect(0, 0, W, TALL);
 
-  // ── Decorative chess pieces (large, faint) ──
-  c.globalAlpha = 0.06;
-  c.fillStyle = "#ffffff";
+  // Faint big chess pieces
+  c.globalAlpha = 0.055;
+  c.fillStyle = "#fff";
   const bgPieces = [
-    {p:"♔", x:60,  y:180, s:180},
-    {p:"♛", x:780, y:80,  s:160},
-    {p:"♜", x:20,  y:700, s:140},
-    {p:"♝", x:820, y:780, s:160},
-    {p:"♞", x:500, y:950, s:150},
-    {p:"♟", x:900, y:400, s:130},
+    {p:"♔",x:30, y:220,s:200},{p:"♛",x:780,y:90, s:180},
+    {p:"♜",x:20, y:800,s:160},{p:"♝",x:840,y:900,s:160},
+    {p:"♞",x:460,y:2200,s:170},{p:"♟",x:900,y:1600,s:150},
+    {p:"♕",x:50, y:1400,s:140},{p:"♖",x:820,y:2000,s:130},
   ];
-  bgPieces.forEach(({p, x, y, s}) => {
+  bgPieces.forEach(({p,x,y,s}) => {
     c.font = `${s}px serif`;
     c.fillText(p, x, y);
   });
   c.globalAlpha = 1;
 
-  // ── Top accent bar ──
-  const accentGrad = c.createLinearGradient(0, 0, W, 0);
-  accentGrad.addColorStop(0, "#FFB300");
-  accentGrad.addColorStop(0.5, "#FFC107");
-  accentGrad.addColorStop(1, "#FF8F00");
-  c.fillStyle = accentGrad;
-  c.fillRect(0, 0, W, 10);
+  // Gold top bar
+  const gold = c.createLinearGradient(0,0,W,0);
+  gold.addColorStop(0,"#FF8F00"); gold.addColorStop(0.5,"#FFC107"); gold.addColorStop(1,"#FF8F00");
+  c.fillStyle = gold; c.fillRect(0, 0, W, 12);
 
-  // ── GCC Logo & Header ──
-  c.fillStyle = "#ffffff";
-  c.font = "bold 62px serif";
+  // ── HEADER SECTION ──
+  let y = 80;
+
+  // GCC Logo
   c.textAlign = "center";
-  c.fillText("♟", W/2, 120);
+  c.font = "bold 72px serif";
+  c.fillStyle = "#fff";
+  c.shadowColor = "rgba(0,0,0,0.5)"; c.shadowBlur = 16;
+  c.fillText("♟", W/2, y); y += 16;
+  c.shadowBlur = 0;
 
-  c.font = "800 38px Lexend, Arial, sans-serif";
-  c.fillStyle = "#ffffff";
-  c.fillText("Gujarat Chess Club", W/2, 175);
+  c.font = "800 36px Arial, sans-serif";
+  c.fillStyle = "#fff";
+  c.fillText("Gujarat Chess Club", W/2, y + 44); y += 60;
 
-  c.font = "500 22px Lexend, Arial, sans-serif";
-  c.fillStyle = "rgba(255,255,255,0.7)";
-  c.fillText("Rated Events GJ", W/2, 212);
+  c.font = "400 22px Arial, sans-serif";
+  c.fillStyle = "rgba(255,255,255,0.72)";
+  c.fillText("Rated Events GJ", W/2, y + 26); y += 46;
 
-  // ── Divider ──
-  c.strokeStyle = "rgba(255,179,0,0.6)";
-  c.lineWidth = 2;
-  c.beginPath(); c.moveTo(60, 240); c.lineTo(W-60, 240); c.stroke();
+  // Divider
+  c.strokeStyle = "rgba(255,179,0,0.7)"; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(60, y+10); c.lineTo(W-60, y+10); c.stroke();
+  y += 36;
 
-  // ── White card area ──
-  const cardX = 48, cardY = 264, cardW = W-96, cardH = 680;
-  c.fillStyle = "rgba(255,255,255,0.97)";
-  roundRect(c, cardX, cardY, cardW, cardH, 24);
-  c.fill();
-  // Card top accent
-  c.fillStyle = "#1565C0";
-  roundRect(c, cardX, cardY, cardW, 8, {tl:24, tr:24, bl:0, br:0});
-  c.fill();
+  // ── WHITE CARD ──
+  const PAD  = 48;
+  const cardX = PAD;
+  const cardW  = W - PAD*2;
+  const cardStartY = y;
 
-  // ── Event Name ──
-  c.fillStyle = "#1A237E";
+  // We draw onto a temp to know height, then draw card bg after
+  // For now draw content, track y, then draw card bg
+
+  // ── EVENT NAME ──
+  y += 28;
   c.textAlign = "left";
-  const eventName = ev.eventName || "—";
-  const fontSize = eventName.length > 42 ? 30 : eventName.length > 28 ? 34 : 40;
-  c.font = `800 ${fontSize}px Lexend, Arial, sans-serif`;
-  wrapText(c, eventName, cardX+36, cardY+82, cardW-72, fontSize+10);
+  const evName = ev.eventName || "—";
+  const nameFontSize = evName.length > 50 ? 28 : evName.length > 34 ? 33 : 38;
+  c.font = `800 ${nameFontSize}px Arial, sans-serif`;
+  c.fillStyle = "#1A237E";
+  y = drawWrappedText(c, evName, cardX+28, y, cardW-56, nameFontSize+10, "#1A237E", true);
+  y += 8;
 
-  // ── Organizer ──
-  c.font = "500 24px Lexend, Arial, sans-serif";
+  // Organizer
+  c.font = "600 24px Arial, sans-serif";
   c.fillStyle = "#1565C0";
-  c.fillText(`🏆 ${ev.organizerName || "—"}`, cardX+36, cardY+160);
+  c.fillText(`🏆 ${ev.organizerName || "—"}`, cardX+28, y + 28); y += 52;
 
-  // ── Info rows ──
-  const infoRows = [
-    ["📅 Dates",   `${ev.startDateDisplay || "—"}  →  ${ev.endDateDisplay || "—"}`],
-    ["📍 District", ev.district || "—"],
-    ["🏟 Venue",   ev.venue || "To Be Announced"],
-    ["🎮 Format",  ev.format || "—"],
-    ["⏱ Time",    ev.timeControl || "—"],
-    ["♟ System",  ev.system || "—"],
-    ["🏆 Prize",   ev.prizeFund || "To Be Announced"],
+  // Gold divider under name block
+  c.fillStyle = "#FFB300";
+  c.fillRect(cardX+28, y, 80, 4); y += 20;
+
+  // ── DETAILS SECTION ──
+  y = drawSectionHeader(c, "📋 Event Details", cardX, y, cardW);
+  const fees = ev.entryFees || {};
+  const eb = fees.earlyBird || {}, ac = fees.actual || {}, le = fees.lateEntry || {};
+
+  const detailRows = [
+    ["📅 Start Date",   ev.startDateDisplay || "—"],
+    ["📅 End Date",     ev.endDateDisplay   || "—"],
+    ["📍 District",     ev.district         || "—"],
+    ["🏟 Venue",        ev.venue            || "To Be Announced"],
+    ["♟ System",       ev.system           || "—"],
+    ["🎮 Format",       ev.format           || "—"],
+    ["⏱ Time Control", ev.timeControl      || "—"],
+    ["🏆 Prize Fund",   ev.prizeFund        || "To Be Announced"],
   ];
+  y = drawInfoTable(c, detailRows, cardX+28, y, cardW-56);
 
-  let iy = cardY + 210;
-  infoRows.forEach(([label, val], i) => {
-    // Alternating row bg
-    if (i % 2 === 0) {
-      c.fillStyle = "#F0F4FF";
-      c.fillRect(cardX+24, iy-22, cardW-48, 44);
+  // ── FEES ──
+  y = drawSectionHeader(c, "💰 Entry Fees", cardX, y + 14, cardW);
+  const feeRows = [];
+  if (eb.fees && eb.fees !== "—") feeRows.push([`Early Bird (till ${eb.date||"—"})`, eb.fees]);
+  if (ac.fees) feeRows.push(["Actual Entry", ac.fees]);
+  if (le.fees && le.fees !== "—") feeRows.push([`Late Entry (from ${le.date||"—"})`, le.fees]);
+  if (!feeRows.length) feeRows.push(["Entry Fees", "To Be Announced"]);
+  y = drawInfoTable(c, feeRows, cardX+28, y, cardW-56);
+
+  // ── TOURNAMENT DIRECTOR ──
+  const td = ev.tournamentDirector || {};
+  if (td.name) {
+    y = drawSectionHeader(c, "🎯 Tournament Director", cardX, y + 14, cardW);
+    y = drawInfoTable(c, [["Name", td.name + (td.fideId ? ` (FIDE: ${td.fideId})` : "")]], cardX+28, y, cardW-56);
+  }
+
+  // ── ARBITERS ──
+  const arb = ev.arbiters || {};
+  const ca = arb.chiefArbiter || {}, d1 = arb.deputyCA1 || {}, d2 = arb.deputyCA2 || {};
+  const arbRows2 = [];
+  if (ca.name) arbRows2.push(["Chief Arbiter", ca.name + (ca.fideId ? ` (FIDE: ${ca.fideId})` : "")]);
+  if (d1.name) arbRows2.push(["Deputy CA 1",  d1.name + (d1.fideId ? ` (FIDE: ${d1.fideId})` : "")]);
+  if (d2.name) arbRows2.push(["Deputy CA 2",  d2.name + (d2.fideId ? ` (FIDE: ${d2.fideId})` : "")]);
+  if (!arbRows2.length) arbRows2.push(["Arbiters", "Not Announced"]);
+  y = drawSectionHeader(c, "⚖️ Arbiters", cardX, y + 14, cardW);
+  y = drawInfoTable(c, arbRows2, cardX+28, y, cardW-56);
+
+  // ── LINKS AVAILABLE ──
+  const links = ev.links || {};
+  const availableLinks = [
+    ["📄 Brochure", links.brochure],
+    ["♟ Chess Results", links.chessResults],
+    ["📍 Map / Venue", links.map],
+    ["🎥 Live Games", links.liveGames],
+    ["🏆 Prize List", links.prizeList],
+    ["📝 Registration", links.register],
+    ["♟ Register via GCC", links.registerGcc],
+    ["📸 Event Photos", links.photographs],
+  ].filter(([,url]) => url);
+
+  if (availableLinks.length) {
+    y = drawSectionHeader(c, "🔗 Available Links", cardX, y + 14, cardW);
+    y += 6;
+    availableLinks.forEach(([label]) => {
+      c.font = "500 18px Arial, sans-serif";
+      c.fillStyle = "#1565C0";
+      c.textAlign = "left";
+      c.fillText(`• ${label}`, cardX+36, y + 20);
+      y += 32;
+    });
+  }
+
+  // ── DEEP LINK FOOTER ──
+  y += 24;
+  // Link box
+  const linkBoxH = 72;
+  c.fillStyle = "rgba(21,101,192,0.08)";
+  roundRect(c, cardX+20, y, cardW-40, linkBoxH, 12); c.fill();
+  c.strokeStyle = "rgba(21,101,192,0.3)"; c.lineWidth = 1.5;
+  roundRect(c, cardX+20, y, cardW-40, linkBoxH, 12); c.stroke();
+
+  c.font = "600 17px Arial, sans-serif";
+  c.fillStyle = "#1A237E"; c.textAlign = "center";
+  c.fillText("👆 Tap to view full event details:", W/2, y + 26);
+  c.font = "700 18px Arial, sans-serif";
+  c.fillStyle = "#1565C0";
+  // Truncate link for display
+  const displayLink = deepLink.length > 55 ? deepLink.slice(0,52)+"…" : deepLink;
+  c.fillText(displayLink, W/2, y + 52);
+  y += linkBoxH + 20;
+
+  // ── CARD BOTTOM ──
+  c.font = "500 17px Arial, sans-serif";
+  c.fillStyle = "rgba(255,255,255,0.65)";
+  c.textAlign = "center";
+  c.fillText("ratedeventsgj.web.app  •  Gujarat Chess Club", W/2, y + 24);
+  y += 48;
+
+  // Gold bottom bar
+  c.fillStyle = gold;
+  c.fillRect(0, y, W, 12);
+  const finalH = y + 12;
+
+  // ── NOW draw the white card BG behind everything ──
+  // We need to redraw: background first, then card, then text
+  // Easiest: use a second canvas, composite
+  const finalCanvas = document.createElement("canvas");
+  finalCanvas.width = W;
+  finalCanvas.height = finalH;
+  const fc = finalCanvas.getContext("2d");
+
+  // 1) Chess BG
+  for (let row = 0; row < finalH / SQ; row++) {
+    for (let col = 0; col < W / SQ; col++) {
+      fc.fillStyle = (row + col) % 2 === 0 ? "#0A2472" : "#0D47A1";
+      fc.fillRect(col * SQ, row * SQ, SQ, SQ);
     }
-    c.font = "700 18px Lexend, Arial, sans-serif";
+  }
+  const bgGrad2 = fc.createLinearGradient(0, 0, 0, finalH);
+  bgGrad2.addColorStop(0,   "rgba(10,36,114,0.93)");
+  bgGrad2.addColorStop(0.5, "rgba(13,71,161,0.88)");
+  bgGrad2.addColorStop(1,   "rgba(10,36,114,0.93)");
+  fc.fillStyle = bgGrad2; fc.fillRect(0, 0, W, finalH);
+
+  // Faint pieces
+  fc.globalAlpha = 0.055; fc.fillStyle = "#fff";
+  bgPieces.forEach(({p,x,y:py,s}) => { fc.font=`${s}px serif`; fc.fillText(p,x,py); });
+  fc.globalAlpha = 1;
+
+  // 2) White card
+  const cardH = y - cardStartY + 12;
+  fc.fillStyle = "rgba(255,255,255,0.97)";
+  roundRect(fc, cardX, cardStartY, cardW, cardH, 20); fc.fill();
+  fc.fillStyle = "#1565C0";
+  roundRect(fc, cardX, cardStartY, cardW, 10, {tl:20,tr:20,bl:0,br:0}); fc.fill();
+  // Subtle card shadow
+  fc.shadowColor = "rgba(0,0,0,0.25)"; fc.shadowBlur = 30; fc.shadowOffsetY = 8;
+  fc.fillStyle = "transparent";
+  roundRect(fc, cardX, cardStartY, cardW, cardH, 20); fc.fill();
+  fc.shadowBlur = 0; fc.shadowOffsetY = 0;
+
+  // 3) Copy all drawn content from first canvas
+  fc.drawImage(canvas, 0, 0, W, finalH, 0, 0, W, finalH);
+
+  // 4) Gold bars (on top)
+  const gold2 = fc.createLinearGradient(0,0,W,0);
+  gold2.addColorStop(0,"#FF8F00"); gold2.addColorStop(0.5,"#FFC107"); gold2.addColorStop(1,"#FF8F00");
+  fc.fillStyle = gold2;
+  fc.fillRect(0, 0, W, 12);
+  fc.fillRect(0, finalH-12, W, 12);
+
+  return finalCanvas.toDataURL("image/jpeg", 0.96);
+}
+
+// ── Canvas Drawing Helpers ────────────────────────────────
+function drawSectionHeader(c, title, x, y, w) {
+  y += 10;
+  c.fillStyle = "#E3F2FD";
+  c.fillRect(x+20, y, w-40, 38);
+  c.fillStyle = "#0D47A1";
+  c.font = "700 19px Arial, sans-serif";
+  c.textAlign = "left";
+  c.fillText(title, x+32, y + 26);
+  return y + 48;
+}
+
+function drawInfoTable(c, rows, x, y, w) {
+  const ROW_H = 42;
+  rows.forEach(([ label, val ], i) => {
+    // Alternating row
+    c.fillStyle = i % 2 === 0 ? "#F8FBFF" : "#EEF4FF";
+    c.fillRect(x, y, w, ROW_H);
+
+    c.font = "700 17px Arial, sans-serif";
     c.fillStyle = "#1565C0";
-    c.fillText(label, cardX+36, iy+6);
-    c.font = "500 18px Lexend, Arial, sans-serif";
+    c.textAlign = "left";
+    const labelW = Math.min(c.measureText(label).width + 16, w * 0.42);
+    c.fillText(label, x + 10, y + 27);
+
+    c.font = "500 17px Arial, sans-serif";
     c.fillStyle = "#37474F";
     c.textAlign = "right";
-    const truncVal = val.length > 38 ? val.substring(0, 36) + "…" : val;
-    c.fillText(truncVal, cardX+cardW-36, iy+6);
+    // Wrap long values
+    const maxValW = w - labelW - 20;
+    let displayVal = String(val || "—");
+    if (c.measureText(displayVal).width > maxValW) {
+      displayVal = displayVal.substring(0, Math.floor(displayVal.length * maxValW / c.measureText(displayVal).width) - 1) + "…";
+    }
+    c.fillText(displayVal, x + w - 10, y + 27);
     c.textAlign = "left";
-    iy += 46;
+
+    y += ROW_H;
+    // Bottom border
+    c.strokeStyle = "#DDEEFF"; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x+w, y); c.stroke();
   });
-
-  // ── Bottom accent in card ──
-  c.fillStyle = "#1565C0";
-  c.font = "600 19px Lexend, Arial, sans-serif";
-  c.textAlign = "center";
-  c.fillStyle = "#1A237E";
-  c.fillText("ratedeventsgj.web.app", W/2, cardY+cardH-30);
-
-  // ── Bottom accent bar ──
-  c.fillStyle = accentGrad;
-  c.fillRect(0, H-10, W, 10);
-
-  // Convert to JPG
-  return canvas.toDataURL("image/jpeg", 0.96);
+  return y + 4;
 }
 
-// Canvas helpers
-function roundRect(ctx, x, y, w, h, r) {
-  if (typeof r === "number") r = {tl:r, tr:r, bl:r, br:r};
-  ctx.beginPath();
-  ctx.moveTo(x + r.tl, y);
-  ctx.lineTo(x + w - r.tr, y);
-  ctx.quadraticCurveTo(x+w, y, x+w, y+r.tr);
-  ctx.lineTo(x+w, y+h-r.br);
-  ctx.quadraticCurveTo(x+w, y+h, x+w-r.br, y+h);
-  ctx.lineTo(x+r.bl, y+h);
-  ctx.quadraticCurveTo(x, y+h, x, y+h-r.bl);
-  ctx.lineTo(x, y+r.tl);
-  ctx.quadraticCurveTo(x, y, x+r.tl, y);
-  ctx.closePath();
-}
-function wrapText(ctx, text, x, y, maxW, lineH) {
+function drawWrappedText(c, text, x, y, maxW, lineH, color, bold) {
+  c.fillStyle = color;
   const words = text.split(" ");
   let line = "";
-  let ly = y;
   words.forEach(word => {
     const test = line + word + " ";
-    if (ctx.measureText(test).width > maxW && line) {
-      ctx.fillText(line.trim(), x, ly);
-      line = word + " ";
-      ly += lineH;
-    } else { line = test; }
+    if (c.measureText(test).width > maxW && line) {
+      c.fillText(line.trim(), x, y); y += lineH; line = word + " ";
+    } else line = test;
   });
-  ctx.fillText(line.trim(), x, ly);
+  c.fillText(line.trim(), x, y);
+  return y + lineH;
 }
 
-// ── SEARCH & FILTER ───────────────────────────────────────
-function applyFilters() {
-  const search = document.getElementById("searchInput").value.toLowerCase().trim();
-  const district = document.getElementById("districtFilter").value;
-  const format = document.getElementById("formatFilter").value;
-  const organizer = document.getElementById("organizerFilter").value;
-  const filtered = allEvents.filter(ev => {
-    return (!district || ev.district === district) &&
-           (!format || ev.format === format) &&
-           (!organizer || ev.organizerName === organizer) &&
-           (!search || (ev.eventName||"").toLowerCase().includes(search) ||
-                       (ev.organizerName||"").toLowerCase().includes(search) ||
-                       (ev.district||"").toLowerCase().includes(search));
-  });
-  renderTable(filtered);
+function roundRect(ctx, x, y, w, h, r) {
+  if (typeof r === "number") r = {tl:r,tr:r,bl:r,br:r};
+  ctx.beginPath();
+  ctx.moveTo(x+r.tl, y);
+  ctx.lineTo(x+w-r.tr, y);     ctx.quadraticCurveTo(x+w,y,   x+w,y+r.tr);
+  ctx.lineTo(x+w, y+h-r.br);   ctx.quadraticCurveTo(x+w,y+h, x+w-r.br,y+h);
+  ctx.lineTo(x+r.bl, y+h);     ctx.quadraticCurveTo(x,y+h,   x,y+h-r.bl);
+  ctx.lineTo(x, y+r.tl);       ctx.quadraticCurveTo(x,y,     x+r.tl,y);
+  ctx.closePath();
 }
-["searchInput","districtFilter","formatFilter","organizerFilter"].forEach(id => {
+
+// ── SEARCH / FILTER ───────────────────────────────────────
+function applyFilters() {
+  const s = document.getElementById("searchInput").value.toLowerCase().trim();
+  const d = document.getElementById("districtFilter").value;
+  const f = document.getElementById("formatFilter").value;
+  const o = document.getElementById("organizerFilter").value;
+  renderTable(allEvents.filter(ev =>
+    (!d || ev.district === d) &&
+    (!f || ev.format === f) &&
+    (!o || ev.organizerName === o) &&
+    (!s || (ev.eventName||"").toLowerCase().includes(s) ||
+           (ev.organizerName||"").toLowerCase().includes(s) ||
+           (ev.district||"").toLowerCase().includes(s))
+  ));
+}
+["searchInput","districtFilter","formatFilter","organizerFilter"].forEach(id =>
   document.getElementById(id).addEventListener(
     id === "searchInput" ? "input" : "change", applyFilters
-  );
-});
+  )
+);
 
-// ── MODAL HELPERS ─────────────────────────────────────────
+// ── MODALS ────────────────────────────────────────────────
 window.openAdminLogin = () => {
   document.getElementById("adminPinInput").value = "";
   document.getElementById("adminPinError").textContent = "";
@@ -541,111 +722,88 @@ window.openOrgLogin = () => {
   document.getElementById("orgLoginModal").classList.add("active");
 };
 window.closeModal = id => document.getElementById(id).classList.remove("active");
-["adminLoginModal","orgLoginModal","eventListModal"].forEach(id => {
-  document.getElementById(id).addEventListener("click", e => {
-    if (e.target.id === id) closeModal(id);
-  });
-});
+["adminLoginModal","orgLoginModal","eventListModal"].forEach(id =>
+  document.getElementById(id).addEventListener("click", e => { if (e.target.id===id) closeModal(id); })
+);
 
-// ── ADMIN PIN ─────────────────────────────────────────────
 window.verifyAdminPin = () => {
   const pin = document.getElementById("adminPinInput").value.trim();
   if (pin === ADMIN_PIN) {
     closeModal("adminLoginModal");
-    showAdminEventList();
+    document.getElementById("eventListTitle").textContent = "All Events (Admin)";
+    document.getElementById("eventListSubtitle").textContent = "Edit or delete any event.";
+    buildEventList(allEvents);
+    document.getElementById("eventListModal").classList.add("active");
   } else {
     document.getElementById("adminPinError").textContent = "Wrong PIN.";
     document.getElementById("adminPinInput").value = "";
   }
 };
 
-function showAdminEventList() {
-  document.getElementById("eventListTitle").textContent = "All Events (Admin)";
-  document.getElementById("eventListSubtitle").textContent = "Edit or delete any event.";
-  buildEventList(allEvents, true);
-  document.getElementById("eventListModal").classList.add("active");
-}
-
-// ── ORGANIZER LOGIN ───────────────────────────────────────
 window.verifyOrgLogin = async () => {
   const orgID = document.getElementById("orgLoginID").value.trim();
-  const pin = document.getElementById("orgLoginPin").value.trim();
+  const pin   = document.getElementById("orgLoginPin").value.trim();
   const errEl = document.getElementById("orgPinError");
   errEl.textContent = "";
   if (!orgID) { errEl.textContent = "Enter your Organizer ID."; return; }
-  if (!pin) { errEl.textContent = "Enter your PIN."; return; }
+  if (!pin)   { errEl.textContent = "Enter your PIN."; return; }
   try {
-    const q = query(collection(db, "organizerdb"), where("organizerID", "==", orgID));
+    const q    = query(collection(db, "organizerdb"), where("organizerID","==",orgID));
     const snap = await getDocs(q);
     if (snap.empty) { errEl.textContent = "Organizer ID not found."; return; }
     const orgData = snap.docs[0].data();
     if (orgData.pin !== pin) { errEl.textContent = "Wrong PIN."; return; }
     loggedInOrgID = orgID;
     closeModal("orgLoginModal");
-    const myEvents = allEvents.filter(e => e.organizerID === orgID || e.organizerName === orgData.organizerName);
+    const myEvents = allEvents.filter(e => e.organizerID===orgID || e.organizerName===orgData.organizerName);
     document.getElementById("eventListTitle").textContent = "My Events";
     document.getElementById("eventListSubtitle").textContent =
       `${orgData.organizerName} — ${myEvents.length} event(s)`;
-    buildEventList(myEvents, false);
+    buildEventList(myEvents);
     document.getElementById("eventListModal").classList.add("active");
-  } catch (err) { errEl.textContent = "Error: " + err.message; }
+  } catch(err) { errEl.textContent = "Error: " + err.message; }
 };
 
-// ── BUILD EVENT LIST ──────────────────────────────────────
-function buildEventList(events, isAdmin) {
-  const container = document.getElementById("eventListContent");
-  container.innerHTML = "";
-  if (events.length === 0) {
-    container.innerHTML = `<div style="text-align:center;color:#78909C;padding:24px;">No events found.</div>`;
+function buildEventList(events) {
+  const cont = document.getElementById("eventListContent");
+  cont.innerHTML = "";
+  if (!events.length) {
+    cont.innerHTML = `<div style="text-align:center;color:#78909C;padding:24px;">No events found.</div>`;
     return;
   }
   events.forEach(ev => {
     const isPast = ev.endDate && ev.endDate < todayStr;
-    const item = document.createElement("div");
+    const item   = document.createElement("div");
     item.className = "event-list-item";
     item.innerHTML = `
       <div>
-        <div class="event-list-name">${ev.eventName || "—"}</div>
-        <div class="event-list-meta">📅 ${ev.startDateDisplay || "—"} → ${ev.endDateDisplay || "—"} &nbsp;|&nbsp; 📍 ${ev.district || "—"}</div>
+        <div class="event-list-name">${ev.eventName||"—"}</div>
+        <div class="event-list-meta">📅 ${ev.startDateDisplay||"—"} → ${ev.endDateDisplay||"—"} &nbsp;|&nbsp; 📍 ${ev.district||"—"}</div>
       </div>
       <div class="event-list-actions">
         <button class="edit-btn" onclick="editEvent('${ev._id}')">✏️ Edit</button>
-        <button class="delete-btn" ${isPast ? "disabled title='Cannot delete past events'" : ""} onclick="deleteEvent('${ev._id}', '${(ev.eventName||"").replace(/'/g,"\\'")}')">🗑 Delete</button>
+        <button class="delete-btn" ${isPast?"disabled title='Cannot delete past events'":""} onclick="deleteEvent('${ev._id}','${(ev.eventName||"").replace(/'/g,"\\'")}')">🗑 Delete</button>
       </div>`;
-    container.appendChild(item);
+    cont.appendChild(item);
   });
 }
 
-// ── EDIT EVENT ────────────────────────────────────────────
-window.editEvent = function(docId) {
-  closeModal("eventListModal");
-  window.location.href = `RTDeventform.html?editDocId=${docId}`;
-};
+window.editEvent = docId => { closeModal("eventListModal"); window.location.href=`RTDeventform.html?editDocId=${docId}`; };
 
-// ── DELETE EVENT ──────────────────────────────────────────
 window.deleteEvent = async function(docId, eventName) {
   if (!confirm(`Delete "${eventName}"? This cannot be undone.`)) return;
   try {
-    await deleteDoc(doc(db, "RTDeventdb", docId));
+    await deleteDoc(doc(db,"RTDeventdb",docId));
     allEvents = allEvents.filter(e => e._id !== docId);
-    showToast("✅ Event deleted successfully.");
+    showToast("✅ Event deleted.");
     closeModal("eventListModal");
     renderTable(allEvents);
-  } catch (err) { alert("Error: " + err.message); }
+  } catch(err) { alert("Error: "+err.message); }
 };
 
-// Digits only
-document.getElementById("adminPinInput").addEventListener("input", function() {
-  this.value = this.value.replace(/\D/g,"");
-});
-document.getElementById("orgLoginPin").addEventListener("input", function() {
-  this.value = this.value.replace(/\D/g,"");
-});
-document.getElementById("adminPinInput").addEventListener("keydown", e => {
-  if (e.key==="Enter") verifyAdminPin();
-});
-document.getElementById("orgLoginPin").addEventListener("keydown", e => {
-  if (e.key==="Enter") verifyOrgLogin();
-});
+document.getElementById("adminPinInput").addEventListener("input", function(){ this.value=this.value.replace(/\D/g,""); });
+document.getElementById("orgLoginPin").addEventListener("input",  function(){ this.value=this.value.replace(/\D/g,""); });
+document.getElementById("adminPinInput").addEventListener("keydown", e=>{ if(e.key==="Enter") verifyAdminPin(); });
+document.getElementById("orgLoginPin").addEventListener("keydown",  e=>{ if(e.key==="Enter") verifyOrgLogin(); });
 
 loadEvents();
