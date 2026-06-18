@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chess Birthday Match Finder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#d4af37;--gold2:#f0cc50;
+  --bg:#07070e;--bg2:#0f0f1c;--bg3:#16162a;
+  --glass:rgba(255,255,255,0.04);
+  --border:rgba(212,175,55,0.18);
+  --text:#e8e8f0;--muted:#6b6b8a;
+  --red:#e05555;--green:#4caf7d;
+  --radius:16px;--radius-sm:10px;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+
+.board-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:repeating-conic-gradient(rgba(212,175,55,.025) 0% 25%,transparent 0% 50%);background-size:56px 56px;}
+.pieces-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.piece{position:absolute;color:var(--gold);opacity:.05;font-size:clamp(20px,3vw,48px);user-select:none;animation:floatPiece var(--dur,12s) ease-in-out infinite;animation-delay:var(--delay,0s);}
+@keyframes floatPiece{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-22px) rotate(5deg);}}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(7,7,14,.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 clamp(16px,4vw,40px);height:64px;display:flex;align-items:center;justify-content:space-between;}
+.nav-brand{display:flex;align-items:center;gap:10px;}
+.nav-brand .crown{font-size:26px;color:var(--gold);filter:drop-shadow(0 0 8px rgba(212,175,55,.5));}
+.nav-brand span{font-size:18px;font-weight:800;letter-spacing:-.4px;}
+.nav-brand span b{color:var(--gold);}
+.nav-links{display:flex;gap:6px;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;padding:7px 14px;border-radius:var(--radius-sm);transition:.2s;}
+.nav-links a:hover{color:var(--text);background:var(--glass);}
+.nav-links a.active{color:#000;background:var(--gold);}
+
+/* ── SCREEN 1: Finder ── */
+#screen-finder{position:relative;z-index:1;}
+.finder-hero{text-align:center;padding:clamp(48px,8vw,88px) 20px 32px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);border-radius:50px;padding:6px 18px;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.8px;text-transform:uppercase;margin-bottom:20px;animation:fadeDown .6s ease-out;}
+.finder-hero h1{font-size:clamp(30px,6vw,60px);font-weight:900;line-height:1.08;margin-bottom:14px;animation:fadeDown .7s ease-out;}
+.finder-hero h1 span{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.finder-hero p{color:var(--muted);font-size:15px;max-width:460px;margin:0 auto;animation:fadeDown .8s ease-out;line-height:1.6;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+.form-card{max-width:420px;margin:0 auto;background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:32px 28px;backdrop-filter:blur(14px);animation:fadeUp .6s ease-out .1s backwards;box-shadow:0 0 80px rgba(212,175,55,.04);}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.field label{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.5px;text-transform:uppercase;}
+.field input{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);color:var(--text);font-size:15px;padding:13px 16px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+.field input:focus{border-color:rgba(212,175,55,.5);box-shadow:0 0 0 3px rgba(212,175,55,.07);}
+.field input::placeholder{color:var(--muted);}
+.field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.6) sepia(1) hue-rotate(5deg) saturate(2);}
+.btn-find{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-size:16px;font-weight:900;border:none;border-radius:14px;padding:15px 24px;cursor:pointer;transition:.2s;box-shadow:0 8px 32px rgba(212,175,55,.25);margin-top:4px;}
+.btn-find:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 40px rgba(212,175,55,.35);}
+.btn-find:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.finder-stats{display:flex;justify-content:center;gap:clamp(20px,6vw,60px);margin-top:32px;padding-bottom:48px;animation:fadeDown .9s ease-out .2s backwards;}
+.fstat{text-align:center;}
+.fstat-val{font-size:24px;font-weight:900;color:var(--gold);}
+.fstat-label{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* ── SCREEN 2: Loading ── */
+#screen-loading{display:none;position:fixed;inset:0;z-index:50;background:rgba(7,7,14,.97);backdrop-filter:blur(10px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;}
+#screen-loading.show{display:flex;}
+
+.mm-ring-wrap{position:relative;width:180px;height:180px;margin:0 auto 24px;flex-shrink:0;}
+.mm-ring{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;}
+.mm-ring-1{border-top-color:rgba(212,175,55,.8);border-right-color:rgba(212,175,55,.2);animation:spin 1.8s linear infinite;}
+.mm-ring-2{inset:12px;border-bottom-color:rgba(212,175,55,.5);border-left-color:rgba(212,175,55,.1);animation:spin 2.8s linear infinite reverse;}
+.mm-ring-3{inset:24px;border-top-color:rgba(212,175,55,.3);animation:spin 3.6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.mm-avatar{position:absolute;inset:36px;border-radius:50%;overflow:hidden;border:3px solid rgba(212,175,55,.5);background:rgba(212,175,55,.1);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:var(--gold);transition:opacity .3s ease;box-shadow:0 0 40px rgba(212,175,55,.2);}
+.mm-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.mm-avatar.fade{opacity:0;}
+.mm-orbit{position:absolute;inset:0;animation:spin 2s linear infinite;}
+.mm-orbit-dot{position:absolute;top:4px;left:50%;transform:translateX(-50%);font-size:18px;color:var(--gold);filter:drop-shadow(0 0 6px rgba(212,175,55,.8));}
+
+.mm-player-name{font-size:16px;font-weight:700;color:var(--gold);min-height:24px;margin-bottom:4px;transition:opacity .3s;}
+.mm-player-name.fade{opacity:0;}
+.mm-message{font-size:14px;color:var(--muted);min-height:22px;margin-bottom:24px;transition:opacity .25s;}
+.mm-message.fade{opacity:0;}
+.mm-dots{display:flex;gap:6px;justify-content:center;}
+.mm-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);opacity:.2;transition:opacity .3s,transform .3s;}
+.mm-dot.active{opacity:1;transform:scale(1.3);}
+
+.particle{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--gold);pointer-events:none;animation:particleFly var(--pd,3s) ease-out infinite;animation-delay:var(--pdelay,0s);opacity:0;}
+@keyframes particleFly{0%{opacity:0;transform:translate(0,0) scale(1);}20%{opacity:.7;}100%{opacity:0;transform:translate(var(--px,40px),var(--py,-60px)) scale(0);}}
+
+/* ── SCREEN 3: Match ── */
+#screen-match{display:none;position:relative;z-index:1;}
+#screen-match.show{display:block;}
+
+.result-wrap{max-width:1100px;margin:0 auto;padding:clamp(24px,4vw,40px) clamp(12px,3vw,24px) 60px;}
+.result-header{text-align:center;margin-bottom:28px;animation:fadeDown .6s ease-out;}
+.result-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);border-radius:50px;padding:6px 18px;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px;}
+.result-headline{font-size:clamp(17px,2.8vw,26px);font-weight:900;line-height:1.35;max-width:640px;margin:0 auto;}
+.result-headline .gold{color:var(--gold);}
+
+.match-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+.match-tab{background:var(--glass);border:1px solid var(--border);border-radius:50px;padding:7px 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:.2s;}
+.match-tab.active{background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4);color:var(--gold);}
+
+.split{display:grid;grid-template-columns:1fr 72px 1fr;align-items:start;gap:0;}
+@media(max-width:700px){.split{grid-template-columns:1fr;}.split-center{padding:12px 0;}}
+
+.user-card,.legend-card{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:26px;backdrop-filter:blur(14px);}
+.user-card{animation:slideLeft .7s ease-out backwards;}
+.legend-card{animation:slideRight .7s ease-out backwards;}
+@keyframes slideLeft{from{opacity:0;transform:translateX(-28px);}to{opacity:1;transform:translateX(0);}}
+@keyframes slideRight{from{opacity:0;transform:translateX(28px);}to{opacity:1;transform:translateX(0);}}
+
+.ucard-top{position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,rgba(212,175,55,.07),rgba(212,175,55,.02));padding:24px 16px;text-align:center;margin-bottom:18px;}
+.ucard-board{position:absolute;inset:0;background-image:repeating-conic-gradient(rgba(212,175,55,.06) 0% 25%,transparent 0% 50%);background-size:20px 20px;}
+.ucard-avatar{position:relative;width:76px;height:76px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#000;box-shadow:0 4px 24px rgba(212,175,55,.3);}
+.legend-av-wrap{position:relative;width:84px;height:84px;border-radius:50%;margin:0 auto 12px;border:3px solid rgba(212,175,55,.4);overflow:hidden;background:rgba(212,175,55,.12);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:var(--gold);box-shadow:0 4px 24px rgba(212,175,55,.2);}
+.legend-av-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.champ-badge{position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;background:var(--gold);border-radius:50%;border:2px solid var(--bg2);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.card-name-big{font-size:17px;font-weight:800;margin-bottom:2px;}
+.card-sub{font-size:12px;color:var(--muted);}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
+.info-row:last-child{border-bottom:none;}
+.ir-label{color:var(--muted);}
+.ir-val{font-weight:600;}
+.ir-val.gold{color:var(--gold);}
+
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin:12px 0 6px;}
+.chip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:50px;}
+.chip-gold{background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.25);color:var(--gold);}
+.chip-green{background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.25);color:var(--green);}
+.chip-gray{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--muted);}
+
+.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gold);margin:16px 0 8px;display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:"";flex:1;height:1px;background:rgba(212,175,55,.15);}
+
+.wiki-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:var(--radius-sm);padding:10px;color:var(--gold);font-size:13px;font-weight:700;text-decoration:none;transition:.2s;margin:12px 0 0;}
+.wiki-btn:hover{background:rgba(212,175,55,.16);}
+
+.pgn-dl{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+.pgn-dl a{display:flex;align-items:center;gap:10px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.15);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);text-decoration:none;font-size:12px;transition:.2s;}
+.pgn-dl a:hover{background:rgba(212,175,55,.12);transform:translateX(3px);}
+
+/* Center */
+.split-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:32px 0;}
+.conn-ring{width:68px;height:68px;border-radius:50%;background:rgba(212,175,55,.08);border:2px solid rgba(212,175,55,.35);display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--gold);position:relative;animation:glowPulse 2.5s ease-in-out infinite;box-shadow:0 0 40px rgba(212,175,55,.15);}
+.conn-ring span{animation:spin 5s linear infinite;display:block;}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(212,175,55,.15);}50%{box-shadow:0 0 60px rgba(212,175,55,.4);}}
+.conn-beam{width:3px;flex:1;min-height:24px;background:linear-gradient(to bottom,rgba(212,175,55,.4),rgba(212,175,55,.05));border-radius:2px;}
+.conn-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);text-align:center;line-height:1.4;}
+
+.result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px;animation:fadeDown .8s ease-out .4s backwards;}
+.btn-action{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:11px 22px;border-radius:var(--radius-sm);border:none;cursor:pointer;transition:.2s;}
+.btn-action:hover{transform:translateY(-2px);}
+.btn-wa{background:#25D366;color:#fff;}
+.btn-copy{background:var(--glass);border:1px solid var(--border);color:var(--text);}
+.btn-reset{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;}
+
+/* ── SCREEN 4: No Match ── */
+#screen-nomatch{display:none;position:relative;z-index:1;}
+#screen-nomatch.show{display:block;}
+.nomatch-wrap{max-width:580px;margin:0 auto;padding:clamp(40px,8vw,80px) clamp(16px,4vw,24px) 60px;text-align:center;}
+.nomatch-icon{font-size:64px;margin-bottom:20px;animation:floatPiece 3s ease-in-out infinite;display:block;}
+.nomatch-wrap h2{font-size:clamp(22px,4vw,36px);font-weight:900;margin-bottom:8px;}
+.nm-dob{color:var(--gold);font-size:18px;font-weight:700;margin-bottom:24px;}
+.quote-box{background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.15);border-left:4px solid var(--gold);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:16px 20px;margin:0 auto 24px;text-align:left;}
+.quote-box .qt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gold);margin-bottom:8px;}
+.quote-box p{font-size:13px;color:var(--text);line-height:1.7;font-style:italic;}
+.preview-players{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 auto 24px;max-width:380px;}
+.pp-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;color:var(--text);}
+.pp-card:hover{border-color:rgba(212,175,55,.3);transform:translateY(-2px);}
+.pp-av{width:46px;height:46px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid rgba(212,175,55,.2);background:rgba(212,175,55,.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gold);}
+.pp-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.pp-name{font-size:11px;font-weight:700;line-height:1.3;}
+.pp-title{font-size:10px;color:var(--gold);}
+
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(212,175,55,.2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="board-bg"></div>
+<div class="pieces-bg" id="piecesBg"></div>
+
+<nav>
+  <div class="nav-brand">
+    <span class="crown">♛</span>
+    <span><b>Chess</b>Birthday</span>
+  </div>
+  <div class="nav-links">
+    <a href="legendchessplayerform.html">Add Legend</a>
+    <a href="legendchessplayer.html">View Legends</a>
+    <a href="chessbornmatch.html" class="active">Birthday Match</a>
+  </div>
+</nav>
+
+<!-- SCREEN 1: Finder -->
+<div id="screen-finder">
+  <div class="finder-hero">
+    <div class="hero-badge">♟ Birthday Match Finder</div>
+    <h1>Discover Your<br/><span>Chess Legend</span></h1>
+    <p>Enter your name and birthday — we'll find which legendary grandmaster shares your birth date.</p>
+  </div>
+  <div style="padding:0 16px;position:relative;z-index:1;">
+    <div class="form-card">
+      <div class="field">
+        <label>Your Name</label>
+        <input type="text" id="userName" placeholder="Enter your full name" maxlength="80" oninput="updateBtn()"/>
+      </div>
+      <div class="field">
+        <label>Date of Birth</label>
+        <input type="date" id="userDob" onchange="updateBtn()"/>
+      </div>
+      <button class="btn-find" id="btnFind" disabled onclick="startMatch()">
+        ♞ &nbsp;Find My Chess Legend
+      </button>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;" id="dbCount">
+        Connecting to database…
+      </p>
+    </div>
+    <div class="finder-stats" id="finderStats" style="display:none;">
+      <div class="fstat"><div class="fstat-val" id="stat-total">—</div><div class="fstat-label">Players</div></div>
+      <div class="fstat"><div class="fstat-val" id="stat-champ">—</div><div class="fstat-label">Champions</div></div>
+      <div class="fstat"><div class="fstat-val" id="stat-country">—</div><div class="fstat-label">Countries</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: Loading -->
+<div id="screen-loading">
+  <div id="particlesBg" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
+  <div class="mm-ring-wrap">
+    <div class="mm-ring mm-ring-1"></div>
+    <div class="mm-ring mm-ring-2"></div>
+    <div class="mm-ring mm-ring-3"></div>
+    <div class="mm-avatar" id="mmAvatar">♟</div>
+    <div class="mm-orbit"><div class="mm-orbit-dot">♞</div></div>
+  </div>
+  <div class="mm-player-name" id="mmPlayerName">&nbsp;</div>
+  <div class="mm-message" id="mmMsg">Searching Chess History…</div>
+  <div class="mm-dots">
+    <div class="mm-dot active"></div>
+    <div class="mm-dot"></div>
+    <div class="mm-dot"></div>
+    <div class="mm-dot"></div>
+    <div class="mm-dot"></div>
+  </div>
+</div>
+
+<!-- SCREEN 3: Match -->
+<div id="screen-match">
+  <div class="result-wrap">
+    <div class="result-header">
+      <div class="result-badge">✨ Birthday Match Found!</div>
+      <div class="result-headline" id="matchHeadline"></div>
+    </div>
+    <div class="match-tabs" id="matchTabs"></div>
+    <div class="split" id="splitLayout"></div>
+    <div class="result-actions">
+      <button class="btn-action btn-wa" onclick="shareWhatsApp()">📱 WhatsApp</button>
+      <button class="btn-action btn-copy" onclick="copyResult()">🔗 Copy</button>
+      <button class="btn-action btn-reset" onclick="resetAll()">♟ Find Again</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: No Match -->
+<div id="screen-nomatch">
+  <div class="nomatch-wrap">
+    <span class="nomatch-icon">♟</span>
+    <h2>No Match Found</h2>
+    <p style="color:var(--muted);margin-bottom:6px;">No legendary player in our database shares your birthday on</p>
+    <div class="nm-dob" id="nmDob"></div>
+    <div class="quote-box">
+      <div class="qt">Chess Wisdom</div>
+      <p id="quoteText"></p>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">Explore some of our legends →</p>
+    <div class="preview-players" id="previewPlayers"></div>
+    <button class="btn-action btn-reset" style="margin:0 auto;display:flex;" onclick="resetAll()">
+      ♟ &nbsp;Try Another Birthday
+    </button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s",
+  authDomain: "ratedeventsgj.firebaseapp.com",
+  projectId: "ratedeventsgj",
+  storageBucket: "ratedeventsgj.firebasestorage.app",
+  messagingSenderId: "527826897689",
+  appId: "1:527826897689:web:fb0439fff04a695a599388"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const MSGS = [
+  "Searching Chess History…",
+  "Looking Through Grandmasters…",
+  "Finding Your Chess Twin…",
+  "Matching Your Birthday…",
+  "Preparing Your Result…",
+];
+const QUOTES = [
+  "Chess is life in miniature. Chess is a struggle, chess battles. — Garry Kasparov",
+  "Every chess master was once a beginner. — Irving Chernev",
+  "Chess teaches you to control the initial excitement. — Viswanathan Anand",
+  "The game of chess is not merely an idle amusement. — Benjamin Franklin",
+  "Chess is a war over the board. The object is to crush the opponent's mind. — Bobby Fischer",
+];
+
+let allPlayers = [];
+let currentUser = {name:"",dob:""};
+let currentMatches = [];
+let selectedIdx = 0;
+
+/* Floating pieces */
+(function(){
+  const p=["♔","♕","♖","♗","♘","♙","♚","♛","♜","♝","♞","♟"];
+  const bg=document.getElementById("piecesBg");
+  p.forEach((ch,i)=>{
+    const d=document.createElement("div");d.className="piece";d.textContent=ch;
+    d.style.cssText=`left:${(i*8.5)%98}%;top:${(i*13.7)%95}%;font-size:${20+Math.random()*36}px;--dur:${9+i*1.4}s;--delay:${i*0.6}s;`;
+    bg.appendChild(d);
+  });
+})();
+
+function ini(n){return(n||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();}
+function fmtDate(d){
+  if(!d) return "—";
+  return new Date(d+"T00:00:00").toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+}
+function getBD(d){const dt=new Date(d+"T00:00:00");return{m:dt.getMonth()+1,d:dt.getDate()};}
+
+/* Load players */
+async function loadPlayers(){
+  try{
+    const snap=await getDocs(collection(db,"legendplayerdb"));
+    allPlayers=snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById("dbCount").textContent=
+      `Searching across ${allPlayers.length} legendary chess player${allPlayers.length!==1?"s":""}`;
+    document.getElementById("stat-total").textContent=allPlayers.length;
+    document.getElementById("stat-champ").textContent=allPlayers.filter(p=>p.worldChampion).length;
+    document.getElementById("stat-country").textContent=[...new Set(allPlayers.map(p=>p.country))].length;
+    document.getElementById("finderStats").style.display="flex";
+  }catch(e){
+    document.getElementById("dbCount").textContent="⚠️ Could not load — check Firebase rules";
+    console.error(e);
+  }
+}
+loadPlayers();
+
+window.updateBtn=function(){
+  const n=document.getElementById("userName").value.trim();
+  const d=document.getElementById("userDob").value;
+  document.getElementById("btnFind").disabled=!n||!d;
+};
+
+window.startMatch=function(){
+  const name=document.getElementById("userName").value.trim();
+  const dob=document.getElementById("userDob").value;
+  if(!name||!dob) return;
+  currentUser={name,dob};
+  const{m:um,d:ud}=getBD(dob);
+  currentMatches=allPlayers.filter(p=>{const{m,d}=getBD(p.dob);return m===um&&d===ud;});
+  selectedIdx=0;
+  showScreen("loading");
+  runLoading();
+};
+
+function runLoading(){
+  /* particles */
+  const pb=document.getElementById("particlesBg");pb.innerHTML="";
+  for(let i=0;i<20;i++){
+    const p=document.createElement("div");p.className="particle";
+    const a=Math.random()*Math.PI*2,dist=50+Math.random()*90;
+    p.style.cssText=`left:calc(50% + ${Math.cos(a)*dist}px);top:calc(50% + ${Math.sin(a)*dist}px);--px:${(Math.random()-.5)*220}px;--py:${-40-Math.random()*90}px;--pd:${1.8+Math.random()*2.2}s;--pdelay:${Math.random()*3}s;`;
+    pb.appendChild(p);
+  }
+
+  const mmMsg=document.getElementById("mmMsg");
+  const mmAv=document.getElementById("mmAvatar");
+  const mmName=document.getElementById("mmPlayerName");
+  const dots=document.querySelectorAll(".mm-dot");
+  let msgIdx=0,photoIdx=0;
+
+  const msgInt=setInterval(()=>{
+    mmMsg.classList.add("fade");
+    setTimeout(()=>{
+      msgIdx=(msgIdx+1)%MSGS.length;
+      mmMsg.textContent=MSGS[msgIdx];
+      mmMsg.classList.remove("fade");
+      dots.forEach((d,i)=>d.classList.toggle("active",i===msgIdx));
+    },220);
+  },1300);
+
+  let photoInt=null;
+  if(allPlayers.length){
+    photoInt=setInterval(()=>{
+      mmAv.classList.add("fade");mmName.classList.add("fade");
+      setTimeout(()=>{
+        photoIdx=(photoIdx+1)%allPlayers.length;
+        const p=allPlayers[photoIdx];
+        mmAv.innerHTML=p.photoURL
+          ?`<img src="${p.photoURL}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<span>${ini(p.name)}</span>'">`
+          :`<span>${ini(p.name)}</span>`;
+        mmName.textContent=p.name;
+        mmAv.classList.remove("fade");mmName.classList.remove("fade");
+      },260);
+    },950);
+  }
+
+  setTimeout(()=>{
+    clearInterval(msgInt);if(photoInt) clearInterval(photoInt);
+    if(currentMatches.length>0){buildMatch();showScreen("match");}
+    else{buildNoMatch();showScreen("nomatch");}
+  },7000);
+}
+
+/* ── Build match screen ── */
+function buildMatch(){
+  const p=currentMatches[selectedIdx];
+  document.getElementById("matchHeadline").innerHTML=
+    p.worldChampion
+      ?`You share your birthday with World Champion <span class="gold">${p.title} ${p.name}</span>`
+      :`Congratulations! Your birthday matches with <span class="gold">${p.title} ${p.name}</span>`;
+
+  const tabs=document.getElementById("matchTabs");
+  if(currentMatches.length>1){
+    tabs.style.display="flex";
+    tabs.innerHTML=currentMatches.map((m,i)=>
+      `<div class="match-tab${i===selectedIdx?" active":""}" onclick="switchMatch(${i})">${m.name}</div>`).join("");
+  }else tabs.style.display="none";
+
+  document.getElementById("splitLayout").innerHTML=buildSplit(currentUser,p);
+}
+window.switchMatch=function(i){selectedIdx=i;buildMatch();};
+
+function buildSplit(user,p){
+  const pgns=p.gamesCollection||[];
+  const pgnSection=pgns.length?`
+    <div class="sec-title">♟ Notable Games</div>
+    <div class="pgn-dl">
+      ${pgns.map(g=>`
+        <a href="${g.url}" download="${g.name}" target="_blank">
+          <span style="font-size:17px;flex-shrink:0">♟</span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${g.name}</span>
+          <span style="color:var(--gold);font-size:16px;flex-shrink:0">⬇</span>
+        </a>`).join("")}
+    </div>`:"";
+
+  return `
+  <div class="user-card">
+    <div class="ucard-top">
+      <div class="ucard-board"></div>
+      <div class="ucard-avatar">${ini(user.name)}</div>
+      <div class="card-name-big" style="margin-top:8px;">${user.name}</div>
+      <div class="card-sub">Chess Enthusiast</div>
+    </div>
+    <div class="info-row"><span class="ir-label">Birthday</span><span class="ir-val gold">${fmtDate(user.dob)}</span></div>
+    <div class="info-row"><span class="ir-label">Your Chess Twin</span><span class="ir-val">${p.name}</span></div>
+    <div class="info-row"><span class="ir-label">Shared Day</span>
+      <span class="ir-val">${new Date(user.dob+"T00:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric"})}</span>
+    </div>
+  </div>
+
+  <div class="split-center">
+    <div class="conn-beam"></div>
+    <div class="conn-ring"><span>♞</span></div>
+    <div class="conn-label">BIRTHDAY<br/>MATCH</div>
+    <div class="conn-beam"></div>
+  </div>
+
+  <div class="legend-card">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div class="legend-av-wrap">
+        ${p.photoURL
+          ?`<img src="${p.photoURL}" alt="${p.name}" onerror="this.parentElement.innerHTML='<span>${ini(p.name)}</span>'">`
+          :`<span>${ini(p.name)}</span>`}
+        ${p.worldChampion?`<div class="champ-badge">♛</div>`:""}
+      </div>
+      <div class="card-name-big">${p.name}</div>
+      <div class="chips" style="justify-content:center;">
+        <span class="chip chip-gold">${p.title||"GM"}</span>
+        ${p.worldChampion?`<span class="chip chip-gold">♛ World Champion</span>`:""}
+        ${p.active?`<span class="chip chip-green">Active</span>`:`<span class="chip chip-gray">Retired</span>`}
+        <span class="chip chip-gray">${p.country||""}</span>
+      </div>
+    </div>
+    <div class="info-row"><span class="ir-label">Born</span><span class="ir-val gold">${fmtDate(p.dob)}</span></div>
+    ${p.dod?`<div class="info-row"><span class="ir-label">Died</span><span class="ir-val">${fmtDate(p.dod)}</span></div>`:""}
+    ${p.peakRating?`<div class="info-row"><span class="ir-label">Peak Rating</span><span class="ir-val gold">${p.peakRating}</span></div>`:""}
+    ${p.fideId?`<div class="info-row"><span class="ir-label">FIDE ID</span><span class="ir-val">${p.fideId}</span></div>`:""}
+    ${p.wikipedia?`<a class="wiki-btn" href="${p.wikipedia}" target="_blank" rel="noopener">📖 View on Wikipedia</a>`:""}
+    ${pgnSection}
+  </div>`;
+}
+
+/* ── No match ── */
+function buildNoMatch(){
+  document.getElementById("nmDob").textContent=fmtDate(currentUser.dob);
+  document.getElementById("quoteText").textContent=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  document.getElementById("previewPlayers").innerHTML=allPlayers.slice(0,3).map(p=>`
+    <a class="pp-card" href="legendchessplayer.html">
+      <div class="pp-av">
+        ${p.photoURL
+          ?`<img src="${p.photoURL}" alt="${p.name}" onerror="this.parentElement.innerHTML='<span>${ini(p.name)}</span>'">`
+          :`<span>${ini(p.name)}</span>`}
+      </div>
+      <div class="pp-name">${p.name}</div>
+      <div class="pp-title">${p.title||"GM"}</div>
+    </a>`).join("");
+}
+
+/* ── Actions ── */
+window.shareWhatsApp=function(){
+  const p=currentMatches[selectedIdx];
+  const text=`🎉 I share my birthday with ${p.worldChampion?"World Champion ":""}${p.title} ${p.name}! Find your chess birthday twin!`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,"_blank");
+};
+window.copyResult=function(){
+  const p=currentMatches[selectedIdx];
+  navigator.clipboard.writeText(
+    `I (${currentUser.name}) share my birthday (${fmtDate(currentUser.dob)}) with ${p.title} ${p.name} from ${p.country||""}! 🎂♟`
+  ).then(()=>alert("Copied to clipboard!"));
+};
+
+/* ── Screen management ── */
+function showScreen(name){
+  document.getElementById("screen-finder").style.display=name==="finder"?"block":"none";
+  document.getElementById("screen-loading").classList.toggle("show",name==="loading");
+  document.getElementById("screen-match").classList.toggle("show",name==="match");
+  document.getElementById("screen-nomatch").classList.toggle("show",name==="nomatch");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+window.resetAll=function(){
+  document.getElementById("userName").value="";
+  document.getElementById("userDob").value="";
+  currentMatches=[];selectedIdx=0;
+  document.getElementById("btnFind").disabled=true;
+  showScreen("finder");
+};
+</script>
+</body>
+</html>

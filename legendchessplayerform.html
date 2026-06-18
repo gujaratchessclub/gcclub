@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Legend Chess Player — Entry Form</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#d4af37;--gold2:#f0cc50;
+  --bg:#07070e;--bg2:#0f0f1c;--bg3:#16162a;
+  --glass:rgba(255,255,255,0.04);
+  --border:rgba(212,175,55,0.18);
+  --text:#e8e8f0;--muted:#6b6b8a;
+  --red:#e05555;--green:#4caf7d;
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+
+.board-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:repeating-conic-gradient(rgba(212,175,55,0.025) 0% 25%,transparent 0% 50%);background-size:56px 56px;}
+.pieces-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.piece{position:absolute;color:var(--gold);opacity:.055;font-size:clamp(22px,4vw,52px);user-select:none;animation:floatPiece var(--dur,12s) ease-in-out infinite;animation-delay:var(--delay,0s);}
+@keyframes floatPiece{0%,100%{transform:translateY(0) rotate(0deg);}33%{transform:translateY(-28px) rotate(6deg);}66%{transform:translateY(-14px) rotate(-4deg);}}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(7,7,14,0.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 clamp(16px,4vw,40px);height:64px;display:flex;align-items:center;justify-content:space-between;}
+.nav-brand{display:flex;align-items:center;gap:10px;}
+.nav-brand .crown{font-size:28px;color:var(--gold);filter:drop-shadow(0 0 8px rgba(212,175,55,.5));}
+.nav-brand span{font-size:18px;font-weight:800;letter-spacing:-.4px;}
+.nav-brand span b{color:var(--gold);}
+.nav-links{display:flex;gap:6px;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;padding:7px 14px;border-radius:var(--radius-sm);transition:.2s;}
+.nav-links a:hover{color:var(--text);background:var(--glass);}
+.nav-links a.active{color:#000;background:var(--gold);}
+
+.hero{position:relative;z-index:1;text-align:center;padding:clamp(40px,8vw,80px) 20px 32px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);border-radius:50px;padding:6px 18px;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.8px;text-transform:uppercase;margin-bottom:20px;animation:fadeDown .6s ease-out;}
+.hero h1{font-size:clamp(28px,5vw,52px);font-weight:900;line-height:1.1;margin-bottom:10px;animation:fadeDown .7s ease-out;}
+.hero h1 span{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{color:var(--muted);font-size:15px;animation:fadeDown .8s ease-out;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+
+.form-wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 clamp(12px,4vw,24px) 60px;animation:fadeUp .6s ease-out .1s backwards;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+.card{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:28px 28px 24px;backdrop-filter:blur(12px);margin-bottom:20px;transition:border-color .3s;}
+.card:hover{border-color:rgba(212,175,55,.3);}
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.06);}
+.card-icon{width:40px;height:40px;background:rgba(212,175,55,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.card-header h2{font-size:17px;font-weight:700;margin:0;}
+.card-header p{font-size:12px;color:var(--muted);margin:2px 0 0;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:600px){.grid-2{grid-template-columns:1fr;}}
+
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.5px;text-transform:uppercase;}
+.field label .req{color:var(--red);margin-left:2px;}
+.field label .opt{color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;font-size:11px;}
+.field input,.field select,.field textarea{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:11px 14px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(212,175,55,.5);box-shadow:0 0 0 3px rgba(212,175,55,.08);}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted);}
+.field select option{background:#1a1a2e;color:var(--text);}
+.field textarea{resize:vertical;min-height:80px;font-family:inherit;}
+.field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.6) sepia(1) hue-rotate(5deg) saturate(2);}
+.field .hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:3px;}
+.char-count.warn{color:#e0a030;}.char-count.over{color:var(--red);}
+
+.photo-upload-area{border:2px dashed rgba(212,175,55,.25);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;}
+.photo-upload-area:hover,.photo-upload-area.drag{border-color:var(--gold);background:rgba(212,175,55,.05);}
+.photo-upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.photo-preview{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);margin:0 auto 10px;display:block;box-shadow:0 0 24px rgba(212,175,55,.3);}
+.photo-placeholder{width:80px;height:80px;border-radius:50%;background:rgba(212,175,55,.1);border:2px dashed rgba(212,175,55,.3);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;color:var(--gold);}
+.photo-upload-area p{font-size:13px;color:var(--muted);}
+.photo-upload-area p b{color:var(--gold);}
+.photo-size-warn{font-size:11px;margin-top:6px;padding:6px 10px;border-radius:6px;display:none;}
+.photo-size-warn.show{display:block;}
+.photo-size-warn.error{background:rgba(224,85,85,.1);color:var(--red);border:1px solid rgba(224,85,85,.3);}
+.photo-size-warn.ok{background:rgba(76,175,125,.1);color:var(--green);border:1px solid rgba(76,175,125,.3);}
+
+.pgn-drop{border:2px dashed rgba(212,175,55,.25);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;}
+.pgn-drop:hover,.pgn-drop.drag{border-color:var(--gold);background:rgba(212,175,55,.04);}
+.pgn-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.pgn-drop-icon{font-size:32px;margin-bottom:8px;}
+.pgn-drop p{font-size:13px;color:var(--muted);}
+.pgn-drop p b{color:var(--gold);}
+.pgn-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+.pgn-item{display:flex;align-items:center;gap:12px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.15);border-radius:var(--radius-sm);padding:10px 14px;animation:slideIn .25s ease-out;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
+.pgn-item .pgn-icon{font-size:20px;flex-shrink:0;}
+.pgn-item .pgn-info{flex:1;min-width:0;}
+.pgn-item .pgn-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pgn-item .pgn-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.pgn-item .pgn-remove{background:rgba(224,85,85,.15);border:none;border-radius:6px;color:var(--red);cursor:pointer;padding:5px 8px;font-size:13px;transition:.2s;flex-shrink:0;}
+.pgn-item .pgn-remove:hover{background:rgba(224,85,85,.3);}
+
+.steps{display:flex;align-items:center;justify-content:center;margin-bottom:28px;position:relative;z-index:1;}
+.step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:160px;cursor:pointer;}
+.step-dot{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--muted);transition:.3s;position:relative;z-index:1;}
+.step.active .step-dot{background:var(--gold);border-color:var(--gold);color:#000;box-shadow:0 0 20px rgba(212,175,55,.4);}
+.step.done .step-dot{background:rgba(76,175,125,.2);border-color:var(--green);color:var(--green);}
+.step-label{font-size:11px;color:var(--muted);font-weight:600;text-align:center;}
+.step.active .step-label{color:var(--gold);}
+.step-line{flex:1;height:2px;background:rgba(255,255,255,.08);margin:0 4px;margin-bottom:20px;}
+.step-line.done{background:rgba(76,175,125,.3);}
+
+.submit-wrap{text-align:center;padding-top:8px;}
+.btn-submit{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-size:16px;font-weight:900;border:none;border-radius:14px;padding:16px 48px;cursor:pointer;transition:.2s;box-shadow:0 8px 32px rgba(212,175,55,.25);}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(212,175,55,.35);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-submit .spinner{width:18px;height:18px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.btn-submit.loading .spinner{display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--border);border-radius:50px;padding:12px 24px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;z-index:999;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;opacity:0;white-space:nowrap;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast.success{border-color:rgba(76,175,125,.4);color:var(--green);}
+.toast.error{border-color:rgba(224,85,85,.4);color:var(--red);}
+
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(212,175,55,.2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="board-bg"></div>
+<div class="pieces-bg" id="piecesBg"></div>
+
+<nav>
+  <div class="nav-brand">
+    <span class="crown">♛</span>
+    <span><b>Chess</b>Birthday</span>
+  </div>
+  <div class="nav-links">
+    <a href="legendchessplayerform.html" class="active">Add Legend</a>
+    <a href="legendchessplayer.html">View Legends</a>
+    <a href="chessbornmatch.html">Birthday Match</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">♟ Admin Panel · Player Entry</div>
+  <h1>Add a <span>Chess Legend</span></h1>
+  <p>Enter complete details of a legendary chess player to the database</p>
+</div>
+
+<!-- Steps -->
+<div class="steps" style="max-width:860px;margin:0 auto;padding:0 clamp(12px,4vw,24px) 8px;">
+  <div class="step active" id="step1" onclick="scrollToSection('sec-basic')">
+    <div class="step-dot">1</div><div class="step-label">Basic Info</div>
+  </div>
+  <div class="step-line" id="line1"></div>
+  <div class="step" id="step2" onclick="scrollToSection('sec-dates')">
+    <div class="step-dot">2</div><div class="step-label">Dates &amp; Links</div>
+  </div>
+  <div class="step-line" id="line2"></div>
+  <div class="step" id="step3" onclick="scrollToSection('sec-photo')">
+    <div class="step-dot">3</div><div class="step-label">Photo</div>
+  </div>
+  <div class="step-line" id="line3"></div>
+  <div class="step" id="step4" onclick="scrollToSection('sec-games')">
+    <div class="step-dot">4</div><div class="step-label">PGN Games</div>
+  </div>
+</div>
+
+<div class="form-wrap">
+
+  <!-- Section 1: Basic Info -->
+  <div class="card" id="sec-basic">
+    <div class="card-header">
+      <div class="card-icon">♞</div>
+      <div><h2>Basic Information</h2><p>Player identity and title</p></div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="f-name" placeholder="e.g. Magnus Carlsen" maxlength="100" oninput="charCount(this,'cc-name',100)"/>
+        <div class="char-count" id="cc-name">0 / 100</div>
+      </div>
+      <div class="field">
+        <label>Title <span class="req">*</span></label>
+        <select id="f-title">
+          <option value="">— Select Title —</option>
+          <option>GM</option><option>IM</option><option>FM</option><option>CM</option>
+          <option>WGM</option><option>WIM</option><option>WFM</option><option>WCM</option>
+          <option>NM</option><option>Untitled</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:14px;">
+      <div class="field">
+        <label>Country of Origin <span class="req">*</span></label>
+        <input type="text" id="f-country" placeholder="e.g. Norway" maxlength="60"/>
+      </div>
+      <div class="field">
+        <label>FIDE ID <span class="opt">(if available)</span></label>
+        <input type="text" id="f-fide" placeholder="e.g. 1503014" maxlength="20" oninput="this.value=this.value.replace(/\D/g,'')"/>
+        <div class="hint">Numbers only</div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:14px;">
+      <div class="field">
+        <label>Peak FIDE Rating <span class="opt">(if known)</span></label>
+        <input type="number" id="f-rating" placeholder="e.g. 2882" min="1000" max="3500"/>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="f-active">
+          <option value="true">Active Player</option>
+          <option value="false">Retired / Deceased</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:14px;font-weight:600;color:var(--text);">
+        <input type="checkbox" id="f-champion" style="width:18px;height:18px;accent-color:var(--gold);"/>
+        ♛ &nbsp;This player held the World Chess Championship title
+      </label>
+    </div>
+  </div>
+
+  <!-- Section 2: Dates & Links -->
+  <div class="card" id="sec-dates">
+    <div class="card-header">
+      <div class="card-icon">📅</div>
+      <div><h2>Dates &amp; Links</h2><p>Birth, death and references</p></div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Date of Birth <span class="req">*</span></label>
+        <input type="date" id="f-dob"/>
+      </div>
+      <div class="field">
+        <label>Date of Death <span class="opt">(leave blank if alive)</span></label>
+        <input type="date" id="f-dod"/>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;">
+      <label>Wikipedia Link <span class="opt">(full URL)</span></label>
+      <input type="url" id="f-wiki" placeholder="https://en.wikipedia.org/wiki/..."/>
+    </div>
+  </div>
+
+  <!-- Section 3: Photo -->
+  <div class="card" id="sec-photo">
+    <div class="card-header">
+      <div class="card-icon">🖼️</div>
+      <div><h2>Passport Photo</h2><p>JPG only · max 30 KB · portrait style</p></div>
+    </div>
+    <div class="photo-upload-area" id="photoArea"
+      ondragover="photoDrag(event,true)" ondragleave="photoDrag(event,false)" ondrop="photoDrop(event)">
+      <input type="file" id="f-photo" accept="image/jpeg,image/jpg" onchange="handlePhoto(this)"/>
+      <div id="photoPlaceholder">
+        <div class="photo-placeholder">📷</div>
+        <p><b>Click to upload</b> or drag &amp; drop</p>
+        <p style="margin-top:4px;">JPG / JPEG only &nbsp;·&nbsp; Maximum 30 KB</p>
+      </div>
+      <img id="photoPreview" class="photo-preview" style="display:none;" alt="Preview"/>
+    </div>
+    <div class="photo-size-warn" id="photoWarn"></div>
+  </div>
+
+  <!-- Section 4: PGN Games -->
+  <div class="card" id="sec-games">
+    <div class="card-header">
+      <div class="card-icon">♟</div>
+      <div><h2>Notable Games Collection</h2><p>Upload PGN files — visitors can download individually</p></div>
+    </div>
+    <div class="pgn-drop" id="pgnDrop"
+      ondragover="pgnDrag(event,true)" ondragleave="pgnDrag(event,false)" ondrop="pgnDropFiles(event)">
+      <input type="file" id="f-pgns" accept=".pgn" multiple onchange="handlePGNs(this.files)"/>
+      <div class="pgn-drop-icon">♜</div>
+      <p><b>Click to add PGN files</b> or drag &amp; drop</p>
+      <p style="margin-top:4px;">.pgn files only &nbsp;·&nbsp; Multiple files allowed</p>
+    </div>
+    <div class="pgn-list" id="pgnList"></div>
+    <div id="pgnCount" style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center;"></div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-wrap">
+    <button class="btn-submit" id="btnSubmit" onclick="submitForm()">
+      <span class="spinner"></span>
+      <span class="btn-text">♛ &nbsp;Save to Database</span>
+    </button>
+    <p style="margin-top:12px;font-size:12px;color:var(--muted);">
+      Saved to Firebase · collection: <code style="background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;">legendplayerdb</code> · project: <code style="background:rgba(0,0,0,.3);padding:1px 6px;border-radius:4px;">ratedeventsgj</code>
+    </p>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toastIcon"></span>
+  <span id="toastMsg"></span>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s",
+  authDomain: "ratedeventsgj.firebaseapp.com",
+  projectId: "ratedeventsgj",
+  storageBucket: "ratedeventsgj.firebasestorage.app",
+  messagingSenderId: "527826897689",
+  appId: "1:527826897689:web:fb0439fff04a695a599388"
+};
+
+const app     = initializeApp(firebaseConfig);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+
+let photoFile = null;
+let pgnFiles  = [];
+
+/* ── Floating pieces ── */
+(function(){
+  const p=["♔","♕","♖","♗","♘","♙","♚","♛","♜","♝","♞","♟"];
+  const bg=document.getElementById("piecesBg");
+  p.forEach((ch,i)=>{
+    const d=document.createElement("div");d.className="piece";d.textContent=ch;
+    d.style.cssText=`left:${(i*8.5)%98}%;top:${(i*13.7)%95}%;font-size:${22+Math.random()*36}px;--dur:${9+i*1.4}s;--delay:${i*0.6}s;`;
+    bg.appendChild(d);
+  });
+})();
+
+/* ── Helpers ── */
+window.charCount=function(el,id,max){
+  const n=el.value.length;const cc=document.getElementById(id);
+  cc.textContent=`${n} / ${max}`;
+  cc.className="char-count"+(n>max?" over":n>max*.8?" warn":"");
+};
+window.scrollToSection=function(id){
+  document.getElementById(id).scrollIntoView({behavior:"smooth",block:"start"});
+};
+
+/* ── Step observer ── */
+const secIds=["sec-basic","sec-dates","sec-photo","sec-games"];
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const i=secIds.indexOf(e.target.id);
+      secIds.forEach((_,j)=>{
+        document.getElementById("step"+(j+1)).className="step"+(j===i?" active":j<i?" done":"");
+        const l=document.getElementById("line"+j);
+        if(l) l.className="step-line"+(j<i?" done":"");
+      });
+    }
+  });
+},{threshold:.4});
+secIds.forEach(id=>obs.observe(document.getElementById(id)));
+
+/* ── Photo ── */
+window.handlePhoto=function(input){if(input.files[0]) processPhoto(input.files[0]);};
+window.photoDrag=function(e,on){e.preventDefault();document.getElementById("photoArea").classList.toggle("drag",on);};
+window.photoDrop=function(e){e.preventDefault();document.getElementById("photoArea").classList.remove("drag");if(e.dataTransfer.files[0]) processPhoto(e.dataTransfer.files[0]);};
+function processPhoto(file){
+  const warn=document.getElementById("photoWarn");
+  const preview=document.getElementById("photoPreview");
+  const ph=document.getElementById("photoPlaceholder");
+  if(!file.type.match(/image\/jpe?g/)){showWarn(warn,"❌ Only JPG/JPEG files are allowed.","error");photoFile=null;return;}
+  if(file.size>30*1024){showWarn(warn,`❌ File is ${(file.size/1024).toFixed(1)} KB — max allowed is 30 KB.`,"error");photoFile=null;return;}
+  photoFile=file;
+  const r=new FileReader();
+  r.onload=ev=>{preview.src=ev.target.result;preview.style.display="block";ph.style.display="none";showWarn(warn,`✅ Photo accepted — ${(file.size/1024).toFixed(1)} KB`,"ok");};
+  r.readAsDataURL(file);
+}
+function showWarn(el,msg,type){el.textContent=msg;el.className="photo-size-warn show "+type;}
+
+/* ── PGN ── */
+window.pgnDrag=function(e,on){e.preventDefault();document.getElementById("pgnDrop").classList.toggle("drag",on);};
+window.pgnDropFiles=function(e){e.preventDefault();document.getElementById("pgnDrop").classList.remove("drag");handlePGNs(e.dataTransfer.files);};
+window.handlePGNs=function(files){
+  Array.from(files).forEach(f=>{
+    if(!f.name.endsWith(".pgn")){toast("Only .pgn files allowed","error");return;}
+    if(pgnFiles.find(x=>x.name===f.name)){toast(`"${f.name}" already added`,"error");return;}
+    pgnFiles.push({file:f,name:f.name});
+  });
+  renderPGNList();
+};
+function renderPGNList(){
+  const list=document.getElementById("pgnList");
+  list.innerHTML="";
+  pgnFiles.forEach((pg,i)=>{
+    const item=document.createElement("div");item.className="pgn-item";
+    item.innerHTML=`<span class="pgn-icon">♟</span>
+      <div class="pgn-info">
+        <div class="pgn-name">${pg.name}</div>
+        <div class="pgn-meta">${(pg.file.size/1024).toFixed(1)} KB · PGN Game File</div>
+      </div>
+      <button class="pgn-remove" onclick="removePGN(${i})">✕</button>`;
+    list.appendChild(item);
+  });
+  document.getElementById("pgnCount").textContent=
+    pgnFiles.length?`${pgnFiles.length} game file${pgnFiles.length>1?"s":""} added`:"";
+}
+window.removePGN=function(i){pgnFiles.splice(i,1);renderPGNList();};
+
+/* ── Toast ── */
+let toastTimer=null;
+window.toast=function(msg,type="success"){
+  const el=document.getElementById("toast");
+  document.getElementById("toastIcon").textContent=type==="success"?"✅":"❌";
+  document.getElementById("toastMsg").textContent=msg;
+  el.className=`toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.className="toast",3400);
+};
+
+/* ── Validate ── */
+function validate(){
+  const name=document.getElementById("f-name").value.trim();
+  const title=document.getElementById("f-title").value;
+  const country=document.getElementById("f-country").value.trim();
+  const dob=document.getElementById("f-dob").value;
+  if(!name){toast("Full name is required","error");scrollToSection("sec-basic");return false;}
+  if(!title){toast("Please select a title","error");scrollToSection("sec-basic");return false;}
+  if(!country){toast("Country is required","error");scrollToSection("sec-basic");return false;}
+  if(!dob){toast("Date of birth is required","error");scrollToSection("sec-dates");return false;}
+  return true;
+}
+
+/* ── Submit ── */
+window.submitForm=async function(){
+  if(!validate()) return;
+  const btn=document.getElementById("btnSubmit");
+  btn.disabled=true;btn.classList.add("loading");
+  try{
+    // Upload photo
+    let photoURL="";
+    if(photoFile){
+      const r=sRef(storage,`legendplayers/photos/${Date.now()}_${photoFile.name}`);
+      await uploadBytes(r,photoFile);
+      photoURL=await getDownloadURL(r);
+    }
+    // Upload PGNs
+    const gamesCollection=[];
+    for(const pg of pgnFiles){
+      const r=sRef(storage,`legendplayers/pgn/${Date.now()}_${pg.name}`);
+      await uploadBytes(r,pg.file);
+      const url=await getDownloadURL(r);
+      gamesCollection.push({name:pg.name,url,size:pg.file.size});
+    }
+    // Save to Firestore
+    await addDoc(collection(db,"legendplayerdb"),{
+      name:        document.getElementById("f-name").value.trim(),
+      title:       document.getElementById("f-title").value,
+      country:     document.getElementById("f-country").value.trim(),
+      fideId:      document.getElementById("f-fide").value.trim()||null,
+      peakRating:  parseInt(document.getElementById("f-rating").value)||null,
+      worldChampion: document.getElementById("f-champion").checked,
+      active:      document.getElementById("f-active").value==="true",
+      dob:         document.getElementById("f-dob").value,
+      dod:         document.getElementById("f-dod").value||null,
+      wikipedia:   document.getElementById("f-wiki").value.trim()||null,
+      photoURL,
+      gamesCollection,
+      createdAt:   serverTimestamp(),
+    });
+    toast("✅ Player saved successfully!","success");
+    setTimeout(resetForm,1500);
+  }catch(err){
+    console.error(err);
+    toast("Error: "+err.message,"error");
+  }finally{
+    btn.disabled=false;btn.classList.remove("loading");
+  }
+};
+
+function resetForm(){
+  ["f-name","f-title","f-country","f-fide","f-rating","f-dob","f-dod","f-wiki"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("f-champion").checked=false;
+  document.getElementById("f-active").value="true";
+  photoFile=null;
+  document.getElementById("photoPreview").style.display="none";
+  document.getElementById("photoPlaceholder").style.display="block";
+  document.getElementById("photoWarn").className="photo-size-warn";
+  pgnFiles=[];renderPGNList();
+  document.getElementById("cc-name").textContent="0 / 100";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
