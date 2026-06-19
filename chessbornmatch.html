@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chess Birthday Match Finder</title>
+<meta name="description" content="Find which legendary chess grandmaster shares your birthday!"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#05050f;--bg2:#0d0d1f;--bg3:#13132a;
+  --blue:#4f8ef7;--blue2:#6fa8ff;--pink:#e040a0;--pink2:#ff6ec7;
+  --purple:#9b5de5;--cyan:#00d4ff;
+  --text:#eaeaf8;--muted:#5a5a82;--muted2:#8888b0;
+  --red:#ff4f6e;--green:#3fd68f;--gold:#d4af37;--gold2:#f0cc50;
+  --border:rgba(79,142,247,0.18);
+  --glass:rgba(255,255,255,0.03);
+  --r:12px;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* BG */
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(88px);opacity:.1;animation:orbF var(--od,20s) ease-in-out infinite;animation-delay:var(--odl,0s);}
+.orb1{width:540px;height:540px;background:radial-gradient(circle,#4f8ef7,transparent);top:-140px;left:-140px;}
+.orb2{width:440px;height:440px;background:radial-gradient(circle,#e040a0,transparent);bottom:-100px;right:-100px;}
+.orb3{width:340px;height:340px;background:radial-gradient(circle,#9b5de5,transparent);top:45%;left:40%;}
+@keyframes orbF{0%,100%{transform:translate(0,0);}50%{transform:translate(28px,-22px);}}
+.pieces-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.fpiece{position:absolute;user-select:none;animation:fp var(--fd,14s) ease-in-out infinite;animation-delay:var(--fdl,0s);font-size:var(--fs,28px);opacity:.06;}
+@keyframes fp{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-22px) rotate(6deg);}}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;height:58px;background:rgba(5,5,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(14px,3vw,32px);}
+.brand{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;text-decoration:none;}
+.brand .icon{font-size:22px;background:linear-gradient(135deg,var(--blue),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.brand span{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* ══════════════════════════════
+   SCREEN 1 — FINDER
+══════════════════════════════ */
+#s-finder{position:relative;z-index:1;}
+.finder-hero{text-align:center;padding:clamp(44px,8vw,84px) 20px 28px;}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(224,64,160,.08));border:1px solid rgba(79,142,247,.28);border-radius:50px;padding:5px 18px;font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:18px;animation:fadeD .6s ease-out;}
+.hero-badge span{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.finder-hero h1{font-size:clamp(28px,6vw,60px);font-weight:900;line-height:1.07;margin-bottom:12px;animation:fadeD .7s ease-out;}
+.finder-hero h1 .g{background:linear-gradient(135deg,var(--blue2),var(--pink2),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.finder-hero p{color:var(--muted2);font-size:14px;max-width:440px;margin:0 auto;line-height:1.65;animation:fadeD .8s ease-out;}
+@keyframes fadeD{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeU{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+.form-card{max-width:400px;margin:0 auto;background:var(--glass);border:1px solid var(--border);border-radius:22px;padding:28px 26px;backdrop-filter:blur(16px);animation:fadeU .55s ease-out .1s backwards;box-shadow:0 0 60px rgba(79,142,247,.06);}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.field label{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.field input{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:var(--r);color:var(--text);font-size:14.5px;padding:12px 14px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;}
+.field input:focus{border-color:rgba(79,142,247,.5);box-shadow:0 0 0 3px rgba(79,142,247,.08);}
+.field input::placeholder{color:var(--muted);}
+.field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.55) sepia(1) hue-rotate(200deg) saturate(2);cursor:pointer;}
+.btn-find{width:100%;background:linear-gradient(135deg,var(--blue),var(--purple),var(--pink));color:#fff;font-size:15px;font-weight:900;border:none;border-radius:var(--r);padding:14px 24px;cursor:pointer;transition:.2s;box-shadow:0 6px 28px rgba(79,142,247,.28);margin-top:4px;background-size:200%;animation:gradShift 4s ease infinite;}
+@keyframes gradShift{0%{background-position:0%}50%{background-position:100%}100%{background-position:0%}}
+.btn-find:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 36px rgba(79,142,247,.4);}
+.btn-find:active{transform:translateY(0);}
+.btn-find:disabled{opacity:.38;cursor:not-allowed;transform:none;animation:none;}
+
+.finder-stats{display:flex;justify-content:center;gap:clamp(20px,6vw,56px);margin-top:28px;padding-bottom:52px;animation:fadeD .9s ease-out .2s backwards;}
+.fstat{text-align:center;}
+.fstat-val{font-size:22px;font-weight:900;background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.fstat-label{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* ══════════════════════════════
+   SCREEN 2 — LOADING
+══════════════════════════════ */
+#s-loading{display:none;position:fixed;inset:0;z-index:50;background:rgba(5,5,15,.97);backdrop-filter:blur(14px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;}
+#s-loading.show{display:flex;}
+.ring-wrap{position:relative;width:180px;height:180px;margin:0 auto 22px;flex-shrink:0;}
+.ring{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;}
+.r1{border-top-color:var(--blue);border-right-color:rgba(79,142,247,.15);animation:spin 1.7s linear infinite;}
+.r2{inset:12px;border-bottom-color:var(--pink);border-left-color:rgba(224,64,160,.1);animation:spin 2.5s linear infinite reverse;}
+.r3{inset:24px;border-top-color:var(--purple);border-right-color:rgba(155,93,229,.1);animation:spin 3.3s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.mm-av{position:absolute;inset:36px;border-radius:50%;overflow:hidden;border:2px solid transparent;background:linear-gradient(var(--bg2),var(--bg2)) padding-box,linear-gradient(135deg,var(--blue),var(--pink)) border-box;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--blue2);transition:opacity .3s ease;box-shadow:0 0 36px rgba(79,142,247,.2);}
+.mm-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.mm-av.fade{opacity:0;}
+.mm-orbit{position:absolute;inset:0;animation:spin 2s linear infinite;}
+.mm-orbit-dot{position:absolute;top:3px;left:50%;transform:translateX(-50%);font-size:18px;background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 6px rgba(79,142,247,.8));}
+.mm-name{font-size:15px;font-weight:700;min-height:22px;margin-bottom:4px;transition:opacity .25s;background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.mm-name.fade{opacity:0;}
+.mm-msg{font-size:13px;color:var(--muted2);min-height:20px;margin-bottom:22px;transition:opacity .2s;}
+.mm-msg.fade{opacity:0;}
+.mm-dots{display:flex;gap:6px;justify-content:center;}
+.mm-dot{width:7px;height:7px;border-radius:50%;opacity:.2;transition:opacity .25s,transform .25s;}
+.mm-dot:nth-child(1){background:var(--blue);}
+.mm-dot:nth-child(2){background:var(--purple);}
+.mm-dot:nth-child(3){background:var(--pink);}
+.mm-dot:nth-child(4){background:var(--cyan);}
+.mm-dot:nth-child(5){background:var(--blue2);}
+.mm-dot.on{opacity:1;transform:scale(1.4);}
+.particle{position:absolute;width:3px;height:3px;border-radius:50%;pointer-events:none;animation:pfly var(--pd,3s) ease-out infinite;animation-delay:var(--pdl,0s);opacity:0;}
+@keyframes pfly{0%{opacity:0;transform:translate(0,0) scale(1);}20%{opacity:.7;}100%{opacity:0;transform:translate(var(--px,40px),var(--py,-60px)) scale(0);}}
+
+/* ══════════════════════════════
+   SCREEN 3 — MATCH
+══════════════════════════════ */
+#s-match{display:none;position:relative;z-index:1;}
+#s-match.show{display:block;}
+.result-wrap{max-width:1060px;margin:0 auto;padding:clamp(22px,4vw,38px) clamp(12px,3vw,22px) 30px;}
+.result-top{text-align:center;margin-bottom:24px;animation:fadeD .55s ease-out;}
+.res-badge{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(224,64,160,.08));border:1px solid rgba(79,142,247,.28);border-radius:50px;padding:5px 18px;font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:12px;}
+.res-badge span{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.res-headline{font-size:clamp(16px,2.6vw,24px);font-weight:900;line-height:1.38;max-width:620px;margin:0 auto;}
+.res-headline .g{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.match-tabs{display:flex;gap:7px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+.mtab{background:var(--glass);border:1px solid var(--border);border-radius:50px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--muted2);cursor:pointer;transition:.15s;}
+.mtab.on{background:linear-gradient(135deg,rgba(79,142,247,.18),rgba(224,64,160,.12));border-color:rgba(79,142,247,.4);color:var(--blue2);}
+
+/* Split */
+.split{display:grid;grid-template-columns:1fr 64px 1fr;align-items:start;}
+@media(max-width:680px){.split{grid-template-columns:1fr;}.split-mid{padding:10px 0;}}
+.ucard,.lcard{background:var(--glass);border:1px solid var(--border);border-radius:22px;padding:24px;backdrop-filter:blur(14px);}
+.ucard{animation:slideL .65s ease-out backwards;}
+.lcard{animation:slideR .65s ease-out backwards;}
+@keyframes slideL{from{opacity:0;transform:translateX(-26px);}to{opacity:1;transform:translateX(0);}}
+@keyframes slideR{from{opacity:0;transform:translateX(26px);}to{opacity:1;transform:translateX(0);}}
+.ucard-top{position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,rgba(79,142,247,.07),rgba(224,64,160,.04));padding:22px 16px;text-align:center;margin-bottom:16px;}
+.uboard{position:absolute;inset:0;background-image:repeating-conic-gradient(rgba(79,142,247,.05) 0% 25%,transparent 0% 50%);background-size:18px 18px;}
+.u-av{position:relative;width:72px;height:72px;border-radius:50%;margin:0 auto 9px;background:linear-gradient(135deg,var(--blue),var(--pink));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;box-shadow:0 4px 24px rgba(79,142,247,.3);}
+.l-av{position:relative;width:80px;height:80px;border-radius:50%;margin:0 auto 11px;border:2px solid transparent;background:linear-gradient(var(--bg2),var(--bg2)) padding-box,linear-gradient(135deg,var(--blue),var(--pink)) border-box;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--blue2);overflow:hidden;box-shadow:0 4px 22px rgba(79,142,247,.2);}
+.l-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.champ-dot{position:absolute;bottom:-2px;right:-2px;width:24px;height:24px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:50%;border:2px solid var(--bg2);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.cname{font-size:16px;font-weight:800;margin-bottom:2px;}
+.csub{font-size:11.5px;color:var(--muted2);}
+.irow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12.5px;}
+.irow:last-child{border-bottom:none;}
+.ir-l{color:var(--muted2);}
+.ir-v{font-weight:600;}
+.ir-v.blue{color:var(--blue2);}
+.ir-v.pink{color:var(--pink2);}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0 4px;}
+.chip{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:50px;}
+.cb{background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.22);color:var(--blue2);}
+.cp{background:rgba(224,64,160,.1);border:1px solid rgba(224,64,160,.2);color:var(--pink2);}
+.cgr{background:rgba(63,214,143,.09);border:1px solid rgba(63,214,143,.2);color:var(--green);}
+.cgy{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted2);}
+.cgold{background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);color:var(--gold);}
+.stitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin:14px 0 7px;display:flex;align-items:center;gap:6px;}
+.stitle .st{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(79,142,247,.25),transparent);}
+.wbtn{display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(135deg,rgba(79,142,247,.1),rgba(224,64,160,.07));border:1px solid rgba(79,142,247,.22);border-radius:var(--r);padding:9px;color:var(--blue2);font-size:12px;font-weight:700;text-decoration:none;transition:.15s;margin:10px 0 0;}
+.wbtn:hover{background:linear-gradient(135deg,rgba(79,142,247,.18),rgba(224,64,160,.12));}
+.pgndl{display:flex;flex-direction:column;gap:6px;margin-top:7px;}
+.pgndl a{display:flex;align-items:center;gap:9px;background:linear-gradient(135deg,rgba(79,142,247,.05),rgba(224,64,160,.03));border:1px solid rgba(79,142,247,.13);border-radius:var(--r);padding:8px 11px;color:var(--text);text-decoration:none;transition:.15s;font-size:12px;}
+.pgndl a:hover{background:linear-gradient(135deg,rgba(79,142,247,.1),rgba(224,64,160,.06));transform:translateX(3px);}
+.pgndl a .pn{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--blue2);}
+.pgndl a .pd{font-size:15px;color:var(--pink2);flex-shrink:0;}
+
+/* Center connector */
+.split-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:28px 0;}
+.conn{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(79,142,247,.1),rgba(224,64,160,.07));border:2px solid transparent;background-clip:padding-box;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;animation:connGlow 2.4s ease-in-out infinite;}
+.conn::before{content:'';position:absolute;inset:-2px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--pink));z-index:-1;}
+.conn span{animation:spin 5s linear infinite;display:block;background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+@keyframes connGlow{0%,100%{box-shadow:0 0 16px rgba(79,142,247,.2);}50%{box-shadow:0 0 48px rgba(224,64,160,.4),0 0 24px rgba(79,142,247,.3);}}
+.beam{width:2px;flex:1;min-height:20px;background:linear-gradient(to bottom,rgba(79,142,247,.4),rgba(224,64,160,.4),rgba(79,142,247,.05));border-radius:2px;}
+.clabel{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;text-align:center;line-height:1.45;background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* Extra: Zodiac + Personality */
+.personality-box{background:linear-gradient(135deg,rgba(79,142,247,.07),rgba(155,93,229,.05));border:1px solid rgba(79,142,247,.18);border-radius:16px;padding:16px 18px;margin-top:20px;animation:fadeU .6s ease-out .5s backwards;}
+.pb-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;background:linear-gradient(135deg,var(--blue2),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.pb-content{font-size:13px;color:var(--muted2);line-height:1.65;}
+.pb-content b{color:var(--text);}
+
+/* Share Section */
+.share-section{background:linear-gradient(135deg,rgba(79,142,247,.06),rgba(224,64,160,.04));border:1px solid var(--border);border-radius:18px;padding:22px;margin-top:22px;animation:fadeU .6s ease-out .6s backwards;}
+.share-title{font-size:13px;font-weight:800;margin-bottom:14px;text-align:center;}
+.share-title span{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.share-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px;}
+.share-btn{display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:700;padding:10px 14px;border-radius:var(--r);border:none;cursor:pointer;transition:.2s;text-align:center;}
+.share-btn:hover{transform:translateY(-2px);}
+.sb-wa{background:#25D366;color:#fff;box-shadow:0 4px 16px rgba(37,211,102,.25);}
+.sb-wa:hover{box-shadow:0 6px 24px rgba(37,211,102,.4);}
+.sb-copy{background:var(--glass);border:1px solid var(--border);color:var(--text);}
+.sb-img{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;box-shadow:0 4px 16px rgba(79,142,247,.25);}
+.sb-img:hover{box-shadow:0 6px 24px rgba(79,142,247,.4);}
+.sb-tool{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;box-shadow:0 4px 16px rgba(155,93,229,.25);}
+.sb-tool:hover{box-shadow:0 6px 24px rgba(155,93,229,.4);}
+.sb-reset{background:linear-gradient(135deg,var(--blue2),var(--cyan));color:#000;font-weight:900;}
+
+/* ══════════════════════════════
+   SCREEN 4 — NO MATCH
+══════════════════════════════ */
+#s-nomatch{display:none;position:relative;z-index:1;}
+#s-nomatch.show{display:block;}
+.nm-wrap{max-width:720px;margin:0 auto;padding:clamp(36px,7vw,70px) clamp(14px,4vw,24px) 60px;}
+
+/* Big uplifting message */
+.nm-hero{text-align:center;margin-bottom:28px;}
+.nm-icon{font-size:56px;margin-bottom:16px;display:block;animation:fp 3s ease-in-out infinite;}
+.nm-wrap h2{font-size:clamp(20px,4vw,32px);font-weight:900;margin-bottom:6px;text-align:center;}
+.nm-dob{text-align:center;background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:18px;font-weight:800;margin-bottom:10px;}
+.nm-message{background:linear-gradient(135deg,rgba(79,142,247,.07),rgba(224,64,160,.05));border:1px solid rgba(79,142,247,.18);border-radius:16px;padding:18px 22px;margin-bottom:24px;line-height:1.75;font-size:14px;color:var(--muted2);}
+.nm-message b{color:var(--text);}
+.nm-message .gold{color:var(--gold);}
+
+/* Same-month section */
+.nm-month-title{font-size:14px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.nm-month-title .mt{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nm-month-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(79,142,247,.3),transparent);}
+.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:26px;}
+.month-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:14px 12px;text-align:center;transition:.2s;animation:cardIn .35s ease-out backwards;}
+.month-card:hover{border-color:rgba(79,142,247,.35);transform:translateY(-3px);}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.mc-av{width:52px;height:52px;border-radius:50%;margin:0 auto 9px;border:2px solid transparent;background:linear-gradient(var(--bg2),var(--bg2)) padding-box,linear-gradient(135deg,var(--blue),var(--pink)) border-box;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:var(--blue2);overflow:hidden;}
+.mc-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.mc-name{font-size:12px;font-weight:800;margin-bottom:3px;line-height:1.25;}
+.mc-title{font-size:10.5px;color:var(--blue2);font-weight:700;}
+.mc-dob{font-size:10px;color:var(--muted);background:rgba(255,255,255,.04);border-radius:5px;padding:2px 7px;margin-top:5px;display:inline-block;}
+
+/* Chess quote */
+.quote-box{background:linear-gradient(135deg,rgba(79,142,247,.06),rgba(155,93,229,.04));border:1px solid rgba(79,142,247,.16);border-left:3px solid var(--blue);border-radius:0 var(--r) var(--r) 0;padding:16px 18px;margin-bottom:22px;}
+.qt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;background:linear-gradient(135deg,var(--blue2),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.quote-box p{font-size:13px;color:var(--muted2);line-height:1.72;font-style:italic;}
+
+/* No-match share */
+.nm-share{background:linear-gradient(135deg,rgba(79,142,247,.06),rgba(224,64,160,.04));border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:6px;}
+.nm-share-title{font-size:13px;font-weight:800;margin-bottom:12px;text-align:center;}
+.nm-share-title span{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);border-radius:50px;padding:10px 22px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok{background:rgba(63,214,143,.12);border:1px solid rgba(63,214,143,.28);color:var(--green);}
+.toast.err{background:rgba(255,79,110,.1);border:1px solid rgba(255,79,110,.28);color:var(--red);}
+
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(79,142,247,.2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1" style="--od:22s;--odl:0s;"></div>
+  <div class="orb orb2" style="--od:18s;--odl:4s;"></div>
+  <div class="orb orb3" style="--od:26s;--odl:9s;"></div>
+</div>
+<div class="pieces-bg" id="piecesBg"></div>
+
+<nav>
+  <a class="brand" href="chessbornmatch.html">
+    <span class="icon">♛</span>
+    <span>Chess Birthday Match</span>
+  </a>
+</nav>
+
+<!-- S1: FINDER -->
+<div id="s-finder">
+  <div class="finder-hero">
+    <div class="hero-badge"><span>🎂 Chess Birthday Match Finder</span></div>
+    <h1>Find Your<br/><span class="g">Chess Legend Twin</span></h1>
+    <p>Enter your name and birthday to discover which legendary chess grandmaster shares your birth date.</p>
+  </div>
+  <div style="padding:0 16px;position:relative;z-index:1;">
+    <div class="form-card">
+      <div class="field">
+        <label>Your Name</label>
+        <input type="text" id="userName" placeholder="Enter your full name" maxlength="80" oninput="updateBtn()"/>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Date of Birth</label>
+        <input type="date" id="userDob" onchange="updateBtn()"/>
+      </div>
+      <button class="btn-find" id="btnFind" disabled onclick="startMatch()" style="margin-top:18px;">
+        ♞ Find My Chess Legend
+      </button>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;" id="dbCount">Connecting…</p>
+    </div>
+    <div class="finder-stats" id="finderStats" style="display:none;">
+      <div class="fstat"><div class="fstat-val" id="s-total">—</div><div class="fstat-label">Legends</div></div>
+      <div class="fstat"><div class="fstat-val" id="s-champ">—</div><div class="fstat-label">Champions</div></div>
+      <div class="fstat"><div class="fstat-val" id="s-country">—</div><div class="fstat-label">Countries</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S2: LOADING -->
+<div id="s-loading">
+  <div id="particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
+  <div class="ring-wrap">
+    <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+    <div class="mm-av" id="mmAv">♟</div>
+    <div class="mm-orbit"><div class="mm-orbit-dot">♞</div></div>
+  </div>
+  <div class="mm-name" id="mmName">&nbsp;</div>
+  <div class="mm-msg"  id="mmMsg">Searching Chess History…</div>
+  <div class="mm-dots">
+    <div class="mm-dot on"></div><div class="mm-dot"></div>
+    <div class="mm-dot"></div><div class="mm-dot"></div><div class="mm-dot"></div>
+  </div>
+</div>
+
+<!-- S3: MATCH -->
+<div id="s-match">
+  <div class="result-wrap" id="matchPage">
+    <div class="result-top">
+      <div class="res-badge"><span>✨ Birthday Match Found!</span></div>
+      <div class="res-headline" id="resHeadline"></div>
+    </div>
+    <div class="match-tabs" id="matchTabs"></div>
+    <div class="split" id="splitWrap"></div>
+    <div class="personality-box" id="personalityBox"></div>
+    <div class="share-section">
+      <div class="share-title"><span>📤 Share Your Result</span></div>
+      <div class="share-grid">
+        <button class="share-btn sb-wa"   onclick="shareResultWA()">📱 Share Result on WhatsApp</button>
+        <button class="share-btn sb-tool" onclick="shareToolWA()">♟ Invite Friends to Try</button>
+        <button class="share-btn sb-copy" onclick="copyResult()">🔗 Copy Result Text</button>
+        <button class="share-btn sb-img"  onclick="saveAsImage()">🖼 Save as Image</button>
+        <button class="share-btn sb-reset" onclick="resetAll()">♟ Find Again</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S4: NO MATCH -->
+<div id="s-nomatch">
+  <div class="nm-wrap" id="noMatchPage">
+    <div class="nm-hero">
+      <span class="nm-icon">♟</span>
+      <h2>No Exact Match — But You're In Great Company!</h2>
+      <div class="nm-dob" id="nmDob"></div>
+    </div>
+    <div class="nm-message" id="nmMessage"></div>
+    <div class="quote-box">
+      <div class="qt">♟ Chess Wisdom For You</div>
+      <p id="quoteText"></p>
+    </div>
+    <div class="nm-month-title"><span class="mt" id="nmMonthTitle">Chess Legends Born In Your Month</span></div>
+    <div class="month-grid" id="monthGrid"></div>
+    <div class="nm-share">
+      <div class="nm-share-title"><span>📤 Share This Tool With Friends</span></div>
+      <div class="share-grid">
+        <button class="share-btn sb-wa"   onclick="shareToolWA()">📱 Share on WhatsApp</button>
+        <button class="share-btn sb-copy" onclick="copyToolLink()">🔗 Copy Tool Link</button>
+        <button class="share-btn sb-reset" onclick="resetAll()">🎂 Try Another Birthday</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s",
+  authDomain:"ratedeventsgj.firebaseapp.com",
+  projectId:"ratedeventsgj",
+  storageBucket:"ratedeventsgj.firebasestorage.app",
+  messagingSenderId:"527826897689",
+  appId:"1:527826897689:web:fb0439fff04a695a599388"
+});
+const db = getFirestore(app);
+
+const TOOL_URL = window.location.href.split("?")[0];
+
+const MSGS = [
+  "Searching Chess History…",
+  "Looking Through Grandmasters…",
+  "Finding Your Chess Twin…",
+  "Matching Your Birthday…",
+  "Preparing Your Result…",
+];
+const QUOTES = [
+  "\"Chess is not about winning. It is about the beauty of the journey — every move teaches you something new about yourself.\"",
+  "\"Every chess master was once a beginner who refused to give up. Your greatest game is still ahead of you.\"",
+  "\"The beauty of chess is that it gives you unlimited ways to express your genius. No two players are ever alike.\"",
+  "\"Chess is the art of analysis. The greatest legends weren't born great — they were forged through thousands of hours of passion.\"",
+  "\"In chess, as in life, the most important quality is the courage to keep playing, keep learning, keep discovering.\"",
+];
+const MONTH_NAMES=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+const ZODIAC=[
+  {s:"Capricorn",e:"Aquarius",d:"Dec 22",e2:"Jan 19",piece:"♖",trait:"strategic and patient — you build your position piece by piece like a master Rook."},
+  {s:"Aquarius",e:"Pisces",d:"Jan 20",e2:"Feb 18",piece:"♘",trait:"innovative and unpredictable — you leap over obstacles like a Knight, always finding unexpected solutions."},
+  {s:"Pisces",e:"Aries",d:"Feb 19",e2:"Mar 20",piece:"♕",trait:"intuitive and powerful — you move in all directions like a Queen, guided by deep inner vision."},
+  {s:"Aries",e:"Taurus",d:"Mar 21",e2:"Apr 19",piece:"♔",trait:"bold and decisive — you lead from the front like a King who never backs down from a challenge."},
+  {s:"Taurus",e:"Gemini",d:"Apr 20",e2:"May 20",piece:"♖",trait:"solid and reliable — your endgame is unbreakable, just like a Rook defending the final ranks."},
+  {s:"Gemini",e:"Cancer",d:"May 21",e2:"Jun 20",piece:"♘",trait:"versatile and quick-minded — like a Knight, you think in multiple directions at once."},
+  {s:"Cancer",e:"Leo",d:"Jun 21",e2:"Jul 22",piece:"♗",trait:"deep and positional — you control the diagonals of life with the subtle power of a Bishop."},
+  {s:"Leo",e:"Virgo",d:"Jul 23",e2:"Aug 22",piece:"♕",trait:"commanding and creative — you dominate the board like a Queen who was born to lead."},
+  {s:"Virgo",e:"Libra",d:"Aug 23",e2:"Sep 22",piece:"♗",trait:"precise and analytical — every move calculated perfectly, just like a Bishop sweeping the board."},
+  {s:"Libra",e:"Scorpio",d:"Sep 23",e2:"Oct 22",piece:"♔",trait:"balanced and elegant — you play the long game, always seeking harmony on every square."},
+  {s:"Scorpio",e:"Sagittarius",d:"Oct 23",e2:"Nov 21",piece:"♘",trait:"intense and tactical — you sacrifice boldly like a Knight in the most brilliant combinations."},
+  {s:"Sagittarius",e:"Capricorn",d:"Nov 22",e2:"Dec 21",piece:"♕",trait:"adventurous and visionary — you play like a Queen who explores every corner of the board fearlessly."},
+];
+
+function getZodiac(dob){
+  const d=new Date(dob+"T00:00:00");
+  const m=d.getMonth()+1,dy=d.getDate();
+  const z=ZODIAC.find((_,i)=>{
+    const signs=[
+      [1,20],[2,19],[3,21],[4,20],[5,21],[6,21],
+      [7,23],[8,23],[9,23],[10,23],[11,22],[12,22]
+    ];
+    const [sm,sd]=signs[i];
+    return(m===sm&&dy>=sd)||(m===(sm%12)+1&&dy<signs[(i+1)%12][1]);
+  });
+  return z||ZODIAC[0];
+}
+
+function personalityHTML(userName,dob,matchName){
+  const z=getZodiac(dob);
+  return`<div class="pb-title">♟ Your Chess Personality</div>
+  <div class="pb-content">
+    <b>${userName}</b>, as a <b>${z.s}</b>, you are ${z.trait}<br/><br/>
+    Your chess spirit piece is the <b style="font-size:18px">${z.piece}</b> — and just like <b>${matchName}</b>, you were born to leave your mark on the board of history. ♟
+  </div>`;
+}
+
+let all=[], curUser={name:"",dob:""}, matches=[], selIdx=0;
+
+/* Floating pieces */
+(function(){
+  const p=["♔","♕","♖","♗","♘","♙","♚","♛","♜","♝","♞","♟"];
+  const c=["#4f8ef7","#e040a0","#9b5de5","#00d4ff","#f0cc50","#ff6ec7"];
+  const bg=document.getElementById("piecesBg");
+  p.forEach((ch,i)=>{
+    const d=document.createElement("div");d.className="fpiece";d.textContent=ch;
+    d.style.cssText=`left:${(i*8.3)%97}%;top:${(i*11.7)%93}%;--fd:${10+i*1.3}s;--fdl:${i*0.55}s;--fs:${18+Math.random()*28}px;color:${c[i%c.length]};`;
+    bg.appendChild(d);
+  });
+})();
+
+function ini(n){return(n||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();}
+function fmt(d){if(!d)return"—";return new Date(d+"T00:00:00").toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});}
+function getBD(d){const dt=new Date(d+"T00:00:00");return{m:dt.getMonth()+1,d:dt.getDate()};}
+function photoSrc(p){return p.photoBase64||p.photoURL||"";}
+
+async function loadDB(){
+  try{
+    const snap=await getDocs(collection(db,"legendplayerdb"));
+    all=snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById("dbCount").textContent=`Searching across ${all.length} legendary chess player${all.length!==1?"s":""}`;
+    document.getElementById("s-total").textContent=all.length;
+    document.getElementById("s-champ").textContent=all.filter(p=>p.worldChampion).length;
+    document.getElementById("s-country").textContent=[...new Set(all.map(p=>p.country))].length;
+    document.getElementById("finderStats").style.display="flex";
+  }catch(e){
+    document.getElementById("dbCount").textContent="⚠️ Could not load — check Firestore rules";
+    console.error(e);
+  }
+}
+loadDB();
+
+window.updateBtn=function(){
+  const n=document.getElementById("userName").value.trim();
+  const d=document.getElementById("userDob").value;
+  document.getElementById("btnFind").disabled=!n||!d;
+};
+
+window.startMatch=function(){
+  const name=document.getElementById("userName").value.trim();
+  const dob=document.getElementById("userDob").value;
+  if(!name||!dob) return;
+  curUser={name,dob};
+  const{m:um,d:ud}=getBD(dob);
+  matches=all.filter(p=>{const{m,d}=getBD(p.dob);return m===um&&d===ud;});
+  selIdx=0;
+  showScreen("loading");
+  runLoading();
+};
+
+function runLoading(){
+  const pb=document.getElementById("particles");pb.innerHTML="";
+  const colors=["#4f8ef7","#e040a0","#9b5de5","#00d4ff","#ff6ec7"];
+  for(let i=0;i<22;i++){
+    const p=document.createElement("div");p.className="particle";
+    const a=Math.random()*Math.PI*2,dist=50+Math.random()*90;
+    p.style.cssText=`left:calc(50% + ${Math.cos(a)*dist}px);top:calc(50% + ${Math.sin(a)*dist}px);--px:${(Math.random()-.5)*220}px;--py:${-40-Math.random()*90}px;--pd:${1.8+Math.random()*2}s;--pdl:${Math.random()*2.5}s;background:${colors[i%colors.length]};`;
+    pb.appendChild(p);
+  }
+  const mmMsg=document.getElementById("mmMsg");
+  const mmAv=document.getElementById("mmAv");
+  const mmName=document.getElementById("mmName");
+  const dots=document.querySelectorAll(".mm-dot");
+  let msgIdx=0,photoIdx=0;
+  const msgInt=setInterval(()=>{
+    mmMsg.classList.add("fade");
+    setTimeout(()=>{msgIdx=(msgIdx+1)%MSGS.length;mmMsg.textContent=MSGS[msgIdx];mmMsg.classList.remove("fade");dots.forEach((d,i)=>d.classList.toggle("on",i===msgIdx));},200);
+  },1300);
+  let photoInt=null;
+  if(all.length){
+    photoInt=setInterval(()=>{
+      mmAv.classList.add("fade");mmName.classList.add("fade");
+      setTimeout(()=>{
+        photoIdx=(photoIdx+1)%all.length;const p=all[photoIdx];const src=photoSrc(p);
+        mmAv.innerHTML=src?`<img src="${src}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='<span>${ini(p.name)}</span>'">`:`<span>${ini(p.name)}</span>`;
+        mmName.textContent=p.name;mmAv.classList.remove("fade");mmName.classList.remove("fade");
+      },240);
+    },950);
+  }
+  setTimeout(()=>{
+    clearInterval(msgInt);if(photoInt)clearInterval(photoInt);
+    if(matches.length>0){buildMatch();showScreen("match");}
+    else{buildNoMatch();showScreen("nomatch");}
+  },7000);
+}
+
+function buildMatch(){
+  const p=matches[selIdx];
+  document.getElementById("resHeadline").innerHTML=
+    p.worldChampion
+      ?`You share your birthday with World Champion <span class="g">${p.title} ${p.name}</span>`
+      :`Congratulations! Your birthday matches legendary <span class="g">${p.title} ${p.name}</span>`;
+  const tabs=document.getElementById("matchTabs");
+  if(matches.length>1){
+    tabs.style.display="flex";
+    tabs.innerHTML=matches.map((m,i)=>`<div class="mtab${i===selIdx?" on":""}" onclick="switchM(${i})">${m.name}</div>`).join("");
+  }else tabs.style.display="none";
+  document.getElementById("splitWrap").innerHTML=buildSplit(curUser,p);
+  document.getElementById("personalityBox").innerHTML=personalityHTML(curUser.name,curUser.dob,p.name);
+}
+window.switchM=function(i){selIdx=i;buildMatch();};
+
+function buildSplit(user,p){
+  const src=photoSrc(p);
+  const notable=p.notableGames||[];
+  const games=p.gamesCollection&&p.notableGames?p.gamesCollection:[];
+  function pgnHTML(arr,label){
+    if(!arr.length) return "";
+    return`<div class="stitle"><span class="st">${label}</span></div>
+    <div class="pgndl">${arr.map(g=>{
+      const blob=new Blob([g.content||""],{type:"application/x-chess-pgn"});
+      const url=URL.createObjectURL(blob);
+      return`<a href="${url}" download="${g.name}"><span style="font-size:14px;flex-shrink:0">♟</span><span class="pn">${g.name}</span><span class="pd">⬇</span></a>`;
+    }).join("")}</div>`;
+  }
+  const fideLink=p.fideId?`<a href="https://ratings.fide.com/profile/${p.fideId}" target="_blank" rel="noopener" style="color:var(--blue2);text-decoration:none;">${p.fideId} ↗</a>`:null;
+  return`
+  <div class="ucard">
+    <div class="ucard-top"><div class="uboard"></div>
+      <div class="u-av">${ini(user.name)}</div>
+      <div class="cname" style="margin-top:8px;">${user.name}</div>
+      <div class="csub">Chess Enthusiast</div>
+    </div>
+    <div class="irow"><span class="ir-l">Birthday</span><span class="ir-v blue">${fmt(user.dob)}</span></div>
+    <div class="irow"><span class="ir-l">Chess Twin</span><span class="ir-v">${p.name}</span></div>
+    <div class="irow"><span class="ir-l">Shared Day</span><span class="ir-v pink">${new Date(user.dob+"T00:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric"})}</span></div>
+  </div>
+  <div class="split-mid">
+    <div class="beam"></div>
+    <div class="conn"><span>♞</span></div>
+    <div class="clabel">BIRTHDAY<br/>MATCH</div>
+    <div class="beam"></div>
+  </div>
+  <div class="lcard">
+    <div style="text-align:center;margin-bottom:14px;">
+      <div class="l-av">${src?`<img src="${src}" alt="${p.name}" onerror="this.parentElement.innerHTML='<span>${ini(p.name)}</span>'">`:`<span>${ini(p.name)}</span>`}${p.worldChampion?`<div class="champ-dot">♛</div>`:""}</div>
+      <div class="cname">${p.name}</div>
+      <div class="chips" style="justify-content:center;">
+        <span class="chip cb">${p.title||"GM"}</span>
+        ${p.worldChampion?`<span class="chip cgold">♛ World Champion</span>`:""}
+        ${p.active?`<span class="chip cgr">Active</span>`:`<span class="chip cgy">Retired</span>`}
+        <span class="chip cgy">${p.country||""}</span>
+      </div>
+    </div>
+    <div class="irow"><span class="ir-l">Born</span><span class="ir-v blue">${fmt(p.dob)}</span></div>
+    ${p.dod?`<div class="irow"><span class="ir-l">Died</span><span class="ir-v">${fmt(p.dod)}</span></div>`:""}
+    ${p.peakRating?`<div class="irow"><span class="ir-l">Peak Rating</span><span class="ir-v pink">${p.peakRating}</span></div>`:""}
+    ${fideLink?`<div class="irow"><span class="ir-l">FIDE Profile</span><span class="ir-v">${fideLink}</span></div>`:""}
+    ${p.wikipedia?`<a class="wbtn" href="${p.wikipedia}" target="_blank" rel="noopener">📖 Wikipedia</a>`:""}
+    ${pgnHTML(notable,"♟ Notable Games")}
+    ${pgnHTML(games,"♗ Games Collection")}
+  </div>`;
+}
+
+function buildNoMatch(){
+  const dob=curUser.dob;
+  const dt=new Date(dob+"T00:00:00");
+  const monthName=MONTH_NAMES[dt.getMonth()];
+  const monthNum=dt.getMonth()+1;
+  document.getElementById("nmDob").textContent=fmt(dob);
+  document.getElementById("nmMessage").innerHTML=
+    `While no chess legend in our database shares your <b>exact birthday</b> of <span class="gold">${new Date(dob+"T00:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric"})}</span>, that doesn't make your birthday any less special! <br/><br/>
+    <b>${monthName}</b> is a remarkable month in chess history. Some of the greatest minds to ever touch a chess piece were born in your month — players who changed the game forever. You walk in the footsteps of legends, and perhaps one day, <b>${curUser.name}</b>, your name will be on this list too. ♟<br/><br/>
+    <span class="gold">♛ Keep playing. Keep learning. Your legacy is just beginning.</span>`;
+  document.getElementById("quoteText").textContent=QUOTES[Math.floor(Math.random()*QUOTES.length)].replace(/"/g,"");
+  const sameMonth=all.filter(p=>{const{m}=getBD(p.dob);return m===monthNum;}).sort((a,b)=>getBD(a.dob).d-getBD(b.dob).d);
+  document.getElementById("nmMonthTitle").textContent=`Chess Legends Born in ${monthName}`;
+  const grid=document.getElementById("monthGrid");
+  if(sameMonth.length){
+    grid.innerHTML=sameMonth.map((p,i)=>{
+      const src=photoSrc(p);
+      return`<div class="month-card" style="animation-delay:${i*.06}s">
+        <div class="mc-av">${src?`<img src="${src}" alt="${p.name}" onerror="this.parentElement.innerHTML='<span>${ini(p.name)}</span>'">`:`<span>${ini(p.name)}</span>`}</div>
+        <div class="mc-name">${p.name}</div>
+        <div class="mc-title">${p.title||"GM"} · ${p.country||""}</div>
+        <div class="mc-dob">${fmt(p.dob)}</div>
+      </div>`;
+    }).join("");
+  }else{
+    grid.innerHTML=`<p style="color:var(--muted2);font-size:13px;grid-column:1/-1;text-align:center;">No players in our database yet for ${monthName}. Check back as we add more legends!</p>`;
+  }
+}
+
+/* Share functions */
+window.shareResultWA=function(){
+  const p=matches[selIdx];
+  const text=`🎂♟ Amazing discovery!\n\nI (${curUser.name}) share my birthday with ${p.worldChampion?"World Champion ":""}${p.title} ${p.name} from ${p.country||""}!\n\nBorn on the same day: ${fmt(curUser.dob)} 🎉\n\n🔍 Find YOUR chess birthday twin here:\n${TOOL_URL}\n\n#ChessBirthday #ChessLegends`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,"_blank");
+};
+window.shareToolWA=function(){
+  const text=`♟ Chess Birthday Match Finder!\n\nDiscover which legendary chess grandmaster shares your birthday!\n\nI found mine — now check yours! 🎂\n👉 ${TOOL_URL}\n\n#ChessBirthday #Chess #Grandmaster`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,"_blank");
+};
+window.copyResult=function(){
+  const p=matches[selIdx];
+  const text=`🎂 I (${curUser.name}) share my birthday (${fmt(curUser.dob)}) with ${p.title} ${p.name} from ${p.country||""}!\nFind YOUR chess birthday twin → ${TOOL_URL}`;
+  navigator.clipboard.writeText(text).then(()=>toast("✅ Copied to clipboard!","ok"));
+};
+window.copyToolLink=function(){
+  const text=`♟ Find which chess grandmaster shares your birthday!\n${TOOL_URL}`;
+  navigator.clipboard.writeText(text).then(()=>toast("✅ Link copied!","ok"));
+};
+window.saveAsImage=function(){
+  toast("📸 Screenshot your screen to save as image — press Power + Volume Down (mobile) or use your browser's screenshot tool","ok");
+};
+
+/* Screen manager */
+function showScreen(name){
+  document.getElementById("s-finder").style.display=name==="finder"?"block":"none";
+  document.getElementById("s-loading").classList.toggle("show",name==="loading");
+  document.getElementById("s-match").classList.toggle("show",name==="match");
+  document.getElementById("s-nomatch").classList.toggle("show",name==="nomatch");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+window.resetAll=function(){
+  document.getElementById("userName").value="";
+  document.getElementById("userDob").value="";
+  document.getElementById("btnFind").disabled=true;
+  matches=[];selIdx=0;
+  showScreen("finder");
+};
+
+/* Toast */
+let tt=null;
+window.toast=function(msg,type="ok"){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.className=`toast show ${type}`;
+  clearTimeout(tt);tt=setTimeout(()=>el.className="toast",3500);
+};
+</script>
+</body>
+</html>
