@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1st Jyoti CNC International Classical Chess Tournament 2026</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+  .page { max-width: 900px; margin: 0 auto; background: #fff; }
+
+  /* HERO */
+  .logo-bar {
+    background: #fff;
+    border: 2px solid #e8e8e8;
+    border-radius: 12px;
+    margin: 18px 18px 0;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .logo-bar img { height: 52px; object-fit: contain; }
+
+  .hero {
+    background: linear-gradient(160deg, #0d1b4b 0%, #1a2f6e 60%, #0d1b4b 100%);
+    color: #fff;
+    text-align: center;
+    padding: 36px 24px 28px;
+    margin: 0 18px;
+  }
+  .event-code {
+    display: inline-block;
+    border: 1.5px solid #c9a227;
+    color: #c9a227;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .hero h1 sup { font-size: 18px; }
+  .hero .tagline {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #c9a227;
+    margin-bottom: 14px;
+  }
+  .hero .org {
+    font-size: 13px;
+    color: #b0bec5;
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+  .hero-pills {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .hero-pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #cfd8dc;
+    text-align: center;
+  }
+  .hero-pill strong { display: block; font-size: 10px; letter-spacing: 1.5px; color: #c9a227; margin-bottom: 2px; }
+
+  /* PRIZE BANNER */
+  .prize-banner {
+    background: linear-gradient(90deg, #0d1b4b, #1a2f6e);
+    border: 2px solid #c9a227;
+    border-radius: 10px;
+    margin: 18px 18px 0;
+    padding: 22px;
+    text-align: center;
+    color: #fff;
+  }
+  .prize-banner .label { font-size: 11px; letter-spacing: 3px; color: #c9a227; margin-bottom: 6px; }
+  .prize-banner .amount { font-size: 42px; font-weight: 900; color: #c9a227; }
+
+  /* SECTIONS */
+  .section { padding: 24px 18px 0; }
+  .section-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1a2f6e;
+    border-bottom: 3px solid #c9a227;
+    padding-bottom: 6px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* OVERVIEW GRID */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .overview-card {
+    border-left: 3px solid #c9a227;
+    padding: 10px 14px;
+    background: #f8f9ff;
+  }
+  .overview-card .oc-label { font-size: 10px; font-weight: 700; color: #c9a227; letter-spacing: 1px; margin-bottom: 3px; }
+  .overview-card .oc-value { font-size: 14px; font-weight: 600; color: #1a2f6e; }
+
+  /* VENUE */
+  .venue-box {
+    background: #f8f9ff;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .venue-box .v-label { font-weight: 700; color: #1a2f6e; font-size: 13px; margin-bottom: 4px; }
+  .venue-box a { color: #c9a227; font-weight: 600; text-decoration: none; }
+  .venue-ac {
+    font-style: italic;
+    color: #555;
+    font-size: 13px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* VENUE PHOTOS */
+  .venue-photos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .venue-photos img {
+    width: 100%;
+    border-radius: 8px;
+    height: 160px;
+    object-fit: cover;
+    background: #ddd;
+  }
+  .venue-photo-placeholder {
+    background: linear-gradient(135deg, #dde1ea, #c8cdd8);
+    border-radius: 8px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 13px;
+  }
+
+  /* ENTRY FEES */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { background: #1a2f6e; color: #fff; padding: 10px 14px; text-align: left; font-weight: 700; }
+  td { padding: 10px 14px; border-bottom: 1px solid #e8e8e8; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #f8f9ff; }
+  .fee-note {
+    background: #fff8e1;
+    border-left: 4px solid #c9a227;
+    padding: 12px 14px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: #1a1a2e;
+    line-height: 1.5;
+  }
+  .fee-note strong { color: #c9a227; }
+
+  /* TWO COLS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+
+  /* REGISTRATION */
+  .reg-box {
+    border: 2px solid #c9a227;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .reg-box .reg-title { font-size: 13px; font-weight: 700; color: #1a2f6e; margin-bottom: 8px; }
+  .qr-placeholder {
+    background: #f0f2f5;
+    border: 1.5px dashed #aaa;
+    border-radius: 8px;
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .reg-link { font-size: 12px; color: #c9a227; font-weight: 600; }
+  .reg-cta { font-size: 12px; font-weight: 800; color: #1a2f6e; letter-spacing: 1px; margin-bottom: 4px; }
+
+  /* BANK */
+  .bank-box {
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .bank-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+  .bank-row:last-child { border-bottom: none; }
+  .bank-row .bk { font-weight: 700; color: #c9a227; }
+  .bank-row .bv { font-weight: 600; color: #1a2f6e; }
+
+  /* PRIZES */
+  .prize-table-wrap { border-radius: 10px; overflow: hidden; margin-bottom: 18px; }
+  .prize-table-wrap table th:first-child,
+  .prize-table-wrap table td:first-child { width: 50%; }
+
+  /* CATEGORY PRIZES */
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .cat-card { border-radius: 8px; overflow: hidden; }
+  .cat-card .cat-head { background: #1a2f6e; color: #fff; padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+  .cat-card table th { background: #2a3f7e; font-size: 12px; }
+  .cat-card table td { font-size: 12.5px; }
+
+  /* SCHEDULE */
+  .schedule-table th { background: #1a2f6e; }
+  .schedule-table tr.highlight td { background: #fff8e1; font-weight: 700; }
+
+  /* ARBITERS */
+  .arbiter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .arbiter-card {
+    border-top: 3px solid #c9a227;
+    padding: 14px;
+    text-align: center;
+    background: #f8f9ff;
+    border-radius: 0 0 8px 8px;
+  }
+  .arbiter-card .arb-role { font-size: 10px; letter-spacing: 1.5px; color: #c9a227; font-weight: 700; margin-bottom: 4px; }
+  .arbiter-card .arb-name { font-size: 14px; font-weight: 800; color: #1a2f6e; margin-bottom: 6px; }
+  .arbiter-card .arb-detail { font-size: 12px; color: #555; line-height: 1.6; }
+
+  /* RULES */
+  .rules-list { list-style: none; padding: 0; }
+  .rules-list li {
+    padding: 7px 0 7px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    position: relative;
+  }
+  .rules-list li::before { content: "•"; position: absolute; left: 0; color: #c9a227; font-weight: 700; }
+  .rules-list li:last-child { border-bottom: none; }
+  .appeals-box {
+    background: #fff8e1;
+    border-left: 4px solid #c9a227;
+    padding: 12px 14px;
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* AICF LINKS */
+  .aicf-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 14px; }
+  .aicf-card {
+    border: 2px solid #c9a227;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .aicf-qr {
+    background: #f0f2f5;
+    border: 1.5px dashed #bbb;
+    border-radius: 6px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+  .aicf-card .aicf-label { font-size: 11px; font-weight: 800; color: #1a2f6e; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .aicf-card .aicf-link { font-size: 11px; color: #c9a227; }
+
+  /* CONTACT */
+  .contact-box {
+    background: #f8f9ff;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
+  .contact-box strong { color: #1a2f6e; }
+
+  /* BEST WISHES */
+  .best-wishes {
+    background: linear-gradient(135deg, #0d1b4b, #1a2f6e);
+    margin: 24px 18px 18px;
+    border-radius: 12px;
+    padding: 28px 24px;
+    text-align: center;
+    color: #fff;
+  }
+  .bw-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    color: #c9a227;
+  }
+  .bw-title-icon { margin-right: 6px; }
+  .bw-divider { width: 60px; height: 2px; background: #c9a227; margin: 8px auto 20px; }
+
+  .bw-org-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #c9a227;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+  .bw-org-divider { width: 120px; height: 1px; background: rgba(201,162,39,0.4); margin: 0 auto 14px; }
+
+  .bw-persons-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .bw-person {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(201,162,39,0.3);
+    border-radius: 8px;
+    padding: 14px 18px;
+    min-width: 170px;
+    text-align: center;
+  }
+  .bw-person .bp-name { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .bw-person .bp-role { font-size: 12px; color: #b0bec5; line-height: 1.4; }
+
+  .bw-org-section { margin-bottom: 22px; }
+
+  /* NOTE */
+  .note-text {
+    font-size: 12.5px;
+    color: #666;
+    text-align: center;
+    font-style: italic;
+    padding: 10px 18px;
+  }
+
+  @media (max-width: 600px) {
+    .overview-grid, .two-col, .arbiter-grid, .cat-grid, .aicf-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 22px; }
+    .prize-banner .amount { font-size: 30px; }
+    .bw-persons-row { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- LOGO BAR -->
+  <div class="logo-bar">
+    <!-- FIDE -->
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/FIDE_Logo.svg/200px-FIDE_Logo.svg.png" alt="FIDE" onerror="this.style.display='none'">
+    <!-- AICF -->
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/6b/All_India_Chess_Federation_Logo.png/150px-All_India_Chess_Federation_Logo.png" alt="AICF" onerror="this.style.display='none'">
+    <!-- GSCA -->
+    <span style="font-size:12px; font-weight:800; color:#1a2f6e; border:2px solid #1a2f6e; padding:6px 10px; border-radius:6px;">G.S.C.A.</span>
+    <!-- Jyoti Foundation -->
+    <span style="font-size:16px; font-weight:900; color:#1a2f6e; display:flex; align-items:center; gap:6px;">
+      <span style="color:#e8a020; font-size:22px;">🌸</span> <span>JYOTI<br><span style="font-weight:400; font-size:12px; letter-spacing:1px;">Foundation</span></span>
+    </span>
+    <!-- Jyoti CNC -->
+    <span style="font-size:18px; font-weight:900; color:#e8a020; letter-spacing:1px;">⚙️ JYOTI</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="event-code">EVENT CODE: TO BE ANNOUNCED</div>
+    <h1>1<sup>ST</sup> JYOTI CNC<br>INTERNATIONAL CLASSICAL<br>BELOW 1800 FIDE RATING<br>CHESS TOURNAMENT 2026</h1>
+    <div class="tagline">★ 9 ROUNDS &nbsp;|&nbsp; CLASSICAL FORMAT &nbsp;|&nbsp; FIDE RATED ★</div>
+    <div class="org">
+      Organized By<br>
+      Jyoti CNC Automation Limited-Rajkot &amp;<br>
+      Jyoti Foundation- Rajkot<br>
+      in association with Gujarat State Chess Association
+    </div>
+    <div class="hero-pills">
+      <div class="hero-pill"><strong>DATES</strong>10–12 July 2026</div>
+      <div class="hero-pill"><strong>VENUE CITY</strong>Vadodara, Gujarat</div>
+      <div class="hero-pill"><strong>PRIZE FUND</strong>₹3,00,000</div>
+      <div class="hero-pill"><strong>TIME CONTROL</strong>30 min + 30 sec</div>
+    </div>
+  </div>
+
+  <!-- PRIZE BANNER -->
+  <div class="prize-banner">
+    <div class="label">TOTAL PRIZE FUND</div>
+    <div class="amount">₹ 3,00,000/-</div>
+  </div>
+
+  <!-- TOURNAMENT OVERVIEW -->
+  <div class="section">
+    <div class="section-title">TOURNAMENT OVERVIEW</div>
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="oc-label">DATES</div>
+        <div class="oc-value">10th – 12th July 2026</div>
+      </div>
+      <div class="overview-card">
+        <div class="oc-label">FORMAT</div>
+        <div class="oc-value">Classical, 9 Rounds (Swiss)</div>
+      </div>
+      <div class="overview-card">
+        <div class="oc-label">TIME CONTROL</div>
+        <div class="oc-value">30 min + 30 sec bonus per move</div>
+      </div>
+      <div class="overview-card">
+        <div class="oc-label">ELIGIBILITY</div>
+        <div class="oc-value">Below 1800 FIDE Rating</div>
+      </div>
+      <div class="overview-card">
+        <div class="oc-label">LAST DATE OF REGISTRATION</div>
+        <div class="oc-value">09th July 2026</div>
+      </div>
+      <div class="overview-card">
+        <div class="oc-label">AICF REGISTRATION 2026-27</div>
+        <div class="oc-value">Compulsory for all players</div>
+      </div>
+    </div>
+
+    <div class="venue-box">
+      <div class="v-label">📍 VENUE</div>
+      Sama Indoor Sports Complex, New Sama Rd, Chanakyapuri Society, Sahkar Nagar 4, New Sama, Vadodara, Gujarat 390024<br><br>
+      <a href="https://share.google/bgL9yIWQZhJ8cw2Z8">📌 View Venue on Google Maps → https://share.google/bgL9yIWQZhJ8cw2Z8</a>
+    </div>
+    <div class="venue-ac">🌬️ <em>Tournament Venue is fully centralized AC for the comfort of all players and parents.</em></div>
+
+    <div class="venue-photos">
+      <div class="venue-photo-placeholder">Venue Photo 1</div>
+      <div class="venue-photo-placeholder">Venue Photo 2</div>
+    </div>
+  </div>
+
+  <!-- ENTRY FEES -->
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title">ENTRY FEES</div>
+    <div class="prize-table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Fee</th><th>Validity</th></tr></thead>
+        <tbody>
+          <tr><td>Early Bird Entry</td><td><strong>₹1,000/-</strong></td><td>Valid till 30th June 2026</td></tr>
+          <tr><td>Regular Entry</td><td><strong>₹1,250/-</strong></td><td>From 1st July 2026</td></tr>
+          <tr><td>Late Entry</td><td><strong>₹1,500/-</strong></td><td>From 6th July 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="fee-note">
+      <strong>Entry fee waved off for all Jyoti CNC Automation Limited Customers &amp; Employee and their immediate family members.</strong><br>
+      Send your entry on company's letterhead by mail to <strong>csr@jyoti.co.in</strong>
+    </div>
+
+    <div class="two-col" style="margin-top:20px;">
+      <!-- REGISTRATION -->
+      <div>
+        <div class="section-title" style="font-size:14px;">📋 TOURNAMENT REGISTRATION</div>
+        <div class="reg-box">
+          <div class="reg-title">Registration QR</div>
+          <div class="qr-placeholder">QR Code</div>
+          <div class="reg-cta">REGISTER HERE</div>
+          <div class="reg-link">forms.gle/kKesEsCZzxToyNVk7</div>
+        </div>
+      </div>
+      <!-- BANK -->
+      <div>
+        <div class="section-title" style="font-size:14px;">🏦 BANK DETAILS (NEFT / RTGS / IMPS)</div>
+        <div class="bank-box">
+          <div class="bank-row"><span class="bk">Account Name</span><span class="bv">Jyoti Foundation</span></div>
+          <div class="bank-row"><span class="bk">Bank</span><span class="bv">HDFC Bank</span></div>
+          <div class="bank-row"><span class="bk">Branch</span><span class="bv">Metoda</span></div>
+          <div class="bank-row"><span class="bk">Account No.</span><span class="bv">50200116491950</span></div>
+          <div class="bank-row"><span class="bk">IFSC Code</span><span class="bv">HDFC0005636</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN PRIZES -->
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title">🏆 MAIN PRIZES</div>
+    <div class="prize-table-wrap">
+      <table>
+        <thead><tr><th>Rank</th><th>Prize</th><th>Rank</th><th>Prize</th></tr></thead>
+        <tbody>
+          <tr><td>1st 🏆</td><td><strong>32,000</strong></td><td>2nd 🏆</td><td><strong>23,000</strong></td></tr>
+          <tr><td>3rd 🏆</td><td><strong>11,000</strong></td><td>4th</td><td><strong>7,000</strong></td></tr>
+          <tr><td>5th</td><td><strong>5,000</strong></td><td>6th</td><td><strong>4,000</strong></td></tr>
+          <tr><td>7th</td><td><strong>3,500</strong></td><td>8th</td><td><strong>3,000</strong></td></tr>
+          <tr><td>9th</td><td><strong>2,000</strong></td><td>10th</td><td><strong>2,000</strong></td></tr>
+          <tr><td colspan="4" style="text-align:center; font-style:italic; color:#555;">11th to 15th — ₹1,500/- each</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CATEGORY PRIZES -->
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title">🥇 CATEGORY PRIZES</div>
+    <p style="font-size:13px; color:#555; margin-bottom:14px; text-align:center;">Each category below awards Rank 1 to 5</p>
+    <div class="cat-grid">
+
+      <div class="cat-card">
+        <div class="cat-head">BELOW 1400–1499</div>
+        <table><thead><tr><th>Rank</th><th>Prize (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>1 🏆</td><td>10,000</td></tr>
+          <tr><td>2 🏆</td><td>6,000</td></tr>
+          <tr><td>3 🏆</td><td>4,000</td></tr>
+          <tr><td>4</td><td>3,000</td></tr>
+          <tr><td>5</td><td>2,000</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-head">BELOW 1500–1599</div>
+        <table><thead><tr><th>Rank</th><th>Prize (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>1 🏆</td><td>10,000</td></tr>
+          <tr><td>2 🏆</td><td>6,000</td></tr>
+          <tr><td>3 🏆</td><td>4,000</td></tr>
+          <tr><td>4</td><td>3,000</td></tr>
+          <tr><td>5</td><td>2,000</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-head">BELOW 1600–1699</div>
+        <table><thead><tr><th>Rank</th><th>Prize (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>1 🏆</td><td>10,000</td></tr>
+          <tr><td>2 🏆</td><td>6,000</td></tr>
+          <tr><td>3 🏆</td><td>4,000</td></tr>
+          <tr><td>4</td><td>3,000</td></tr>
+          <tr><td>5</td><td>2,000</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-head">BEST UNRATED</div>
+        <table><thead><tr><th>Rank</th><th>Prize (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>1 🏆</td><td>10,000</td></tr>
+          <tr><td>2 🏆</td><td>6,000</td></tr>
+          <tr><td>3 🏆</td><td>4,000</td></tr>
+          <tr><td>4</td><td>3,000</td></tr>
+          <tr><td>5</td><td>2,000</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-head">BEST VADODARA PLAYER</div>
+        <table><thead><tr><th>Rank</th><th>Prize (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>1 🏆</td><td>10,000</td></tr>
+          <tr><td>2 🏆</td><td>6,000</td></tr>
+          <tr><td>3 🏆</td><td>4,000</td></tr>
+          <tr><td>4</td><td>3,000</td></tr>
+          <tr><td>5</td><td>2,000</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-head">BEST VETERAN (ABOVE 60)</div>
+        <table><thead><tr><th>Rank</th><th>Prize (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>1 🏆</td><td>10,000</td></tr>
+          <tr><td>2 🏆</td><td>6,000</td></tr>
+          <tr><td>3 🏆</td><td>4,000</td></tr>
+          <tr><td>4</td><td>3,000</td></tr>
+          <tr><td>5</td><td>2,000</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-head">BEST UNDER-11</div>
+        <table><thead><tr><th>Rank</th><th>Prize (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>1 🏆</td><td>10,000</td></tr>
+          <tr><td>2 🏆</td><td>6,000</td></tr>
+          <tr><td>3 🏆</td><td>4,000</td></tr>
+          <tr><td>4</td><td>3,000</td></tr>
+          <tr><td>5</td><td>2,000</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="cat-card">
+        <div class="cat-head">BEST UNDER-17</div>
+        <table><thead><tr><th>Rank</th><th>Prize (₹)</th></tr></thead>
+        <tbody>
+          <tr><td>1 🏆</td><td>10,000</td></tr>
+          <tr><td>2 🏆</td><td>6,000</td></tr>
+          <tr><td>3 🏆</td><td>4,000</td></tr>
+          <tr><td>4</td><td>3,000</td></tr>
+          <tr><td>5</td><td>2,000</td></tr>
+        </tbody></table>
+      </div>
+
+    </div>
+    <div class="note-text">Note: Prizes are not cumulative. One player is eligible for only one higher cash prize.</div>
+  </div>
+
+  <!-- TOURNAMENT SCHEDULE -->
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title">📅 TOURNAMENT SCHEDULE</div>
+    <div class="prize-table-wrap">
+      <table class="schedule-table">
+        <thead><tr><th>Date</th><th>Time</th><th>Round</th></tr></thead>
+        <tbody>
+          <tr><td>10 July 2026</td><td>11:00 AM</td><td>Reporting Time</td></tr>
+          <tr><td>10 July 2026</td><td>12:00 PM</td><td>Round 1</td></tr>
+          <tr><td>10 July 2026</td><td>03:00 PM</td><td>Round 2</td></tr>
+          <tr><td>10 July 2026</td><td>05:30 PM</td><td>Round 3</td></tr>
+          <tr><td>11 July 2026</td><td>09:00 AM</td><td>Round 4</td></tr>
+          <tr><td>11 July 2026</td><td>12:00 PM</td><td>Round 5</td></tr>
+          <tr><td>11 July 2026</td><td>03:00 PM</td><td>Round 6</td></tr>
+          <tr><td>12 July 2026</td><td>09:00 AM</td><td>Round 7</td></tr>
+          <tr><td>12 July 2026</td><td>12:00 PM</td><td>Round 8</td></tr>
+          <tr><td>12 July 2026</td><td>03:00 PM</td><td>Round 9</td></tr>
+          <tr class="highlight"><td><strong>12 July 2026</strong></td><td><strong>06:30 PM</strong></td><td><strong>🏆 Prize Distribution</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ARBITERS -->
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title">⚖️ ARBITERS</div>
+    <div class="arbiter-grid">
+      <div class="arbiter-card">
+        <div class="arb-role">CHIEF ARBITER</div>
+        <div class="arb-name">IA Nitin Shenvi</div>
+        <div class="arb-detail">FIDE ID: 25004387<br>+91 97676 76927</div>
+      </div>
+      <div class="arbiter-card">
+        <div class="arb-role">DEPUTY CHIEF ARBITER</div>
+        <div class="arb-name">IA Aagam Aditya E</div>
+        <div class="arb-detail">FIDE ID: 35056557<br>+91 72019 38040</div>
+      </div>
+      <div class="arbiter-card">
+        <div class="arb-role">DEPUTY CHIEF ARBITER</div>
+        <div class="arb-name">FA Nikunjkumar I. Desai</div>
+        <div class="arb-detail">FIDE ID: 33464111<br>+91 88666 04114</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES & REGULATIONS -->
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title">📜 RULES &amp; REGULATIONS</div>
+    <ul class="rules-list">
+      <li>Tournament under FIDE Laws of Chess, Swiss System, 9 rounds.</li>
+      <li>Time Control: 30 minutes + 30 seconds increment per move (Classical).</li>
+      <li><strong>Eligibility:</strong> Players with FIDE Rating <strong>below 1800</strong> are eligible. Foreign players require a valid FIDE ID (FIN). Unrated players are also welcome.</li>
+      <li>Tie-Breaks in order: Buchholz Cut 1 → Buchholz All → Sonneborn-Berger → Direct Encounter → Greater number of wins → Wins with Black.</li>
+      <li>All prize winners must be present at the prize distribution ceremony to claim prizes.</li>
+      <li>Organisers reserve the right to accept/reject any entry without assigning reason.</li>
+      <li><strong>Withdrawals:</strong> Must inform the Chief Arbiter in writing.</li>
+      <li><strong>Electronic Devices:</strong> Mobiles, tabs, smartwatches, earbuds &amp; headphones are strictly not allowed in the hall — possession leads to a loss declaration.</li>
+      <li><strong>Discipline:</strong> Any player/parent disrupting decorum will face exclusion.</li>
+      <li><strong>Protests:</strong> Must be submitted in writing with a fee of ₹2,000/- within 10 minutes of the incident. Refunded only if upheld.</li>
+      <li>AICF Registration 2026–27 is compulsory and must be paid online before the tournament starts.</li>
+      <li>All prize money will be transferred within 7–20 working days after submission of required details.</li>
+      <li><strong>Indian Income Tax Act and Rules will be applicable.</strong></li>
+      <li><strong>One player will be given one (higher) prize only.</strong></li>
+      <li>Organizer's decision will be final &amp; binding.</li>
+    </ul>
+    <div class="appeals-box">
+      <strong>⚖️ Appeals Committee:</strong> An Appeals Committee will be formed before the start of the tournament, comprising of 5 members. The Appeals Committee's decision will be final and binding on all concerned players.
+    </div>
+  </div>
+
+  <!-- AICF REGISTRATION LINKS -->
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title">🔗 AICF REGISTRATION LINKS</div>
+    <div class="aicf-grid">
+      <div class="aicf-card">
+        <div class="aicf-qr">QR Code</div>
+        <div class="aicf-label">NEW AICF REGISTRATION</div>
+        <div class="aicf-link">prs.aicf.in/new-register</div>
+      </div>
+      <div class="aicf-card">
+        <div class="aicf-qr">QR Code</div>
+        <div class="aicf-label">AICF ID RENEWAL</div>
+        <div class="aicf-link">prs.aicf.in/players</div>
+      </div>
+      <div class="aicf-card">
+        <div class="aicf-qr">QR Code</div>
+        <div class="aicf-label">TOURNAMENT ENTRY</div>
+        <div class="aicf-link">forms.gle/kKesEsCZzxToyNVk7</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOD & ACCOMMODATION -->
+  <div class="section" style="margin-top:20px;">
+    <div class="section-title">🍽️ FOOD &amp; ACCOMMODATION</div>
+    <div class="contact-box">
+      For Food &amp; Accommodation queries, please contact <strong>Mr. Shailesh Rawal Sir</strong> — +91 77975 77779
+    </div>
+  </div>
+
+  <!-- REGISTRATION / ENTRIES / QUERIES -->
+  <div class="section" style="margin-top:20px; padding-bottom:4px;">
+    <div class="section-title">📞 REGISTRATION / ENTRIES / QUERIES</div>
+    <div class="contact-box">
+      <strong>Mr. Shailesh Rawal Sir</strong> (Chess Coach)<br><br>
+      For entries contact:<br>
+      +91 77975 77779 &nbsp;|&nbsp; +91 75758 18393 &nbsp;|&nbsp; +91 75758 18384
+    </div>
+  </div>
+
+  <!-- BEST WISHES FROM -->
+  <div class="best-wishes">
+    <div class="bw-title">✨ BEST WISHES FROM</div>
+    <div class="bw-divider"></div>
+
+    <!-- GSCA -->
+    <div class="bw-org-section">
+      <div class="bw-org-title">Gujarat State Chess Association (GSCA)</div>
+      <div class="bw-org-divider"></div>
+      <div class="bw-persons-row">
+        <div class="bw-person">
+          <div class="bp-name">Mr. Dev Patel</div>
+          <div class="bp-role">Secretary, AICF &amp; President, GSCA</div>
+        </div>
+        <div class="bw-person">
+          <div class="bp-name">Ms. Krishna Gadhiya</div>
+          <div class="bp-role">Secretary, GSCA</div>
+        </div>
+        <div class="bw-person">
+          <div class="bp-name">Mr. Bhavesh Patel</div>
+          <div class="bp-role">Ex-Vice President AICF &amp;<br>Ex-Secretary GSCA</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jyoti CNC -->
+    <div class="bw-org-section">
+      <div class="bw-org-title">Jyoti CNC</div>
+      <div class="bw-org-divider"></div>
+      <div class="bw-persons-row">
+        <div class="bw-person">
+          <div class="bp-name">Parakramsinh Jadeja</div>
+          <div class="bp-role">CMD,<br>Jyoti CNC Automation Limited-Rajkot</div>
+        </div>
+        <div class="bw-person">
+          <div class="bp-name">Kaushik Solanki</div>
+          <div class="bp-role">President,<br>Jyoti Foundation- Rajkot</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>
