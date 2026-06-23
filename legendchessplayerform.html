@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Add Chess Legend — Admin Tool</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#05050f;--bg2:#0d0d1f;--bg3:#13132a;
+  --blue:#4f8ef7;--blue2:#6fa8ff;--pink:#e040a0;--pink2:#ff6ec7;
+  --purple:#9b5de5;--cyan:#00d4ff;
+  --text:#eaeaf8;--muted:#5a5a82;--muted2:#8888b0;
+  --red:#ff4f6e;--green:#3fd68f;--gold:#d4af37;
+  --border:rgba(79,142,247,0.2);
+  --glass:rgba(255,255,255,0.03);
+  --r:12px;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.11;animation:orbF var(--od,20s) ease-in-out infinite;animation-delay:var(--odl,0s);}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,#4f8ef7,transparent);top:-120px;left:-120px;}
+.orb2{width:420px;height:420px;background:radial-gradient(circle,#e040a0,transparent);bottom:-100px;right:-100px;}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,#9b5de5,transparent);top:40%;left:38%;}
+@keyframes orbF{0%,100%{transform:translate(0,0);}50%{transform:translate(28px,-18px);}}
+.pieces-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.fpiece{position:absolute;user-select:none;animation:fp var(--fd,14s) ease-in-out infinite;animation-delay:var(--fdl,0s);font-size:var(--fs,28px);opacity:.06;}
+@keyframes fp{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-24px) rotate(7deg);}}
+nav{position:sticky;top:0;z-index:50;height:58px;background:rgba(5,5,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(12px,3vw,28px);}
+.brand{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;text-decoration:none;}
+.brand .icon{font-size:22px;background:linear-gradient(135deg,var(--blue),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.brand span{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-links{display:flex;gap:4px;flex-wrap:wrap;}
+.nav-links a{color:var(--muted2);text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;transition:.15s;}
+.nav-links a:hover{color:var(--text);background:rgba(255,255,255,.06);}
+.nav-links a.active{background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff;}
+.tool-header{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:24px clamp(12px,3vw,24px) 14px;}
+.tool-header h1{font-size:22px;font-weight:900;}
+.ht{background:linear-gradient(135deg,var(--blue2),var(--pink2),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.tool-header p{font-size:12px;color:var(--muted2);margin-top:4px;}
+.tool-wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:0 clamp(12px,3vw,24px) 80px;}
+.section{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:14px;backdrop-filter:blur(10px);transition:border-color .2s;}
+.section:focus-within{border-color:rgba(79,142,247,.4);}
+.sec-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sl{background:linear-gradient(135deg,var(--blue2),var(--pink2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sec-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(79,142,247,.3),transparent);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:560px){.g2,.g3{grid-template-columns:1fr;}}
+.f{display:flex;flex-direction:column;gap:5px;position:relative;}
+.f label{font-size:11px;font-weight:700;color:var(--muted2);letter-spacing:.3px;display:flex;align-items:center;justify-content:space-between;}
+.f label .req{color:var(--red);}
+.f label .opt{color:var(--muted);font-weight:400;font-size:10px;}
+.f input,.f select,.f textarea{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);color:var(--text);font-size:13.5px;padding:10px 13px;outline:none;width:100%;transition:border-color .15s,background .15s,box-shadow .15s;font-family:inherit;}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:rgba(79,142,247,.55);background:rgba(79,142,247,.04);box-shadow:0 0 0 3px rgba(79,142,247,.08);}
+.f input::placeholder,.f textarea::placeholder{color:var(--muted);}
+.f select option{background:#0d0d1f;}
+.f textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.f .hint{font-size:10.5px;color:var(--muted);margin-top:2px;}
+
+/* Date row */
+.date-row{display:flex;gap:8px;align-items:stretch;}
+.date-row .date-text{flex:1;}
+.date-row .date-cal-btn{width:40px;height:40px;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.25);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;position:relative;overflow:hidden;transition:.15s;}
+.date-row .date-cal-btn:hover{background:rgba(79,142,247,.2);}
+.date-row .date-cal-btn input[type=date]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.date-row .date-cal-btn input[type=date]::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+
+/* Country searchable */
+.country-wrap{position:relative;}
+.country-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid rgba(79,142,247,.3);border-radius:var(--r);z-index:200;max-height:200px;overflow-y:auto;display:none;box-shadow:0 8px 32px rgba(0,0,0,.6);}
+.country-drop.open{display:block;}
+.copt{padding:9px 13px;font-size:13px;cursor:pointer;transition:.12s;display:flex;align-items:center;gap:8px;}
+.copt:hover{background:rgba(79,142,247,.1);color:var(--blue2);}
+.country-drop::-webkit-scrollbar{width:4px;}
+.country-drop::-webkit-scrollbar-thumb{background:rgba(79,142,247,.2);border-radius:2px;}
+
+/* Toggle */
+.toggle-row{display:flex;align-items:center;gap:10px;cursor:pointer;padding:3px 0;}
+.toggle-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;}
+.toggle-row span{font-size:13px;color:var(--muted2);}
+
+/* Champion extra */
+.champ-extra{display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(79,142,247,.15);}
+.champ-extra.show{display:block;}
+.candidate-extra{display:none;margin-top:10px;}
+.candidate-extra.show{display:block;}
+
+/* Photo */
+.photo-row{display:flex;align-items:flex-start;gap:16px;}
+.photo-circle{width:76px;height:76px;border-radius:50%;flex-shrink:0;border:2px dashed rgba(79,142,247,.35);overflow:hidden;background:rgba(79,142,247,.06);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;position:relative;transition:.2s;}
+.photo-circle:hover{border-color:var(--blue);}
+.photo-circle img{width:100%;height:100%;object-fit:cover;display:block;}
+.photo-circle input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.pstatus{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 9px;border-radius:50px;margin-top:6px;}
+.pstatus.ok{background:rgba(63,214,143,.1);border:1px solid rgba(63,214,143,.22);color:var(--green);}
+.pstatus.err{background:rgba(255,79,110,.09);border:1px solid rgba(255,79,110,.22);color:var(--red);}
+
+/* PGN */
+.pgn-add-btn{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(224,64,160,.08));border:1px solid rgba(79,142,247,.25);border-radius:var(--r);color:var(--blue2);font-size:12px;font-weight:700;padding:9px 16px;cursor:pointer;transition:.15s;position:relative;overflow:hidden;}
+.pgn-add-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.pgn-list{margin-top:10px;display:flex;flex-direction:column;gap:7px;}
+.pgn-row{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(79,142,247,.05),rgba(224,64,160,.03));border:1px solid rgba(79,142,247,.14);border-radius:9px;padding:9px 13px;animation:rowIn .2s ease-out;}
+@keyframes rowIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+.pgn-row .pname{flex:1;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--blue2);}
+.pgn-row .psize{font-size:11px;color:var(--muted2);flex-shrink:0;}
+.pgn-row .pdel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:0 3px;transition:.15s;}
+.pgn-row .pdel:hover{color:var(--red);}
+
+/* Submit bar */
+.submit-bar{position:sticky;bottom:0;z-index:10;background:rgba(5,5,15,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding:11px clamp(12px,3vw,24px);display:flex;align-items:center;justify-content:flex-end;gap:10px;}
+.btn-clear{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted2);font-size:12px;font-weight:600;padding:9px 18px;border-radius:var(--r);cursor:pointer;transition:.15s;}
+.btn-clear:hover{color:var(--text);}
+.btn-save{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue),var(--purple),var(--pink));color:#fff;font-size:13px;font-weight:900;border:none;border-radius:var(--r);padding:10px 28px;cursor:pointer;transition:.2s;box-shadow:0 4px 20px rgba(79,142,247,.3);}
+.btn-save:hover:not(:disabled){box-shadow:0 6px 32px rgba(79,142,247,.5);transform:translateY(-1px);}
+.btn-save:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-save .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+.btn-save.saving .spin{display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(16px);border-radius:50px;padding:10px 22px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok{background:rgba(63,214,143,.12);border:1px solid rgba(63,214,143,.28);color:var(--green);}
+.toast.err{background:rgba(255,79,110,.1);border:1px solid rgba(255,79,110,.28);color:var(--red);}
+</style>
+</head>
+<body>
+<div class="bg-orbs">
+  <div class="orb orb1" style="--od:22s;"></div>
+  <div class="orb orb2" style="--od:18s;--odl:4s;"></div>
+  <div class="orb orb3" style="--od:26s;--odl:8s;"></div>
+</div>
+<div class="pieces-bg" id="piecesBg"></div>
+
+<nav>
+  <a class="brand" href="legendchessplayerform.html"><span class="icon">♛</span><span>ChessBirthday</span></a>
+  <div class="nav-links">
+    <a href="legendchessplayerform.html" class="active">♟ Add Legend</a>
+    <a href="legendchessplayer.html">📚 Study Material</a>
+    <a href="chessbornmatch.html">🎂 Birthday Match</a>
+  </div>
+</nav>
+
+<div class="tool-header">
+  <h1>♟ <span class="ht">Add Chess Legend</span></h1>
+  <p>Fast entry · DD/MM/YYYY dates · Searchable country · Smart champion fields</p>
+</div>
+
+<div class="tool-wrap">
+
+  <!-- S1: Identity -->
+  <div class="section">
+    <div class="sec-label"><span class="sl">♞ Identity</span></div>
+    <div class="g2">
+      <div class="f">
+        <label>Full Name <span class="req">*</span></label>
+        <input id="f-name" type="text" placeholder="e.g. Magnus Carlsen" maxlength="100" autocomplete="off"/>
+      </div>
+      <div class="f">
+        <label>Title <span class="req">*</span></label>
+        <select id="f-title">
+          <option value="">— Select Title —</option>
+          <option>GM</option><option>IM</option><option>FM</option><option>CM</option>
+          <option>WGM</option><option>WIM</option><option>WFM</option><option>WCM</option>
+          <option>NM</option><option>Untitled</option>
+        </select>
+      </div>
+    </div>
+    <div class="g3" style="margin-top:12px;">
+      <div class="f">
+        <label>Country <span class="req">*</span></label>
+        <div class="country-wrap">
+          <input id="f-country" type="text" placeholder="Type to search…" autocomplete="off"
+            oninput="filterCountries()" onfocus="filterCountries()" onblur="hideCountries()"/>
+          <div class="country-drop" id="countryDrop"></div>
+        </div>
+      </div>
+      <div class="f">
+        <label>FIDE ID <span class="opt">optional · clickable link</span></label>
+        <input id="f-fide" type="text" placeholder="e.g. 1503014" maxlength="20"
+          oninput="this.value=this.value.replace(/\D/g,'')"/>
+      </div>
+      <div class="f">
+        <label>Peak Rating <span class="opt">optional</span></label>
+        <input id="f-rating" type="number" placeholder="e.g. 2882" min="1000" max="3500"/>
+      </div>
+    </div>
+    <div style="margin-top:13px;display:flex;gap:22px;flex-wrap:wrap;">
+      <label class="toggle-row">
+        <input type="checkbox" id="f-champion" onchange="toggleChampion()"/>
+        <span>♛ World Champion</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="f-active" checked/>
+        <span>✅ Currently Active</span>
+      </label>
+    </div>
+
+    <!-- Champion Extra -->
+    <div class="champ-extra" id="champExtra">
+      <div class="g2" style="margin-bottom:10px;">
+        <div class="f">
+          <label>Championship Years</label>
+          <input id="f-champ-years" type="text" placeholder="e.g. 2014,2016,2018"
+            oninput="autoCommaYears(this)" maxlength="120"/>
+          <span class="hint">Type 2014201620182020 → auto → 2014,2016,2018,2020</span>
+        </div>
+        <div class="f">
+          <label>Format</label>
+          <input id="f-champ-format" type="text" placeholder="e.g. std,rapid,blitz"
+            oninput="autoCommaFormat(this)" maxlength="100"/>
+          <span class="hint">Type stdrapidblitz → auto → std,rapid,blitz</span>
+        </div>
+      </div>
+      <label class="toggle-row">
+        <input type="checkbox" id="f-candidate" onchange="toggleCandidate()"/>
+        <span>🏆 Candidates Qualifier</span>
+      </label>
+      <div class="candidate-extra" id="candidateExtra">
+        <div class="f" style="margin-top:10px;">
+          <label>Candidates Qualifier Years</label>
+          <input id="f-candidate-years" type="text" placeholder="e.g. 2013,2016,2018"
+            oninput="autoCommaYears(this)" maxlength="120"/>
+          <span class="hint">Type 201320162018 → auto → 2013,2016,2018</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2: Dates & Links -->
+  <div class="section">
+    <div class="sec-label"><span class="sl">📅 Dates &amp; Links</span></div>
+    <div class="g3">
+      <div class="f">
+        <label>Date of Birth <span class="req">*</span></label>
+        <div class="date-row">
+          <input class="date-text" id="f-dob-text" type="text" placeholder="DD/MM/YYYY" maxlength="10"
+            oninput="autoSlash(this,'f-dob-cal')" autocomplete="off"/>
+          <div class="date-cal-btn" title="Open calendar">
+            📅<input type="date" id="f-dob-cal" onchange="calSync(this,'f-dob-text')"/>
+          </div>
+        </div>
+        <span class="hint">Type 06062000 → 06/06/2000</span>
+      </div>
+      <div class="f">
+        <label>Date of Death <span class="opt">leave blank if alive</span></label>
+        <div class="date-row">
+          <input class="date-text" id="f-dod-text" type="text" placeholder="DD/MM/YYYY" maxlength="10"
+            oninput="autoSlash(this,'f-dod-cal');checkDeath()" autocomplete="off"/>
+          <div class="date-cal-btn" title="Open calendar">
+            📅<input type="date" id="f-dod-cal" onchange="calSync(this,'f-dod-text');checkDeath()"/>
+          </div>
+        </div>
+        <span class="hint">Filling this removes Active tick</span>
+      </div>
+      <div class="f">
+        <label>Wikipedia URL <span class="opt">optional</span></label>
+        <input id="f-wiki" type="url" placeholder="https://en.wikipedia.org/wiki/..."/>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3: Photo -->
+  <div class="section">
+    <div class="sec-label"><span class="sl">📷 Passport Photo</span></div>
+    <div class="photo-row">
+      <div class="photo-circle" title="Click to upload">
+        <span id="photoIcon">📷</span>
+        <img id="photoImg" style="display:none;" alt=""/>
+        <input type="file" id="f-photo" accept="image/jpeg,image/jpg" onchange="handlePhoto(this)"/>
+      </div>
+      <div>
+        <p style="font-size:12px;color:var(--muted2);line-height:1.55;">Click circle · <b style="color:var(--blue2);">JPG only</b> · Max <b style="color:var(--blue2);">30 KB</b></p>
+        <p style="font-size:11px;color:var(--muted);margin-top:3px;">Stored as base64 — instant save</p>
+        <div id="photoStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4: Notable Games -->
+  <div class="section">
+    <div class="sec-label"><span class="sl">♟ Notable Games Collection</span></div>
+    <p style="font-size:12px;color:var(--muted2);margin-bottom:12px;">Famous curated games. Each PGN can contain multiple games. Visitors download whole file in one click.</p>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="pgn-add-btn">♜ Add PGN Files
+        <input type="file" id="f-notable-pgns" accept=".pgn" multiple onchange="handlePGNs(this.files,'notable')"/>
+      </div>
+      <span id="notableCount" style="font-size:12px;color:var(--muted2);"></span>
+    </div>
+    <div class="pgn-list" id="notableList"></div>
+  </div>
+
+  <!-- S5: Chess Games -->
+  <div class="section">
+    <div class="sec-label"><span class="sl">♗ Chess Games Collection</span></div>
+    <p style="font-size:12px;color:var(--muted2);margin-bottom:12px;">Full game collections. Any number of games per PGN file. One-click download.</p>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="pgn-add-btn" style="background:linear-gradient(135deg,rgba(155,93,229,.12),rgba(0,212,255,.08));border-color:rgba(155,93,229,.25);">
+        <span style="color:var(--purple);">♖ Add PGN Collections</span>
+        <input type="file" id="f-games-pgns" accept=".pgn" multiple onchange="handlePGNs(this.files,'games')"/>
+      </div>
+      <span id="gamesCount" style="font-size:12px;color:var(--muted2);"></span>
+    </div>
+    <div class="pgn-list" id="gamesList"></div>
+  </div>
+
+  <!-- S6: Description -->
+  <div class="section">
+    <div class="sec-label"><span class="sl">📝 Description</span></div>
+    <div class="f">
+      <label>Player Description <span class="opt">biography / achievements / playing style</span></label>
+      <textarea id="f-description" placeholder="Write a biography, notable achievements, playing style, legacy…" style="min-height:110px;"></textarea>
+      <span class="hint">Displayed on study material page. Viewable only.</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="submit-bar">
+  <button class="btn-clear" onclick="clearForm()">Clear All</button>
+  <button class="btn-save" id="btnSave" onclick="savePlayer()">
+    <span class="spin"></span>
+    <span class="save-text">♛ Save Player</span>
+  </button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyBXrHcMJzQn3cxutg41LZs9oYwEfALe00s",
+  authDomain:"ratedeventsgj.firebaseapp.com",
+  projectId:"ratedeventsgj",
+  storageBucket:"ratedeventsgj.firebasestorage.app",
+  messagingSenderId:"527826897689",
+  appId:"1:527826897689:web:fb0439fff04a695a599388"
+});
+const db = getFirestore(app);
+
+let photoBase64=null, notablePGNs=[], gamesPGNs=[];
+
+/* Floating pieces */
+(function(){
+  const p=["♔","♕","♖","♗","♘","♙","♚","♛","♜","♝","♞","♟"];
+  const c=["#4f8ef7","#e040a0","#9b5de5","#00d4ff","#f0cc50","#ff6ec7"];
+  const bg=document.getElementById("piecesBg");
+  p.forEach((ch,i)=>{
+    const d=document.createElement("div");d.className="fpiece";d.textContent=ch;
+    d.style.cssText=`left:${(i*8.3)%97}%;top:${(i*11.7)%93}%;--fd:${10+i*1.3}s;--fdl:${i*0.6}s;--fs:${20+Math.random()*28}px;color:${c[i%c.length]};`;
+    bg.appendChild(d);
+  });
+})();
+
+/* Country list */
+const COUNTRIES=[
+  {n:"Afghanistan",f:"🇦🇫"},{n:"Albania",f:"🇦🇱"},{n:"Algeria",f:"🇩🇿"},{n:"Argentina",f:"🇦🇷"},
+  {n:"Armenia",f:"🇦🇲"},{n:"Australia",f:"🇦🇺"},{n:"Austria",f:"🇦🇹"},{n:"Azerbaijan",f:"🇦🇿"},
+  {n:"Bangladesh",f:"🇧🇩"},{n:"Belarus",f:"🇧🇾"},{n:"Belgium",f:"🇧🇪"},{n:"Brazil",f:"🇧🇷"},
+  {n:"Bulgaria",f:"🇧🇬"},{n:"Canada",f:"🇨🇦"},{n:"Chile",f:"🇨🇱"},{n:"China",f:"🇨🇳"},
+  {n:"Colombia",f:"🇨🇴"},{n:"Croatia",f:"🇭🇷"},{n:"Cuba",f:"🇨🇺"},{n:"Czech Republic",f:"🇨🇿"},
+  {n:"Denmark",f:"🇩🇰"},{n:"Egypt",f:"🇪🇬"},{n:"England",f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},{n:"Estonia",f:"🇪🇪"},
+  {n:"Finland",f:"🇫🇮"},{n:"France",f:"🇫🇷"},{n:"Georgia",f:"🇬🇪"},{n:"Germany",f:"🇩🇪"},
+  {n:"Greece",f:"🇬🇷"},{n:"Hungary",f:"🇭🇺"},{n:"Iceland",f:"🇮🇸"},{n:"India",f:"🇮🇳"},
+  {n:"Indonesia",f:"🇮🇩"},{n:"Iran",f:"🇮🇷"},{n:"Ireland",f:"🇮🇪"},{n:"Israel",f:"🇮🇱"},
+  {n:"Italy",f:"🇮🇹"},{n:"Japan",f:"🇯🇵"},{n:"Kazakhstan",f:"🇰🇿"},{n:"Latvia",f:"🇱🇻"},
+  {n:"Lithuania",f:"🇱🇹"},{n:"Mexico",f:"🇲🇽"},{n:"Mongolia",f:"🇲🇳"},{n:"Netherlands",f:"🇳🇱"},
+  {n:"New Zealand",f:"🇳🇿"},{n:"Nigeria",f:"🇳🇬"},{n:"Norway",f:"🇳🇴"},{n:"Pakistan",f:"🇵🇰"},
+  {n:"Peru",f:"🇵🇪"},{n:"Philippines",f:"🇵🇭"},{n:"Poland",f:"🇵🇱"},{n:"Portugal",f:"🇵🇹"},
+  {n:"Romania",f:"🇷🇴"},{n:"Russia",f:"🇷🇺"},{n:"Saudi Arabia",f:"🇸🇦"},{n:"Serbia",f:"🇷🇸"},
+  {n:"Slovakia",f:"🇸🇰"},{n:"Slovenia",f:"🇸🇮"},{n:"South Africa",f:"🇿🇦"},{n:"South Korea",f:"🇰🇷"},
+  {n:"Spain",f:"🇪🇸"},{n:"Sri Lanka",f:"🇱🇰"},{n:"Sweden",f:"🇸🇪"},{n:"Switzerland",f:"🇨🇭"},
+  {n:"Turkey",f:"🇹🇷"},{n:"Ukraine",f:"🇺🇦"},{n:"United Kingdom",f:"🇬🇧"},{n:"United States",f:"🇺🇸"},
+  {n:"USSR",f:"🏳️"},{n:"Uzbekistan",f:"🇺🇿"},{n:"Venezuela",f:"🇻🇪"},{n:"Vietnam",f:"🇻🇳"},
+  {n:"Yugoslavia",f:"🏳️"},{n:"Zimbabwe",f:"🇿🇼"},
+];
+window.filterCountries=function(){
+  const q=document.getElementById("f-country").value.toLowerCase().trim();
+  const drop=document.getElementById("countryDrop");
+  if(!q){drop.classList.remove("open");return;}
+  const m=COUNTRIES.filter(c=>c.n.toLowerCase().includes(q));
+  if(!m.length){drop.classList.remove("open");return;}
+  drop.innerHTML=m.slice(0,10).map(c=>`<div class="copt" onmousedown="selectCountry('${c.n}','${c.f}')">${c.f} ${c.n}</div>`).join("");
+  drop.classList.add("open");
+};
+window.selectCountry=function(name){
+  document.getElementById("f-country").value=name;
+  document.getElementById("countryDrop").classList.remove("open");
+};
+window.hideCountries=function(){
+  setTimeout(()=>document.getElementById("countryDrop").classList.remove("open"),200);
+};
+
+/* DD/MM/YYYY auto-slash */
+window.autoSlash=function(el,calId){
+  let raw=el.value.replace(/\D/g,"");
+  if(raw.length>8) raw=raw.slice(0,8);
+  let out="";
+  if(raw.length>4) out=raw.slice(0,2)+"/"+raw.slice(2,4)+"/"+raw.slice(4);
+  else if(raw.length>2) out=raw.slice(0,2)+"/"+raw.slice(2);
+  else out=raw;
+  el.value=out;
+  if(raw.length===8){
+    const d=raw.slice(0,2),m=raw.slice(2,4),y=raw.slice(4,8);
+    document.getElementById(calId).value=`${y}-${m}-${d}`;
+  }
+};
+window.calSync=function(calEl,textId){
+  if(!calEl.value) return;
+  const [y,m,d]=calEl.value.split("-");
+  document.getElementById(textId).value=`${d}/${m}/${y}`;
+};
+
+/* Auto untick active when death date filled */
+window.checkDeath=function(){
+  const t=document.getElementById("f-dod-text").value.trim();
+  const c=document.getElementById("f-dod-cal").value;
+  if(t.length===10||c) document.getElementById("f-active").checked=false;
+};
+
+/* Champion toggle */
+window.toggleChampion=function(){
+  document.getElementById("champExtra").classList.toggle("show",document.getElementById("f-champion").checked);
+};
+window.toggleCandidate=function(){
+  document.getElementById("candidateExtra").classList.toggle("show",document.getElementById("f-candidate").checked);
+};
+
+/* Auto-comma years: 4-digit groups */
+window.autoCommaYears=function(el){
+  const raw=el.value.replace(/[^0-9]/g,"");
+  let out="";
+  for(let i=0;i<raw.length;i++){
+    if(i>0&&i%4===0) out+=",";
+    out+=raw[i];
+  }
+  el.value=out;
+};
+
+/* Auto-comma format: known words */
+window.autoCommaFormat=function(el){
+  const raw=el.value.replace(/[^a-zA-Z,]/g,"");
+  if(raw.includes(",")) return; // already has commas — leave it
+  const words=["standard","classical","rapid","blitz","online","correspondence","std"];
+  let rem=raw.toLowerCase(),found=[],safe=0;
+  while(rem.length>0&&safe++<20){
+    let hit=false;
+    for(const w of words){
+      if(rem.startsWith(w)){found.push(w);rem=rem.slice(w.length);hit=true;break;}
+    }
+    if(!hit){found.push(rem[0]);rem=rem.slice(1);}
+  }
+  const known=found.filter(x=>words.includes(x));
+  if(known.length>1) el.value=known.join(",");
+};
+
+/* Photo */
+window.handlePhoto=function(input){
+  const file=input.files[0];if(!file) return;
+  if(!file.type.match(/image\/jpe?g/)){setPS("❌ JPG/JPEG only","err");photoBase64=null;return;}
+  if(file.size>30*1024){setPS(`❌ ${(file.size/1024).toFixed(1)} KB — max 30 KB`,"err");photoBase64=null;return;}
+  const r=new FileReader();
+  r.onload=e=>{
+    photoBase64=e.target.result;
+    const img=document.getElementById("photoImg");
+    img.src=photoBase64;img.style.display="block";
+    document.getElementById("photoIcon").style.display="none";
+    setPS(`✅ ${file.name} · ${(file.size/1024).toFixed(1)} KB`,"ok");
+  };
+  r.readAsDataURL(file);
+};
+function setPS(msg,type){document.getElementById("photoStatus").innerHTML=`<span class="pstatus ${type}">${msg}</span>`;}
+
+/* PGN */
+window.handlePGNs=function(files,type){
+  const arr=type==="notable"?notablePGNs:gamesPGNs;
+  Array.from(files).forEach(f=>{
+    if(!f.name.endsWith(".pgn")){toast("Only .pgn files","err");return;}
+    if(arr.find(x=>x.name===f.name)){toast(`"${f.name}" already added`,"err");return;}
+    const r=new FileReader();
+    r.onload=e=>{arr.push({name:f.name,content:e.target.result,size:f.size});renderPGNs(type);};
+    r.readAsText(f);
+  });
+};
+function renderPGNs(type){
+  const arr=type==="notable"?notablePGNs:gamesPGNs;
+  document.getElementById(type==="notable"?"notableList":"gamesList").innerHTML=
+    arr.map((p,i)=>`<div class="pgn-row"><span style="font-size:16px;flex-shrink:0">♟</span>
+      <span class="pname">${p.name}</span><span class="psize">${(p.size/1024).toFixed(1)} KB</span>
+      <button class="pdel" onclick="removePGN('${type}',${i})">✕</button></div>`).join("");
+  document.getElementById(type==="notable"?"notableCount":"gamesCount").textContent=
+    arr.length?`${arr.length} file${arr.length>1?"s":""} added`:"";
+}
+window.removePGN=function(type,i){(type==="notable"?notablePGNs:gamesPGNs).splice(i,1);renderPGNs(type);};
+
+/* Parse DD/MM/YYYY */
+function parseDMY(s){
+  if(!s||s.length<10) return null;
+  const p=s.split("/");
+  if(p.length!==3) return null;
+  return`${p[2]}-${p[1]}-${p[0]}`;
+}
+
+/* Validate */
+function validate(){
+  const name=document.getElementById("f-name").value.trim();
+  const title=document.getElementById("f-title").value;
+  const country=document.getElementById("f-country").value.trim();
+  const dob=document.getElementById("f-dob-text").value.trim();
+  if(!name){toast("Full name is required","err");document.getElementById("f-name").focus();return false;}
+  if(!title){toast("Please select a title","err");return false;}
+  if(!country){toast("Country is required","err");document.getElementById("f-country").focus();return false;}
+  if(!parseDMY(dob)){toast("Valid date of birth required DD/MM/YYYY","err");document.getElementById("f-dob-text").focus();return false;}
+  return true;
+}
+
+/* Save */
+window.savePlayer=async function(){
+  if(!validate()) return;
+  const btn=document.getElementById("btnSave");
+  btn.disabled=true;btn.classList.add("saving");
+  try{
+    const dobISO=parseDMY(document.getElementById("f-dob-text").value.trim());
+    const dodText=document.getElementById("f-dod-text").value.trim();
+    const dodISO=dodText.length===10?parseDMY(dodText):null;
+    await addDoc(collection(db,"legendplayerdb"),{
+      name:             document.getElementById("f-name").value.trim(),
+      title:            document.getElementById("f-title").value,
+      country:          document.getElementById("f-country").value.trim(),
+      fideId:           document.getElementById("f-fide").value.trim()||null,
+      peakRating:       parseInt(document.getElementById("f-rating").value)||null,
+      worldChampion:    document.getElementById("f-champion").checked,
+      champYears:       document.getElementById("f-champ-years").value.trim()||null,
+      champFormat:      document.getElementById("f-champ-format").value.trim()||null,
+      candidateQualifier:document.getElementById("f-candidate").checked,
+      candidateYears:   document.getElementById("f-candidate-years").value.trim()||null,
+      active:           document.getElementById("f-active").checked,
+      dob:              dobISO,
+      dod:              dodISO,
+      wikipedia:        document.getElementById("f-wiki").value.trim()||null,
+      photoBase64,
+      description:      document.getElementById("f-description").value.trim()||null,
+      notableGames:     notablePGNs.map(p=>({name:p.name,content:p.content,size:p.size})),
+      gamesCollection:  gamesPGNs.map(p=>({name:p.name,content:p.content,size:p.size})),
+      createdAt:        serverTimestamp(),
+    });
+    toast("✅ Player saved!","ok");
+    setTimeout(clearForm,900);
+  }catch(err){
+    console.error(err);toast("❌ "+err.message,"err");
+  }finally{
+    btn.disabled=false;btn.classList.remove("saving");
+  }
+};
+
+/* Clear */
+window.clearForm=function(){
+  ["f-name","f-title","f-country","f-fide","f-rating",
+   "f-dob-text","f-dob-cal","f-dod-text","f-dod-cal",
+   "f-wiki","f-description","f-champ-years","f-champ-format","f-candidate-years"]
+  .forEach(id=>{const el=document.getElementById(id);if(el) el.value="";});
+  document.getElementById("f-champion").checked=false;
+  document.getElementById("f-active").checked=true;
+  document.getElementById("f-candidate").checked=false;
+  document.getElementById("champExtra").classList.remove("show");
+  document.getElementById("candidateExtra").classList.remove("show");
+  photoBase64=null;
+  document.getElementById("photoImg").style.display="none";
+  document.getElementById("photoIcon").style.display="block";
+  document.getElementById("photoStatus").innerHTML="";
+  notablePGNs=[];gamesPGNs=[];
+  renderPGNs("notable");renderPGNs("games");
+  window.scrollTo({top:0,behavior:"smooth"});
+};
+
+/* Toast */
+let tt=null;
+window.toast=function(msg,type="ok"){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.className=`toast show ${type}`;
+  clearTimeout(tt);tt=setTimeout(()=>el.className="toast",2800);
+};
+</script>
+</body>
+</html>
