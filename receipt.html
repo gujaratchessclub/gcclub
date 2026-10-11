@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banking App Prototype Builder</title>
+<style>
+:root{--primary:#12408f;--accent:#f5b800;--ink:#1c2430;--mute:#5d6b7c;--line:#d9e1ec;--bg:#eef2f7;--card:#fff;--ok:#1b7a43;--okbg:#e4f4e9}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{display:grid;grid-template-columns:340px 1fr;min-height:100vh}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+form{background:#fff;border-right:1px solid var(--line);padding:18px;overflow:auto}
+form h1{font-size:18px;margin:0 0 4px}
+form p.n{font-size:12.5px;color:var(--mute);margin:0 0 14px}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 12px;padding:10px 12px}
+legend{font-weight:600;font-size:13px;padding:0 6px}
+label{display:block;font-size:12px;color:var(--mute);margin:8px 0 2px}
+input,select{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font:inherit;font-size:14px}
+input[type=color]{padding:2px;height:36px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font:inherit;font-size:13px;padding:8px 12px;border-radius:6px;border:1px solid var(--primary);background:var(--primary);color:#fff;cursor:pointer;margin-top:8px}
+button.alt{background:#fff;color:var(--primary)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+main{padding:18px;overflow:auto}
+#shot{min-width:760px;max-width:1100px;margin:0 auto;background:#fff;border:1px solid var(--line);position:relative}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:var(--hbg);color:#fff}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:64px;height:64px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:contain}
+.bn{font-size:22px;font-weight:700;line-height:1.15;max-width:480px}
+.tag{font-size:14px;opacity:.9}
+.usr{text-align:right;font-size:14px}
+.menu{display:flex;border-bottom:1px solid var(--line);background:#fafbfd}
+.menu div{flex:1;text-align:center;padding:12px 6px;font-size:13px;color:var(--ink)}
+.menu .on{border-bottom:3px solid var(--primary);color:var(--primary);font-weight:600;background:#eaf1fb}
+.body{padding:16px 22px 22px}
+.bar{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:12px}
+h2{margin:0 0 10px;font-size:19px;color:var(--primary);background:#e3edf9;padding:9px 12px;border-radius:4px}
+.succ{background:var(--okbg);border:1px solid #bfe3cc;border-radius:6px;padding:12px 14px;margin-bottom:12px;display:flex;gap:12px;align-items:center;color:var(--ok)}
+.tick{width:34px;height:34px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.succ b{display:block;font-size:15px}
+.sec{border:1px solid var(--line);border-radius:6px;margin-bottom:12px;overflow:hidden}
+.sec h3{margin:0;padding:7px 12px;font-size:14px;color:var(--primary);background:#e3edf9}
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:0}
+.kv{display:grid;grid-template-columns:150px 1fr;padding:10px 12px;font-size:14px;row-gap:7px}
+.kv span{color:var(--mute)}
+.kv b{font-weight:500;overflow-wrap:anywhere}
+.grid .kv+.kv{border-left:1px solid var(--line)}
+.amt{background:#eaf3fc}
+.amt b.big{font-size:18px;font-weight:700}
+.wm{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.wm span{transform:rotate(-24deg);font-size:46px;font-weight:800;color:rgba(200,30,30,.16);border:6px solid rgba(200,30,30,.16);padding:6px 24px;border-radius:10px;white-space:nowrap}
+.dm{background:#b3261e;color:#fff;text-align:center;font-size:12px;padding:4px;letter-spacing:.2px}
+@media print{form{display:none}.wrap{display:block}main{padding:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<form id="f" onsubmit="return false">
+  <h1>Prototype builder</h1>
+  <p class="n">Design mockup tool for your future banking app. All details are sample data; every preview carries a fixed "PROTOTYPE" mark.</p>
+
+  <fieldset><legend>Brand</legend>
+    <label for="bank">App / bank name</label><input id="bank" value="Sample Co-Operative Bank Ltd.">
+    <label for="tag">Tagline</label><input id="tag" value="Service With Trust">
+    <label for="logo">Logo (PNG / JPG)</label><input id="logo" type="file" accept="image/*">
+    <div class="row">
+      <div><label for="c1">Header colour</label><input id="c1" type="color" value="#12408f"></div>
+      <div><label for="c2">Accent colour</label><input id="c2" type="color" value="#f5b800"></div>
+    </div>
+    <button type="button" class="alt" id="pick">Use logo colour for header</button>
+  </fieldset>
+
+  <fieldset><legend>User</legend>
+    <label for="user">Welcome name</label><input id="user" value="Mr. Sample User">
+    <label for="dt">Date &amp; time</label><input id="dt" value="">
+  </fieldset>
+
+  <fieldset><legend>Debit account</legend>
+    <label for="dn">Holder name</label><input id="dn" value="Sample User">
+    <label for="da">Account no.</label><input id="da" value="00000000000001">
+    <div class="row"><div><label for="di">IFSC</label><input id="di" value="SAMP0000001"></div>
+    <div><label for="dt2">Type</label><input id="dt2" value="Current"></div></div>
+    <label for="dbk">Bank name</label><input id="dbk" value="Sample Bank">
+    <label for="dbr">Branch</label><input id="dbr" value="Main Branch">
+  </fieldset>
+
+  <fieldset><legend>Credit account</legend>
+    <label for="cn">Holder name</label><input id="cn" value="Demo Academy Pvt Ltd">
+    <label for="ca">Account no.</label><input id="ca" value="00000000000002">
+    <div class="row"><div><label for="ci">IFSC</label><input id="ci" value="DEMO0000002"></div>
+    <div><label for="ct">Type</label><input id="ct" value="Current"></div></div>
+    <label for="cbk">Bank name</label><input id="cbk" value="Demo Bank">
+    <label for="cbr">Branch</label><input id="cbr" value="Central Branch">
+  </fieldset>
+
+  <fieldset><legend>Transaction</legend>
+    <div class="row"><div><label for="tt">Type</label>
+      <select id="tt"><option>NEFT</option><option>IMPS</option><option>RTGS</option><option>UPI</option></select></div>
+    <div><label for="amt">Amount (₹)</label><input id="amt" value="1000.00"></div></div>
+    <label for="ref">Reference no.</label><input id="ref" value="REF000000000001">
+    <label for="utr">UTR no.</label><input id="utr" value="UTR000000000001">
+  </fieldset>
+
+  <button type="button" id="dl">Download PNG</button>
+  <button type="button" class="alt" onclick="window.print()">Print / Save PDF</button>
+</form>
+
+<main>
+<div id="shot">
+  <div class="dm">DEMO RECEIPT – SAMPLE DATA – NOT A REAL TRANSACTION</div>
+  <div class="hd" id="hd">
+    <div class="brand">
+      <div class="logo"><img id="limg" alt="" hidden><svg id="lph" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#999" stroke-dasharray="4 3"/></svg></div>
+      <div><div class="bn" id="o_bank"></div><div class="tag" id="o_tag"></div></div>
+    </div>
+    <div class="usr">Welcome<br><b id="o_user"></b></div>
+  </div>
+  <div class="menu"><div>My Accounts &amp; Profile</div><div class="on">Payments / Transfers</div><div>Bill Payments</div><div>Fixed Deposit</div><div>e-Services</div><div>Requests</div></div>
+  <div class="body">
+    <div class="bar"><span id="o_dt"></span><span id="o_bank2"></span></div>
+    <h2>Transaction Details</h2>
+    <div class="succ"><div class="tick">✓</div><div><b>Your transaction has been successfully completed.</b><b>UTR No – <span id="o_utr1"></span></b><small>Transaction Date &amp; Time – <span id="o_dt2"></span></small></div></div>
+    <div class="sec"><h3>Debit Account Details</h3><div class="grid">
+      <div class="kv"><span>Account Holder</span><b id="o_dn"></b><span>Account No.</span><b id="o_da"></b><span>Bank Name</span><b id="o_dbk"></b><span>Branch</span><b id="o_dbr"></b></div>
+      <div class="kv"><span>IFSC</span><b id="o_di"></b><span>Account Type</span><b id="o_dt2x"></b></div></div></div>
+    <div class="sec"><h3>Credit Account Details</h3><div class="grid">
+      <div class="kv"><span>Account Holder</span><b id="o_cn"></b><span>Account No.</span><b id="o_ca"></b><span>Bank Name</span><b id="o_cbk"></b><span>Branch</span><b id="o_cbr"></b></div>
+      <div class="kv"><span>IFSC</span><b id="o_ci"></b><span>Account Type</span><b id="o_ct"></b></div></div></div>
+    <div class="sec amt"><div class="grid">
+      <div class="kv"><span>Transaction Type</span><b id="o_tt"></b><span>Amount</span><b class="big" id="o_amt"></b></div>
+      <div class="kv"><span>Reference No.</span><b id="o_ref"></b><span>UTR No.</span><b id="o_utr2"></b></div></div></div>
+  </div>
+  <div class="wm"><span>DEMO RECEIPT</span></div>
+</div>
+</main>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const map={bank:['o_bank','o_bank2'],tag:['o_tag'],user:['o_user'],dt:['o_dt','o_dt2'],dn:['o_dn'],da:['o_da'],di:['o_di'],dt2:['o_dt2x'],dbk:['o_dbk'],dbr:['o_dbr'],cn:['o_cn'],ca:['o_ca'],ci:['o_ci'],ct:['o_ct'],cbk:['o_cbk'],cbr:['o_cbr'],tt:['o_tt'],ref:['o_ref'],utr:['o_utr1','o_utr2']};
+function render(){
+  for(const k in map){map[k].forEach(t=>{$(t).textContent=$(k).value})}
+  const a=parseFloat(String($('amt').value).replace(/,/g,''))||0;
+  $('o_amt').textContent='₹ '+a.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.documentElement.style.setProperty('--primary',$('c1').value);
+  document.documentElement.style.setProperty('--accent',$('c2').value);
+  $('hd').style.setProperty('--hbg',$('c1').value);
+  $('hd').style.background=$('c1').value;
+}
+const d=new Date();
+$('dt').value=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).replace(/ /g,'-')+' '+d.toLocaleTimeString('en-US');
+$('f').addEventListener('input',render);render();
+
+$('logo').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{const i=$('limg');i.src=r.result;i.hidden=false;$('lph').style.display='none'};
+  r.readAsDataURL(f);
+});
+
+// pick a dominant non-white colour from the logo
+$('pick').addEventListener('click',()=>{
+  const i=$('limg');if(i.hidden||!i.complete)return alert('Upload a logo first.');
+  const c=document.createElement('canvas');c.width=c.height=64;
+  const x=c.getContext('2d');x.drawImage(i,0,0,64,64);
+  const px=x.getImageData(0,0,64,64).data;const bins={};
+  for(let p=0;p<px.length;p+=4){
+    const r=px[p],g=px[p+1],b=px[p+2],al=px[p+3];
+    if(al<200||(r>225&&g>225&&b>225)||(r<35&&g<35&&b<35))continue;
+    const k=[r>>5,g>>5,b>>5].join();(bins[k]=bins[k]||{n:0,r:0,g:0,b:0});
+    const o=bins[k];o.n++;o.r+=r;o.g+=g;o.b+=b;
+  }
+  let best=null;for(const k in bins)if(!best||bins[k].n>best.n)best=bins[k];
+  if(!best)return;
+  const h=v=>Math.round(v/best.n).toString(16).padStart(2,'0');
+  $('c1').value='#'+h(best.r)+h(best.g)+h(best.b);render();
+});
+
+// PNG export: loads html2canvas from CDN (needs internet)
+$('dl').addEventListener('click',()=>{
+  const go=()=>html2canvas($('shot'),{scale:3,backgroundColor:'#fff'}).then(c=>{
+    const a=document.createElement('a');a.download='prototype.png';a.href=c.toDataURL('image/png');a.click();
+  });
+  if(window.html2canvas)return go();
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  s.onload=go;s.onerror=()=>alert('Could not load the export library. Use Print / Save PDF instead.');
+  document.head.appendChild(s);
+});
+</script>
+</body>
+</html>
